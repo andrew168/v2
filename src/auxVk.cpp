@@ -19,6 +19,7 @@ namespace aux
         allocMemory();
         VK_CHECK_RESULT(vkBindImageMemory(*(Device::get()), m_image, m_deviceMemory, 0));
         createImageView();
+        createSampler();
     }
 
     Image::Image(VkFormat format, int32_t cubeLength, VkImageCreateFlagBits flags) :
@@ -36,6 +37,7 @@ namespace aux
         allocMemory();
         VK_CHECK_RESULT(vkBindImageMemory(*(Device::get()), m_image, m_deviceMemory, 0));
         createImageView();
+        createSampler();
     }
 
     void Image::createCubemap()
