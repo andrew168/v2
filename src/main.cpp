@@ -1039,45 +1039,16 @@ public:
 				break;
 			};
 
-			const uint32_t numMips = static_cast<uint32_t>(floor(log2(dim))) + 1;
+			aux::Device::setVksDevice(vulkanDevice);
+			aux::Device::set(&device);
 
 			// Create target cubemap
+				auto auxCube = new aux::Image(format, dim, VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT);
+				cubemap.image = auxCube->getImage();
+				cubemap.deviceMemory = auxCube->getDeviceMemory();				
+				cubemap.view = auxCube->getView();
+				const uint32_t numMips = auxCube->getMipLevels();
 			{
-				// Image
-				VkImageCreateInfo imageCI{};
-				imageCI.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
-				imageCI.imageType = VK_IMAGE_TYPE_2D;
-				imageCI.format = format;
-				imageCI.extent.width = dim;
-				imageCI.extent.height = dim;
-				imageCI.extent.depth = 1;
-				imageCI.mipLevels = numMips;
-				imageCI.arrayLayers = 6;
-				imageCI.samples = VK_SAMPLE_COUNT_1_BIT;
-				imageCI.tiling = VK_IMAGE_TILING_OPTIMAL;
-				imageCI.usage = VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT;
-				imageCI.flags = VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT;
-				VK_CHECK_RESULT(vkCreateImage(device, &imageCI, nullptr, &cubemap.image));
-				VkMemoryRequirements memReqs;
-				vkGetImageMemoryRequirements(device, cubemap.image, &memReqs);
-				VkMemoryAllocateInfo memAllocInfo{};
-				memAllocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-				memAllocInfo.allocationSize = memReqs.size;
-				memAllocInfo.memoryTypeIndex = vulkanDevice->getMemoryType(memReqs.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
-				VK_CHECK_RESULT(vkAllocateMemory(device, &memAllocInfo, nullptr, &cubemap.deviceMemory));
-				VK_CHECK_RESULT(vkBindImageMemory(device, cubemap.image, cubemap.deviceMemory, 0));
-
-				// View
-				VkImageViewCreateInfo viewCI{};
-				viewCI.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-				viewCI.viewType = VK_IMAGE_VIEW_TYPE_CUBE;
-				viewCI.format = format;
-				viewCI.subresourceRange = {};
-				viewCI.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-				viewCI.subresourceRange.levelCount = numMips;
-				viewCI.subresourceRange.layerCount = 6;
-				viewCI.image = cubemap.image;
-				VK_CHECK_RESULT(vkCreateImageView(device, &viewCI, nullptr, &cubemap.view));
 
 				// Sampler
 				VkSamplerCreateInfo samplerCI{};

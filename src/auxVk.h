@@ -39,17 +39,25 @@ namespace aux
         uint32_t m_width;
         uint32_t m_height;
         VkFormat m_format;
+        uint32_t m_mipLevels;
+        uint32_t m_arrayLayers;
+        bool m_isCubemap;
         VkImage m_image;
         VkDevice m_device;
         VkDeviceMemory m_deviceMemory;
         VkImageView m_view;
+
     public:
         Image(VkFormat format, int32_t width, int32_t height);
+        Image(VkFormat format, int32_t cubeLength, VkImageCreateFlagBits flags);
         VkImage getImage() { return m_image; }
         VkDeviceMemory getDeviceMemory() { return m_deviceMemory; }
         VkImageView getView() { return m_view; }
+        uint32_t getMipLevels() { return m_mipLevels; }
     private:
+        VkImageCreateInfo getDefaultCI();
         void createImage();
+        void createCubemap();
         void allocMemory();
         void createImageView();
     };
