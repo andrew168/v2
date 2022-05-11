@@ -1,38 +1,4 @@
-﻿/*
-* Vulkan physical based rendering glTF 2.0 demo
-*
-* Copyright (C) 2018 by Sascha Willems - www.saschawillems.de
-*
-* This code is licensed under the MIT license (MIT) (http://opensource.org/licenses/MIT)
-*/
-
-// glTF format: https://github.com/KhronosGroup/glTF
-// tinyglTF loader: https://github.com/syoyo/tinygltf
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <assert.h>
-#include <vector>
-#include <chrono>
-#include <map>
-#include "algorithm"
-
-#if defined(__ANDROID__)
-#define TINYGLTF_ANDROID_LOAD_FROM_ASSETS
-#endif
-
-#include <vulkan/vulkan.h>
-#include "VulkanExampleBase.h"
-#include "VulkanTexture.hpp"
-#include "VulkanglTFModel.h"
-#include "VulkanUtils.hpp"
-#include "ui.hpp"
-
-#define GLM_FORCE_RADIANS
-#define GLM_FORCE_DEPTH_ZERO_TO_ONE
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
+﻿#include "vk2.h"
 
 /*
 	PBR example main class
