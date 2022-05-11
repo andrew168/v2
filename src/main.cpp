@@ -794,22 +794,8 @@ public:
 		textures.lutBrdf.image = auxImage->getImage();
 		textures.lutBrdf.deviceMemory = auxImage->getDeviceMemory();
 		textures.lutBrdf.view = auxImage->getView();
-
-		// Sampler
-		VkSamplerCreateInfo samplerCI{};
-		samplerCI.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
-		samplerCI.magFilter = VK_FILTER_LINEAR;
-		samplerCI.minFilter = VK_FILTER_LINEAR;
-		samplerCI.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
-		samplerCI.addressModeU = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
-		samplerCI.addressModeV = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
-		samplerCI.addressModeW = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
-		samplerCI.minLod = 0.0f;
-		samplerCI.maxLod = 1.0f;
-		samplerCI.maxAnisotropy = 1.0f;
-		samplerCI.borderColor = VK_BORDER_COLOR_FLOAT_OPAQUE_WHITE;
-		VK_CHECK_RESULT(vkCreateSampler(device, &samplerCI, nullptr, &textures.lutBrdf.sampler));
-
+		textures.lutBrdf.sampler = auxImage->getSampler();
+	
 		// FB, Att, RP, Pipe, etc.
 		VkAttachmentDescription attDesc{};
 		// Color attachment
@@ -1048,23 +1034,7 @@ public:
 				cubemap.deviceMemory = auxCube->getDeviceMemory();				
 				cubemap.view = auxCube->getView();
 				const uint32_t numMips = auxCube->getMipLevels();
-			{
-
-				// Sampler
-				VkSamplerCreateInfo samplerCI{};
-				samplerCI.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
-				samplerCI.magFilter = VK_FILTER_LINEAR;
-				samplerCI.minFilter = VK_FILTER_LINEAR;
-				samplerCI.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
-				samplerCI.addressModeU = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
-				samplerCI.addressModeV = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
-				samplerCI.addressModeW = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
-				samplerCI.minLod = 0.0f;
-				samplerCI.maxLod = static_cast<float>(numMips);
-				samplerCI.maxAnisotropy = 1.0f;
-				samplerCI.borderColor = VK_BORDER_COLOR_FLOAT_OPAQUE_WHITE;
-				VK_CHECK_RESULT(vkCreateSampler(device, &samplerCI, nullptr, &cubemap.sampler));
-			}
+				cubemap.sampler = auxCube->getSampler();
 
 			// FB, Att, RP, Pipe, etc.
 			VkAttachmentDescription attDesc{};

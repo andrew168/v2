@@ -46,6 +46,7 @@ namespace aux
         VkDevice m_device;
         VkDeviceMemory m_deviceMemory;
         VkImageView m_view;
+        VkSampler m_sampler;
 
     public:
         Image(VkFormat format, int32_t width, int32_t height);
@@ -54,12 +55,14 @@ namespace aux
         VkDeviceMemory getDeviceMemory() { return m_deviceMemory; }
         VkImageView getView() { return m_view; }
         uint32_t getMipLevels() { return m_mipLevels; }
+        VkSampler getSampler() { return m_sampler; }
     private:
         VkImageCreateInfo getDefaultCI();
         void createImage();
         void createCubemap();
         void allocMemory();
         void createImageView();
+        void createSampler();
     };
 
 
