@@ -1,4 +1,5 @@
 ﻿#include "vk2.h"
+#include "auxVk.h"
 
 /*
 	PBR example main class
@@ -786,40 +787,13 @@ public:
 		const VkFormat format = VK_FORMAT_R16G16_SFLOAT;
 		const int32_t dim = 512;
 
-		// Image
-		VkImageCreateInfo imageCI{};
-		imageCI.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
-		imageCI.imageType = VK_IMAGE_TYPE_2D;
-		imageCI.format = format;
-		imageCI.extent.width = dim;
-		imageCI.extent.height = dim;
-		imageCI.extent.depth = 1;
-		imageCI.mipLevels = 1;
-		imageCI.arrayLayers = 1;
-		imageCI.samples = VK_SAMPLE_COUNT_1_BIT; // 1个sample 每pixel 
-		imageCI.tiling = VK_IMAGE_TILING_OPTIMAL;
-		imageCI.usage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
-		VK_CHECK_RESULT(vkCreateImage(device, &imageCI, nullptr, &textures.lutBrdf.image));
-		VkMemoryRequirements memReqs;
-		vkGetImageMemoryRequirements(device, textures.lutBrdf.image, &memReqs);
-		VkMemoryAllocateInfo memAllocInfo{};
-		memAllocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-		memAllocInfo.allocationSize = memReqs.size;
-		memAllocInfo.memoryTypeIndex = vulkanDevice->getMemoryType(memReqs.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
-		VK_CHECK_RESULT(vkAllocateMemory(device, &memAllocInfo, nullptr, &textures.lutBrdf.deviceMemory));
-		VK_CHECK_RESULT(vkBindImageMemory(device, textures.lutBrdf.image, textures.lutBrdf.deviceMemory, 0));
+		aux::Device::setVksDevice(vulkanDevice);
+		aux::Device::set(&device);
 
-		// View
-		VkImageViewCreateInfo viewCI{};
-		viewCI.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-		viewCI.viewType = VK_IMAGE_VIEW_TYPE_2D;
-		viewCI.format = format;
-		viewCI.subresourceRange = {};
-		viewCI.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-		viewCI.subresourceRange.levelCount = 1;
-		viewCI.subresourceRange.layerCount = 1;
-		viewCI.image = textures.lutBrdf.image;
-		VK_CHECK_RESULT(vkCreateImageView(device, &viewCI, nullptr, &textures.lutBrdf.view));
+		auto auxImage = new aux::Image(format, dim, dim);
+		textures.lutBrdf.image = auxImage->getImage();
+		textures.lutBrdf.deviceMemory = auxImage->getDeviceMemory();
+		textures.lutBrdf.view = auxImage->getView();
 
 		// Sampler
 		VkSamplerCreateInfo samplerCI{};
