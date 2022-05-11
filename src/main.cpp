@@ -1,4 +1,4 @@
-﻿#include "vk2.h"
+﻿#include "v2.h"
 #include "auxVk.h"
 
 /*
@@ -796,53 +796,9 @@ public:
 		textures.lutBrdf.view = auxImage->getView();
 		textures.lutBrdf.sampler = auxImage->getSampler();
 	
-		// FB, Att, RP, Pipe, etc.
-		VkAttachmentDescription attDesc{};
-		// Color attachment
-		attDesc.format = format;
-		attDesc.samples = VK_SAMPLE_COUNT_1_BIT;
-		attDesc.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-		attDesc.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-		attDesc.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-		attDesc.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-		attDesc.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-		attDesc.finalLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-		VkAttachmentReference colorReference = { 0, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL };
+		auto auxRenderPass = new aux::RenderPass(*auxImage);
 
-		VkSubpassDescription subpassDescription{};
-		subpassDescription.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
-		subpassDescription.colorAttachmentCount = 1;
-		subpassDescription.pColorAttachments = &colorReference;
-
-		// Use subpass dependencies for layout transitions
-		std::array<VkSubpassDependency, 2> dependencies;
-		dependencies[0].srcSubpass = VK_SUBPASS_EXTERNAL;
-		dependencies[0].dstSubpass = 0;
-		dependencies[0].srcStageMask = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
-		dependencies[0].dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-		dependencies[0].srcAccessMask = VK_ACCESS_MEMORY_READ_BIT;
-		dependencies[0].dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-		dependencies[0].dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
-		dependencies[1].srcSubpass = 0;
-		dependencies[1].dstSubpass = VK_SUBPASS_EXTERNAL;
-		dependencies[1].srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-		dependencies[1].dstStageMask = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
-		dependencies[1].srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-		dependencies[1].dstAccessMask = VK_ACCESS_MEMORY_READ_BIT;
-		dependencies[1].dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
-
-		// Create the actual renderpass
-		VkRenderPassCreateInfo renderPassCI{};
-		renderPassCI.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
-		renderPassCI.attachmentCount = 1;
-		renderPassCI.pAttachments = &attDesc;
-		renderPassCI.subpassCount = 1;
-		renderPassCI.pSubpasses = &subpassDescription;
-		renderPassCI.dependencyCount = 2;
-		renderPassCI.pDependencies = dependencies.data();
-
-		VkRenderPass renderpass;
-		VK_CHECK_RESULT(vkCreateRenderPass(device, &renderPassCI, nullptr, &renderpass));
+		VkRenderPass renderpass = auxRenderPass->getRenderPass();
 
 		VkFramebufferCreateInfo framebufferCI{};
 		framebufferCI.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;

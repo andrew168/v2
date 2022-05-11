@@ -1,5 +1,5 @@
 #pragma once
-#include "vk2.h"
+#include "vk.h"
 
 namespace aux
 {
@@ -9,9 +9,9 @@ namespace aux
         static VkDevice* m_device;
         static vks::VulkanDevice* m_vksDevice;
     public:
-        static VkDevice *get() {
+        static VkDevice* get() {
             if (m_device == nullptr) {
-                assert(0, "setup first");
+                Assert(0, "setup first");
             }
 
             return m_device;
@@ -19,17 +19,17 @@ namespace aux
 
         static vks::VulkanDevice* getVksDevice() {
             if (m_vksDevice == nullptr) {
-                assert(0, "setup first");
+                Assert(0, "setup first");
             }
             return m_vksDevice;
         }
 
-        static void set(VkDevice *device)
+        static void set(VkDevice* device)
         {
             m_device = device;
         }
 
-        static void setVksDevice(vks::VulkanDevice *device)
+        static void setVksDevice(vks::VulkanDevice* device)
         {
             m_vksDevice = device;
         }
@@ -51,11 +51,13 @@ namespace aux
     public:
         Image(VkFormat format, int32_t width, int32_t height);
         Image(VkFormat format, int32_t cubeLength, VkImageCreateFlagBits flags);
+        VkFormat getFormat() { return m_format; }
         VkImage getImage() { return m_image; }
         VkDeviceMemory getDeviceMemory() { return m_deviceMemory; }
         VkImageView getView() { return m_view; }
         uint32_t getMipLevels() { return m_mipLevels; }
         VkSampler getSampler() { return m_sampler; }
+
     private:
         VkImageCreateInfo getDefaultCI();
         void createImage();
@@ -65,5 +67,19 @@ namespace aux
         void createSampler();
     };
 
+    class RenderPass
+    {
+        VkFormat m_format;
+        VkRenderPass m_renderPass;
+        VkAttachmentReference m_colorReference;
+        VkSubpassDescription m_subpassDescription{};
+    public:
+        RenderPass(aux::Image& image);
+        VkRenderPass getRenderPass() { return m_renderPass; }
+    private:
+        void createAttachmentReference();
+        void createSubpass();
+        void createRenderPass();
+    };
 
 }
