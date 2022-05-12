@@ -55,9 +55,12 @@ namespace aux
         VkImage getImage() { return m_image; }
         VkDeviceMemory getDeviceMemory() { return m_deviceMemory; }
         VkImageView getView() { return m_view; }
+        VkImageView *getViewP() { return &m_view; }
         uint32_t getMipLevels() { return m_mipLevels; }
+        uint32_t getArrayLayers() { return m_arrayLayers; }
         VkSampler getSampler() { return m_sampler; }
-
+        uint32_t getWidth() { return m_width; }
+        uint32_t getHeight() { return m_height; }
     private:
         VkImageCreateInfo getDefaultCI();
         void createImage();
@@ -74,8 +77,8 @@ namespace aux
         VkAttachmentReference m_colorReference;
         VkSubpassDescription m_subpassDescription{};
     public:
-        RenderPass(aux::Image& image);
-        VkRenderPass getRenderPass() { return m_renderPass; }
+        explicit RenderPass(aux::Image& image);
+        VkRenderPass get() { return m_renderPass; }
     private:
         void createAttachmentReference();
         void createSubpass();

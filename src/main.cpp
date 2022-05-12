@@ -798,7 +798,7 @@ public:
 	
 		auto auxRenderPass = new aux::RenderPass(*auxImage);
 
-		VkRenderPass renderpass = auxRenderPass->getRenderPass();
+		VkRenderPass renderpass = auxRenderPass->get();
 
 		VkFramebufferCreateInfo framebufferCI{};
 		framebufferCI.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
