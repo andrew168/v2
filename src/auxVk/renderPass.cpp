@@ -26,7 +26,6 @@ void RenderPass::createSubpass()
 
 void RenderPass::createRenderPass()
 {
-
     // Use subpass dependencies for layout transitions
     std::array<VkSubpassDependency, 2> dependencies;
     dependencies[0].srcSubpass = VK_SUBPASS_EXTERNAL;
@@ -55,7 +54,6 @@ void RenderPass::createRenderPass()
     attDesc.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
     attDesc.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
     attDesc.finalLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-
 
     // Create the actual renderpass
     VkRenderPassCreateInfo renderPassCI{};

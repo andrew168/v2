@@ -885,7 +885,7 @@ public:
 				cubemap.sampler = auxCube.getSampler();
 
 			// FB, Att, RP, Pipe, etc.
-			VkAttachmentDescription attDesc{};
+				VkAttachmentDescription attDesc{};
 			// Color attachment
 			attDesc.format = format;
 			attDesc.samples = VK_SAMPLE_COUNT_1_BIT;
