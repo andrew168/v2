@@ -44,13 +44,13 @@ void RenderPass::createRenderPass()
     dependencies[1].dstAccessMask = VK_ACCESS_MEMORY_READ_BIT;
     dependencies[1].dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
 
-    m_pAuxAttachmentDescription = new aux::AttachmentDescription(*m_pImage);
+    aux::AttachmentDescription auxAttDesc(*m_pImage);
     
     // Create the actual renderpass
     VkRenderPassCreateInfo renderPassCI{};
     renderPassCI.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
     renderPassCI.attachmentCount = 1;
-    renderPassCI.pAttachments = m_pAuxAttachmentDescription->get();
+    renderPassCI.pAttachments = auxAttDesc.get();
     renderPassCI.subpassCount = 1;
     renderPassCI.pSubpasses = &m_subpassDescription;
     renderPassCI.dependencyCount = 2;
@@ -80,6 +80,5 @@ void RenderPass::begin(VkCommandBuffer *pCmdBuf, aux::Framebuffer *auxFramebuffe
 RenderPass::~RenderPass()
 {
     vkDestroyRenderPass(*(aux::Device::get()), m_renderPass, nullptr);
-    delete m_pAuxAttachmentDescription;
 }
 }
