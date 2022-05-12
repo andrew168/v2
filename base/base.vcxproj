@@ -279,6 +279,7 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     <ClCompile Include="E:\projectsVK\glTF-PBR\base\VulkanAndroid.cpp" />
     <ClCompile Include="E:\projectsVK\glTF-PBR\base\VulkanExampleBase.cpp" />
     <ClCompile Include="E:\projectsVK\glTF-PBR\base\VulkanglTFModel.cpp" />
+    <ClCompile Include="VulkanUtils.cpp" />
     <ClInclude Include="E:\projectsVK\glTF-PBR\base\VulkanAndroid.h" />
     <ClInclude Include="E:\projectsVK\glTF-PBR\base\VulkanDevice.hpp" />
     <ClInclude Include="E:\projectsVK\glTF-PBR\base\VulkanExampleBase.h" />
