@@ -5,12 +5,15 @@
 
 namespace aux
 {
+class AttachmentDescription;
+
 class RenderPass
 {
     aux::Image* m_pImage;
     VkFormat m_format;
     VkRenderPass m_renderPass;
     VkAttachmentReference m_colorReference;
+    aux::AttachmentDescription *m_pAuxAttachmentDescription;
     VkSubpassDescription m_subpassDescription{};
 public:
     explicit RenderPass(aux::Image& image);

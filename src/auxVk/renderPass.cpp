@@ -1,4 +1,5 @@
 ﻿#include "auxVk.h"
+#include "attachmentDescription.h"
 
 namespace aux
 {
@@ -43,23 +44,13 @@ void RenderPass::createRenderPass()
     dependencies[1].dstAccessMask = VK_ACCESS_MEMORY_READ_BIT;
     dependencies[1].dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
 
-
-    VkAttachmentDescription attDesc{};
-    // Color attachment
-    attDesc.format = m_format;
-    attDesc.samples = VK_SAMPLE_COUNT_1_BIT;
-    attDesc.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-    attDesc.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-    attDesc.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-    attDesc.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-    attDesc.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-    attDesc.finalLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-
+    m_pAuxAttachmentDescription = new aux::AttachmentDescription(*m_pImage);
+    
     // Create the actual renderpass
     VkRenderPassCreateInfo renderPassCI{};
     renderPassCI.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
     renderPassCI.attachmentCount = 1;
-    renderPassCI.pAttachments = &attDesc;
+    renderPassCI.pAttachments = m_pAuxAttachmentDescription->get();
     renderPassCI.subpassCount = 1;
     renderPassCI.pSubpasses = &m_subpassDescription;
     renderPassCI.dependencyCount = 2;
@@ -89,5 +80,6 @@ void RenderPass::begin(VkCommandBuffer *pCmdBuf, aux::Framebuffer *auxFramebuffe
 RenderPass::~RenderPass()
 {
     vkDestroyRenderPass(*(aux::Device::get()), m_renderPass, nullptr);
+    delete m_pAuxAttachmentDescription;
 }
 }
