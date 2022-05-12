@@ -877,12 +877,12 @@ public:
 			aux::Device::set(&device);
 
 			// Create target cubemap
-				auto auxCube = new aux::Image(format, dim, VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT);
-				cubemap.image = auxCube->getImage();
-				cubemap.deviceMemory = auxCube->getDeviceMemory();				
-				cubemap.view = auxCube->getView();
-				const uint32_t numMips = auxCube->getMipLevels();
-				cubemap.sampler = auxCube->getSampler();
+			aux::Image auxCube(format, dim, VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT);
+				cubemap.image = auxCube.getImage();
+				cubemap.deviceMemory = auxCube.getDeviceMemory();				
+				cubemap.view = auxCube.getView();
+				const uint32_t numMips = auxCube.getMipLevels();
+				cubemap.sampler = auxCube.getSampler();
 
 			// FB, Att, RP, Pipe, etc.
 			VkAttachmentDescription attDesc{};
