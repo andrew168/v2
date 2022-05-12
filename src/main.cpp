@@ -800,16 +800,14 @@ public:
 
 		VkRenderPass renderpass = auxRenderPass.get();
 		aux::Framebuffer auxFramebuffer(auxImage);
-		aux::PipelineLayout* pAuxPipelineLayout = new aux::PipelineLayout();
-		VkPipelineLayout pipelinelayout = pAuxPipelineLayout->get();
+		aux::PipelineLayout auxPipelineLayout(&auxImage);
+		VkPipelineLayout pipelinelayout = auxPipelineLayout.get();
 		aux::Pipeline::setCache(&pipelineCache);
-		aux::Pipeline auxPipeline(pAuxPipelineLayout, &auxRenderPass);
+		aux::Pipeline auxPipeline(&auxPipelineLayout, &auxRenderPass);
 		VkPipeline pipeline = auxPipeline.get();
 
 		// Render
-		VkCommandBuffer cmdBuf = vulkanDevice->createCommandBuffer(VK_COMMAND_BUFFER_LEVEL_PRIMARY, true);
-
-		
+		VkCommandBuffer cmdBuf = vulkanDevice->createCommandBuffer(VK_COMMAND_BUFFER_LEVEL_PRIMARY, true);		
 		auxRenderPass.begin(&cmdBuf, &auxFramebuffer);
 
 		VkViewport viewport{};
@@ -832,8 +830,8 @@ public:
 		vkQueueWaitIdle(queue);
 
 		// vkDestroyPipelineLayout(device, pipelinelayout, nullptr);
-		vkDestroyRenderPass(device, renderpass, nullptr);
-		vkDestroyFramebuffer(device, auxFramebuffer.get(), nullptr);
+		// vkDestroyRenderPass(device, renderpass, nullptr);
+		// vkDestroyFramebuffer(device, auxFramebuffer.get(), nullptr);
 		// vkDestroyDescriptorSetLayout by dtor();
 
 		textures.lutBrdf.descriptor.imageView = textures.lutBrdf.view;

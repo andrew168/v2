@@ -19,4 +19,10 @@ Framebuffer::Framebuffer(aux::Image& image)
 
     VK_CHECK_RESULT(vkCreateFramebuffer(*Device::get(), &framebufferCI, nullptr, &m_framebuffer));
 };
+
+
+Framebuffer::~Framebuffer()
+{
+    vkDestroyFramebuffer(*(aux::Device::get()), m_framebuffer, nullptr);
+}
 }

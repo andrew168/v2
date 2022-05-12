@@ -87,4 +87,9 @@ void RenderPass::begin(VkCommandBuffer *pCmdBuf, aux::Framebuffer *auxFramebuffe
     vkCmdBeginRenderPass(*pCmdBuf, &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
 
 }
+
+RenderPass::~RenderPass()
+{
+    vkDestroyRenderPass(*(aux::Device::get()), m_renderPass, nullptr);
+}
 }

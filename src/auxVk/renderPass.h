@@ -14,6 +14,7 @@ class RenderPass
     VkSubpassDescription m_subpassDescription{};
 public:
     explicit RenderPass(aux::Image& image);
+    ~RenderPass();
     void begin(VkCommandBuffer* pCmdBuf, aux::Framebuffer* auxFramebuffer);
     VkRenderPass get() { return m_renderPass; }
 private:

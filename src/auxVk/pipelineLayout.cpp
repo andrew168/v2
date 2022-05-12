@@ -2,7 +2,9 @@
 
 namespace aux
 {
-PipelineLayout::PipelineLayout()
+class Image;
+
+PipelineLayout::PipelineLayout(aux::Image* image)
 {
 	VkDevice *pDevice = aux::Device::get();
 
