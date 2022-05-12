@@ -12,16 +12,12 @@ class RenderPass
     aux::Image& m_image;
     VkFormat m_format;
     VkRenderPass m_renderPass;
-    VkAttachmentReference m_colorReference;
-    VkSubpassDescription m_subpassDescription{};
 public:
     explicit RenderPass(aux::Image& image);
     ~RenderPass();
     void begin(VkCommandBuffer* pCmdBuf, aux::Framebuffer* auxFramebuffer);
     VkRenderPass get() { return m_renderPass; }
 private:
-    void createAttachmentReference();
-    void createSubpass();
     void createRenderPass();
 };
 

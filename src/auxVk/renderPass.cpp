@@ -7,22 +7,7 @@ RenderPass::RenderPass(aux::Image& image) :
     m_image(image),
     m_format(image.getFormat())
 {
-    createAttachmentReference();
-    createSubpass();
     createRenderPass();
-}
-
-void RenderPass::createAttachmentReference()
-{
-    m_colorReference = { 0, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL };
-}
-
-void RenderPass::createSubpass()
-{
-    VkSubpassDescription subpassDescription{};
-    m_subpassDescription.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
-    m_subpassDescription.colorAttachmentCount = 1;
-    m_subpassDescription.pColorAttachments = &m_colorReference;
 }
 
 void RenderPass::createRenderPass()
@@ -45,14 +30,15 @@ void RenderPass::createRenderPass()
     dependencies[1].dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
 
     aux::AttachmentDescription auxAttDesc(m_image);
-    
+    aux::SubpassDescription auxSubpassDescription(m_image);
+
     // Create the actual renderpass
     VkRenderPassCreateInfo renderPassCI{};
     renderPassCI.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
     renderPassCI.attachmentCount = 1;
     renderPassCI.pAttachments = auxAttDesc.get();
     renderPassCI.subpassCount = 1;
-    renderPassCI.pSubpasses = &m_subpassDescription;
+    renderPassCI.pSubpasses = auxSubpassDescription.get();
     renderPassCI.dependencyCount = 2;
     renderPassCI.pDependencies = dependencies.data();
 
