@@ -884,18 +884,9 @@ public:
 				const uint32_t numMips = auxCube.getMipLevels();
 				cubemap.sampler = auxCube.getSampler();
 
-			//	aux::AttachmentDescription auxAttDesc(auxCube);
-			// FB, Att, RP, Pipe, etc.
-				VkAttachmentDescription attDesc{};
-			// Color attachment
-			attDesc.format = format;
-			attDesc.samples = VK_SAMPLE_COUNT_1_BIT;
-			attDesc.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-			attDesc.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-			attDesc.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-			attDesc.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-			attDesc.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-			attDesc.finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+			aux::AttachmentDescription auxAttDesc(auxCube);
+			auxAttDesc.finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+			
 			VkAttachmentReference colorReference = { 0, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL };
 
 			VkSubpassDescription subpassDescription{};
@@ -924,7 +915,7 @@ public:
 			VkRenderPassCreateInfo renderPassCI{};
 			renderPassCI.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
 			renderPassCI.attachmentCount = 1;
-			renderPassCI.pAttachments = &attDesc;
+			renderPassCI.pAttachments = auxAttDesc.get();
 			renderPassCI.subpassCount = 1;
 			renderPassCI.pSubpasses = &subpassDescription;
 			renderPassCI.dependencyCount = 2;

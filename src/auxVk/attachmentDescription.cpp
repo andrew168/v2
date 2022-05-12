@@ -17,8 +17,6 @@ AttachmentDescription::AttachmentDescription(aux::Image& image) :
     this->stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
     this->initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
     this->finalLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-
-    // attDesc.finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 }
 
 
