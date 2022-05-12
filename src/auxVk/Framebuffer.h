@@ -4,6 +4,9 @@
 
 namespace aux
 {
+class RenderPass;
+
+
 class Framebuffer {
     aux::RenderPass* m_pAuxRenderPass;
     VkFramebuffer m_framebuffer;

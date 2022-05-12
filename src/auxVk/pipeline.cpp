@@ -87,5 +87,6 @@ Pipeline::Pipeline(aux::PipelineLayout* pPipelineLayout, aux::RenderPass* pRende
 }
 Pipeline::~Pipeline()
 {
+	vkDestroyPipeline(*(aux::Device::get()), m_pipeline, nullptr);
 }
 }

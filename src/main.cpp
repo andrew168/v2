@@ -807,20 +807,10 @@ public:
 		VkPipeline pipeline = auxPipeline->get();
 
 		// Render
-		VkClearValue clearValues[1];
-		clearValues[0].color = { { 0.0f, 0.0f, 0.0f, 1.0f } };
-
-		VkRenderPassBeginInfo renderPassBeginInfo{};
-		renderPassBeginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-		renderPassBeginInfo.renderPass = renderpass;
-		renderPassBeginInfo.renderArea.extent.width = dim;
-		renderPassBeginInfo.renderArea.extent.height = dim;
-		renderPassBeginInfo.clearValueCount = 1;
-		renderPassBeginInfo.pClearValues = clearValues;
-		renderPassBeginInfo.framebuffer = auxFramebuffer->get();
-
 		VkCommandBuffer cmdBuf = vulkanDevice->createCommandBuffer(VK_COMMAND_BUFFER_LEVEL_PRIMARY, true);
-		vkCmdBeginRenderPass(cmdBuf, &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
+
+		
+		auxRenderPass->begin(&cmdBuf, auxFramebuffer);
 
 		VkViewport viewport{};
 		viewport.width = (float)dim;
@@ -841,7 +831,6 @@ public:
 
 		vkQueueWaitIdle(queue);
 
-		vkDestroyPipeline(device, pipeline, nullptr);
 		// vkDestroyPipelineLayout(device, pipelinelayout, nullptr);
 		vkDestroyRenderPass(device, renderpass, nullptr);
 		vkDestroyFramebuffer(device, auxFramebuffer->get(), nullptr);

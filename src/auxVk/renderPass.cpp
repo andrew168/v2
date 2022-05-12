@@ -3,6 +3,7 @@
 namespace aux
 {
 RenderPass::RenderPass(aux::Image& image) :
+    m_pImage(&image),
     m_format(image.getFormat())
 {
     createAttachmentReference();
@@ -67,5 +68,23 @@ void RenderPass::createRenderPass()
     renderPassCI.pDependencies = dependencies.data();
 
     VK_CHECK_RESULT(vkCreateRenderPass(*aux::Device::get(), &renderPassCI, nullptr, &m_renderPass));
+}
+
+void RenderPass::begin(VkCommandBuffer *pCmdBuf, aux::Framebuffer *auxFramebuffer)
+{
+    VkClearValue clearValues[1];
+    clearValues[0].color = { { 0.0f, 0.0f, 0.0f, 1.0f } };
+
+    VkRenderPassBeginInfo renderPassBeginInfo{};
+    renderPassBeginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+    renderPassBeginInfo.renderPass = m_renderPass;
+    renderPassBeginInfo.renderArea.extent.width = m_pImage->getWidth();
+    renderPassBeginInfo.renderArea.extent.height = m_pImage->getHeight();
+    renderPassBeginInfo.clearValueCount = 1;
+    renderPassBeginInfo.pClearValues = clearValues;
+    renderPassBeginInfo.framebuffer = auxFramebuffer->get();
+
+    vkCmdBeginRenderPass(*pCmdBuf, &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
+
 }
 }
