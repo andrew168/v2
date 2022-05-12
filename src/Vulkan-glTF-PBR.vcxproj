@@ -328,6 +328,7 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     <ClCompile Include="auxVk\pipeline.cpp" />
     <ClCompile Include="auxVk\pipelineLayout.cpp" />
     <ClCompile Include="auxVk\renderPass.cpp" />
+    <ClCompile Include="auxVk\subpassDescription.cpp" />
     <ClCompile Include="auxVk\util.cpp" />
     <ClCompile Include="E:\projectsVK\glTF-PBR\src\main.cpp" />
     <ClCompile Include="v2\v2.cpp" />
@@ -366,6 +367,7 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     <ClInclude Include="auxVk\pipeline.h" />
     <ClInclude Include="auxVk\pipelineLayout.h" />
     <ClInclude Include="auxVk\renderPass.h" />
+    <ClInclude Include="auxVk\subpassDescription.h" />
     <ClInclude Include="auxVk\util.h" />
     <ClInclude Include="v2\v2.h" />
   </ItemGroup>

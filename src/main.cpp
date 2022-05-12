@@ -886,13 +886,8 @@ public:
 
 			aux::AttachmentDescription auxAttDesc(auxCube);
 			auxAttDesc.finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-			
-			VkAttachmentReference colorReference = { 0, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL };
 
-			VkSubpassDescription subpassDescription{};
-			subpassDescription.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
-			subpassDescription.colorAttachmentCount = 1;
-			subpassDescription.pColorAttachments = &colorReference;
+			aux::SubpassDescription auxSubpassDescription(auxCube);
 
 			// Use subpass dependencies for layout transitions
 			std::array<VkSubpassDependency, 2> dependencies;
@@ -917,7 +912,7 @@ public:
 			renderPassCI.attachmentCount = 1;
 			renderPassCI.pAttachments = auxAttDesc.get();
 			renderPassCI.subpassCount = 1;
-			renderPassCI.pSubpasses = &subpassDescription;
+			renderPassCI.pSubpasses = auxSubpassDescription.get();
 			renderPassCI.dependencyCount = 2;
 			renderPassCI.pDependencies = dependencies.data();
 			VkRenderPass renderpass;

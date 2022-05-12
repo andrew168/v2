@@ -7,3 +7,4 @@
 #include "pipelineLayout.h"
 #include "pipeline.h"
 #include "attachmentDescription.h"
+#include "subpassDescription.h"
