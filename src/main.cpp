@@ -800,20 +800,8 @@ public:
 
 		VkRenderPass renderpass = auxRenderPass->get();
 		auto auxFramebuffer = new aux::Framebuffer(*auxImage);
-
-		// Desriptors
-		VkDescriptorSetLayout descriptorsetlayout;
-		VkDescriptorSetLayoutCreateInfo descriptorSetLayoutCI{};
-		descriptorSetLayoutCI.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-		VK_CHECK_RESULT(vkCreateDescriptorSetLayout(device, &descriptorSetLayoutCI, nullptr, &descriptorsetlayout));
-
-		// Pipeline layout
-		VkPipelineLayout pipelinelayout;
-		VkPipelineLayoutCreateInfo pipelineLayoutCI{};
-		pipelineLayoutCI.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-		pipelineLayoutCI.setLayoutCount = 1;
-		pipelineLayoutCI.pSetLayouts = &descriptorsetlayout;
-		VK_CHECK_RESULT(vkCreatePipelineLayout(device, &pipelineLayoutCI, nullptr, &pipelinelayout));
+		auto auxPipelineLayout = new aux::PipelineLayout();
+		VkPipelineLayout pipelinelayout = auxPipelineLayout->get();
 
 		// Pipeline
 		VkPipelineInputAssemblyStateCreateInfo inputAssemblyStateCI{};
@@ -926,10 +914,10 @@ public:
 		vkQueueWaitIdle(queue);
 
 		vkDestroyPipeline(device, pipeline, nullptr);
-		vkDestroyPipelineLayout(device, pipelinelayout, nullptr);
+		// vkDestroyPipelineLayout(device, pipelinelayout, nullptr);
 		vkDestroyRenderPass(device, renderpass, nullptr);
 		vkDestroyFramebuffer(device, auxFramebuffer->get(), nullptr);
-		vkDestroyDescriptorSetLayout(device, descriptorsetlayout, nullptr);
+		// vkDestroyDescriptorSetLayout by dtor();
 
 		textures.lutBrdf.descriptor.imageView = textures.lutBrdf.view;
 		textures.lutBrdf.descriptor.sampler = textures.lutBrdf.sampler;
