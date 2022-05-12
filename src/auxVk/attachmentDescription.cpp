@@ -4,7 +4,7 @@
 namespace aux
 {
 AttachmentDescription::AttachmentDescription(aux::Image& image) :
-    m_pImage(&image),
+    m_image(image),
     m_format(image.getFormat()),
     m_AttachmentDescription{}
 {

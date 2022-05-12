@@ -6,7 +6,7 @@ namespace aux
 {
 class AttachmentDescription
 {
-    aux::Image* m_pImage;
+    aux::Image& m_image;
     VkFormat m_format;
     VkAttachmentDescription m_AttachmentDescription;
 public:
