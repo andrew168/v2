@@ -799,18 +799,7 @@ public:
 		auto auxRenderPass = new aux::RenderPass(*auxImage);
 
 		VkRenderPass renderpass = auxRenderPass->get();
-
-		VkFramebufferCreateInfo framebufferCI{};
-		framebufferCI.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-		framebufferCI.renderPass = renderpass;
-		framebufferCI.attachmentCount = 1;
-		framebufferCI.pAttachments = &textures.lutBrdf.view;
-		framebufferCI.width = dim;
-		framebufferCI.height = dim;
-		framebufferCI.layers = 1;
-
-		VkFramebuffer framebuffer;
-		VK_CHECK_RESULT(vkCreateFramebuffer(device, &framebufferCI, nullptr, &framebuffer));
+		auto auxFramebuffer = new aux::Framebuffer(*auxImage);
 
 		// Desriptors
 		VkDescriptorSetLayout descriptorsetlayout;
@@ -912,7 +901,7 @@ public:
 		renderPassBeginInfo.renderArea.extent.height = dim;
 		renderPassBeginInfo.clearValueCount = 1;
 		renderPassBeginInfo.pClearValues = clearValues;
-		renderPassBeginInfo.framebuffer = framebuffer;
+		renderPassBeginInfo.framebuffer = auxFramebuffer->get();
 
 		VkCommandBuffer cmdBuf = vulkanDevice->createCommandBuffer(VK_COMMAND_BUFFER_LEVEL_PRIMARY, true);
 		vkCmdBeginRenderPass(cmdBuf, &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
@@ -939,7 +928,7 @@ public:
 		vkDestroyPipeline(device, pipeline, nullptr);
 		vkDestroyPipelineLayout(device, pipelinelayout, nullptr);
 		vkDestroyRenderPass(device, renderpass, nullptr);
-		vkDestroyFramebuffer(device, framebuffer, nullptr);
+		vkDestroyFramebuffer(device, auxFramebuffer->get(), nullptr);
 		vkDestroyDescriptorSetLayout(device, descriptorsetlayout, nullptr);
 
 		textures.lutBrdf.descriptor.imageView = textures.lutBrdf.view;
