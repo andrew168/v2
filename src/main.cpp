@@ -884,6 +884,7 @@ public:
 				const uint32_t numMips = auxCube.getMipLevels();
 				cubemap.sampler = auxCube.getSampler();
 
+			//	aux::AttachmentDescription auxAttDesc(auxCube);
 			// FB, Att, RP, Pipe, etc.
 				VkAttachmentDescription attDesc{};
 			// Color attachment

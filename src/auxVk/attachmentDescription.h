@@ -4,15 +4,14 @@
 
 namespace aux
 {
-class AttachmentDescription
+class AttachmentDescription: public VkAttachmentDescription
 {
     aux::Image& m_image;
     VkFormat m_format;
-    VkAttachmentDescription m_AttachmentDescription;
 public:
     explicit AttachmentDescription(aux::Image& image);
     ~AttachmentDescription();
-    VkAttachmentDescription *get() { return &m_AttachmentDescription; }
+    VkAttachmentDescription *get() { return dynamic_cast<VkAttachmentDescription *>(this); }
 private:
 };
 
