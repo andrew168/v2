@@ -790,27 +790,27 @@ public:
 		aux::Device::setVksDevice(vulkanDevice);
 		aux::Device::set(&device);
 
-		auto auxImage = new aux::Image(format, dim, dim);
-		textures.lutBrdf.image = auxImage->getImage();
-		textures.lutBrdf.deviceMemory = auxImage->getDeviceMemory();
-		textures.lutBrdf.view = auxImage->getView();
-		textures.lutBrdf.sampler = auxImage->getSampler();
+		aux::Image auxImage(format, dim, dim);
+		textures.lutBrdf.image = auxImage.getImage();
+		textures.lutBrdf.deviceMemory = auxImage.getDeviceMemory();
+		textures.lutBrdf.view = auxImage.getView();
+		textures.lutBrdf.sampler = auxImage.getSampler();
 	
-		auto auxRenderPass = new aux::RenderPass(*auxImage);
+		aux::RenderPass auxRenderPass(auxImage);
 
-		VkRenderPass renderpass = auxRenderPass->get();
-		auto auxFramebuffer = new aux::Framebuffer(*auxImage);
-		auto auxPipelineLayout = new aux::PipelineLayout();
-		VkPipelineLayout pipelinelayout = auxPipelineLayout->get();
+		VkRenderPass renderpass = auxRenderPass.get();
+		aux::Framebuffer auxFramebuffer(auxImage);
+		aux::PipelineLayout* pAuxPipelineLayout = new aux::PipelineLayout();
+		VkPipelineLayout pipelinelayout = pAuxPipelineLayout->get();
 		aux::Pipeline::setCache(&pipelineCache);
-		auto auxPipeline = new aux::Pipeline(auxPipelineLayout, auxRenderPass);
-		VkPipeline pipeline = auxPipeline->get();
+		aux::Pipeline auxPipeline(pAuxPipelineLayout, &auxRenderPass);
+		VkPipeline pipeline = auxPipeline.get();
 
 		// Render
 		VkCommandBuffer cmdBuf = vulkanDevice->createCommandBuffer(VK_COMMAND_BUFFER_LEVEL_PRIMARY, true);
 
 		
-		auxRenderPass->begin(&cmdBuf, auxFramebuffer);
+		auxRenderPass.begin(&cmdBuf, &auxFramebuffer);
 
 		VkViewport viewport{};
 		viewport.width = (float)dim;
@@ -833,7 +833,7 @@ public:
 
 		// vkDestroyPipelineLayout(device, pipelinelayout, nullptr);
 		vkDestroyRenderPass(device, renderpass, nullptr);
-		vkDestroyFramebuffer(device, auxFramebuffer->get(), nullptr);
+		vkDestroyFramebuffer(device, auxFramebuffer.get(), nullptr);
 		// vkDestroyDescriptorSetLayout by dtor();
 
 		textures.lutBrdf.descriptor.imageView = textures.lutBrdf.view;
