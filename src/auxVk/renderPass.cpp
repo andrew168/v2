@@ -4,7 +4,7 @@
 namespace aux
 {
 RenderPass::RenderPass(aux::Image& image) :
-    m_pImage(&image),
+    m_image(image),
     m_format(image.getFormat())
 {
     createAttachmentReference();
@@ -44,7 +44,7 @@ void RenderPass::createRenderPass()
     dependencies[1].dstAccessMask = VK_ACCESS_MEMORY_READ_BIT;
     dependencies[1].dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
 
-    aux::AttachmentDescription auxAttDesc(*m_pImage);
+    aux::AttachmentDescription auxAttDesc(m_image);
     
     // Create the actual renderpass
     VkRenderPassCreateInfo renderPassCI{};
@@ -67,8 +67,8 @@ void RenderPass::begin(VkCommandBuffer *pCmdBuf, aux::Framebuffer *auxFramebuffe
     VkRenderPassBeginInfo renderPassBeginInfo{};
     renderPassBeginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
     renderPassBeginInfo.renderPass = m_renderPass;
-    renderPassBeginInfo.renderArea.extent.width = m_pImage->getWidth();
-    renderPassBeginInfo.renderArea.extent.height = m_pImage->getHeight();
+    renderPassBeginInfo.renderArea.extent.width = m_image.getWidth();
+    renderPassBeginInfo.renderArea.extent.height = m_image.getHeight();
     renderPassBeginInfo.clearValueCount = 1;
     renderPassBeginInfo.pClearValues = clearValues;
     renderPassBeginInfo.framebuffer = auxFramebuffer->get();

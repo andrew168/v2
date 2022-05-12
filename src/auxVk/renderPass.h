@@ -9,7 +9,7 @@ class AttachmentDescription;
 
 class RenderPass
 {
-    aux::Image* m_pImage;
+    aux::Image& m_image;
     VkFormat m_format;
     VkRenderPass m_renderPass;
     VkAttachmentReference m_colorReference;
