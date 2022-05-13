@@ -798,7 +798,7 @@ public:
 	
 		aux::RenderPass auxRenderPass(auxImage);
 
-		VkRenderPass renderpass = auxRenderPass.get();
+		VkRenderPass renderpass = *(auxRenderPass.get());
 		aux::Framebuffer auxFramebuffer(auxImage);
 		aux::PipelineLayout auxPipelineLayout(&auxImage);
 		VkPipelineLayout pipelinelayout = auxPipelineLayout.get();
@@ -888,35 +888,7 @@ public:
 			auxAttDesc.finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 
 			aux::SubpassDescription auxSubpassDescription(auxCube);
-
-			// Use subpass dependencies for layout transitions
-			std::array<VkSubpassDependency, 2> dependencies;
-			dependencies[0].srcSubpass = VK_SUBPASS_EXTERNAL;
-			dependencies[0].dstSubpass = 0;
-			dependencies[0].srcStageMask = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
-			dependencies[0].dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-			dependencies[0].srcAccessMask = VK_ACCESS_MEMORY_READ_BIT;
-			dependencies[0].dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-			dependencies[0].dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
-			dependencies[1].srcSubpass = 0;
-			dependencies[1].dstSubpass = VK_SUBPASS_EXTERNAL;
-			dependencies[1].srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-			dependencies[1].dstStageMask = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
-			dependencies[1].srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-			dependencies[1].dstAccessMask = VK_ACCESS_MEMORY_READ_BIT;
-			dependencies[1].dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
-
-			// Renderpass
-			VkRenderPassCreateInfo renderPassCI{};
-			renderPassCI.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
-			renderPassCI.attachmentCount = 1;
-			renderPassCI.pAttachments = auxAttDesc.get();
-			renderPassCI.subpassCount = 1;
-			renderPassCI.pSubpasses = auxSubpassDescription.get();
-			renderPassCI.dependencyCount = 2;
-			renderPassCI.pDependencies = dependencies.data();
-			VkRenderPass renderpass;
-			VK_CHECK_RESULT(vkCreateRenderPass(device, &renderPassCI, nullptr, &renderpass));
+			aux::RenderPass auxRenderPass(auxCube);
 
 			struct Offscreen {
 				VkImage image;
@@ -970,7 +942,7 @@ public:
 				// Framebuffer
 				VkFramebufferCreateInfo framebufferCI{};
 				framebufferCI.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-				framebufferCI.renderPass = renderpass;
+				framebufferCI.renderPass = *(auxRenderPass.get());
 				framebufferCI.attachmentCount = 1;
 				framebufferCI.pAttachments = &offscreen.view;
 				framebufferCI.width = dim;
@@ -1121,7 +1093,7 @@ public:
 			VkGraphicsPipelineCreateInfo pipelineCI{};
 			pipelineCI.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
 			pipelineCI.layout = pipelinelayout;
-			pipelineCI.renderPass = renderpass;
+			pipelineCI.renderPass = *(auxRenderPass.get());
 			pipelineCI.pInputAssemblyState = &inputAssemblyStateCI;
 			pipelineCI.pVertexInputState = &vertexInputStateCI;
 			pipelineCI.pRasterizationState = &rasterizationStateCI;
@@ -1132,7 +1104,7 @@ public:
 			pipelineCI.pDynamicState = &dynamicStateCI;
 			pipelineCI.stageCount = 2;
 			pipelineCI.pStages = shaderStages.data();
-			pipelineCI.renderPass = renderpass;
+			pipelineCI.renderPass = *(auxRenderPass.get());
 
 			shaderStages[0] = loadShader(device, "filtercube.vert.spv", VK_SHADER_STAGE_VERTEX_BIT);
 			switch (target) {
@@ -1155,7 +1127,7 @@ public:
 
 			VkRenderPassBeginInfo renderPassBeginInfo{};
 			renderPassBeginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-			renderPassBeginInfo.renderPass = renderpass;
+			renderPassBeginInfo.renderPass = *(auxRenderPass.get());
 			renderPassBeginInfo.framebuffer = offscreen.framebuffer;
 			renderPassBeginInfo.renderArea.extent.width = dim;
 			renderPassBeginInfo.renderArea.extent.height = dim;
@@ -1316,7 +1288,7 @@ public:
 			}
 
 
-			vkDestroyRenderPass(device, renderpass, nullptr);
+			// vkDestroyRenderPass(device, renderpass, nullptr);
 			vkDestroyFramebuffer(device, offscreen.framebuffer, nullptr);
 			vkFreeMemory(device, offscreen.memory, nullptr);
 			vkDestroyImageView(device, offscreen.view, nullptr);

@@ -10,7 +10,7 @@ Framebuffer::Framebuffer(aux::Image& image)
     auto rp = new aux::RenderPass(image);
     VkFramebufferCreateInfo framebufferCI{};
     framebufferCI.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-    framebufferCI.renderPass = m_pAuxRenderPass->get();
+    framebufferCI.renderPass = *(m_pAuxRenderPass->get());
     framebufferCI.attachmentCount = 1;
     framebufferCI.pAttachments = image.getViewP();
     framebufferCI.width = image.getWidth();

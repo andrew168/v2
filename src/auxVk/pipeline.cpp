@@ -63,7 +63,7 @@ Pipeline::Pipeline(aux::PipelineLayout* pPipelineLayout, aux::RenderPass* pRende
 	VkGraphicsPipelineCreateInfo pipelineCI{};
 	pipelineCI.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
 	pipelineCI.layout = m_pPipelineLayout->get();
-	pipelineCI.renderPass = m_pRenderPass->get();
+	pipelineCI.renderPass = *(m_pRenderPass->get());
 	pipelineCI.pInputAssemblyState = &inputAssemblyStateCI;
 	pipelineCI.pVertexInputState = &emptyInputStateCI;
 	pipelineCI.pRasterizationState = &rasterizationStateCI;
