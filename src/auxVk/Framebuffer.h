@@ -14,7 +14,7 @@ class Framebuffer {
 public:
     Framebuffer(aux::Image& image);
     ~Framebuffer();
-    VkFramebuffer get() { return m_framebuffer; }
+    VkFramebuffer* get() { return &m_framebuffer; }
 };
 }
 

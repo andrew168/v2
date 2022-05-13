@@ -45,10 +45,10 @@ void RenderPass::createRenderPass()
     VK_CHECK_RESULT(vkCreateRenderPass(*aux::Device::get(), &renderPassCI, nullptr, &m_renderPass));
 }
 
-void RenderPass::begin(VkCommandBuffer *pCmdBuf, aux::Framebuffer *auxFramebuffer)
+void RenderPass::begin(VkCommandBuffer *pCmdBuf, aux::Framebuffer *auxFramebuffer, VkClearColorValue color)
 {
     VkClearValue clearValues[1];
-    clearValues[0].color = { { 0.0f, 0.0f, 0.0f, 1.0f } };
+    clearValues[0].color = { color };
 
     VkRenderPassBeginInfo renderPassBeginInfo{};
     renderPassBeginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
@@ -57,10 +57,9 @@ void RenderPass::begin(VkCommandBuffer *pCmdBuf, aux::Framebuffer *auxFramebuffe
     renderPassBeginInfo.renderArea.extent.height = m_image.getHeight();
     renderPassBeginInfo.clearValueCount = 1;
     renderPassBeginInfo.pClearValues = clearValues;
-    renderPassBeginInfo.framebuffer = auxFramebuffer->get();
+    renderPassBeginInfo.framebuffer = *(auxFramebuffer->get());
 
     vkCmdBeginRenderPass(*pCmdBuf, &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
-
 }
 
 RenderPass::~RenderPass()

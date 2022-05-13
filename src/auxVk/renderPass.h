@@ -15,7 +15,7 @@ class RenderPass
 public:
     explicit RenderPass(aux::Image& image);
     ~RenderPass();
-    void begin(VkCommandBuffer* pCmdBuf, aux::Framebuffer* auxFramebuffer);
+    void begin(VkCommandBuffer* pCmdBuf, aux::Framebuffer* auxFramebuffer, VkClearColorValue color = { 0.0f, 0.0f, 0.0f, 1.0f });
     VkRenderPass* get() { return &m_renderPass; }
 private:
     void createRenderPass();
