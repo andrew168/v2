@@ -12,6 +12,7 @@ class RenderPass
     aux::Image& m_image;
     VkFormat m_format;
     VkRenderPass m_renderPass;
+    VkRenderPassBeginInfo* m_pRenderPassBeginInfo;
 public:
     explicit RenderPass(aux::Image& image);
     ~RenderPass();

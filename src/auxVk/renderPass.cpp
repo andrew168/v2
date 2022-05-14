@@ -5,7 +5,8 @@ namespace aux
 {
 RenderPass::RenderPass(aux::Image& image) :
     m_image(image),
-    m_format(image.getFormat())
+    m_format(image.getFormat()),
+    m_pRenderPassBeginInfo(nullptr)
 {
     createRenderPass();
 }
@@ -48,22 +49,25 @@ void RenderPass::createRenderPass()
 void RenderPass::begin(VkCommandBuffer *pCmdBuf, aux::Framebuffer *auxFramebuffer, VkClearColorValue color)
 {
     VkClearValue clearValues[1];
-    clearValues[0].color = { color };
+    clearValues[0].color = { color };    
+    if (m_pRenderPassBeginInfo == nullptr) {
+        m_pRenderPassBeginInfo = new VkRenderPassBeginInfo{};
+        m_pRenderPassBeginInfo->sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+        m_pRenderPassBeginInfo->renderPass = m_renderPass;
+        m_pRenderPassBeginInfo->renderArea.extent.width = m_image.getWidth();
+        m_pRenderPassBeginInfo->renderArea.extent.height = m_image.getHeight();
+        m_pRenderPassBeginInfo->framebuffer = *(auxFramebuffer->get());
+    }
 
-    VkRenderPassBeginInfo renderPassBeginInfo{};
-    renderPassBeginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-    renderPassBeginInfo.renderPass = m_renderPass;
-    renderPassBeginInfo.renderArea.extent.width = m_image.getWidth();
-    renderPassBeginInfo.renderArea.extent.height = m_image.getHeight();
-    renderPassBeginInfo.clearValueCount = 1;
-    renderPassBeginInfo.pClearValues = clearValues;
-    renderPassBeginInfo.framebuffer = *(auxFramebuffer->get());
+    m_pRenderPassBeginInfo->clearValueCount = 1;
+    m_pRenderPassBeginInfo->pClearValues = clearValues;
 
-    vkCmdBeginRenderPass(*pCmdBuf, &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
+    vkCmdBeginRenderPass(*pCmdBuf, m_pRenderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
 }
 
 RenderPass::~RenderPass()
 {
+    delete m_pRenderPassBeginInfo;
     vkDestroyRenderPass(*(aux::Device::get()), m_renderPass, nullptr);
 }
 }
