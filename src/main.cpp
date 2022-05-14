@@ -78,13 +78,13 @@ public:
 	bool animate = true;
 
 	bool displayBackground = true;
-	
+
 	struct LightSource {
 		glm::vec3 color = glm::vec3(1.0f);
 		glm::vec3 rotation = glm::vec3(75.0f, 40.0f, 0.0f);
 	} lightSource;
 
-	UI *ui;
+	UI* ui;
 
 #if defined(VK_USE_PLATFORM_ANDROID_KHR)
 	const std::string assetpath = "";
@@ -96,7 +96,7 @@ public:
 	glm::vec3 modelrot = glm::vec3(0.0f);
 	glm::vec3 modelPos = glm::vec3(0.0f);
 
-	enum PBRWorkflows{ PBR_WORKFLOW_METALLIC_ROUGHNESS = 0, PBR_WORKFLOW_SPECULAR_GLOSINESS = 1 };
+	enum PBRWorkflows { PBR_WORKFLOW_METALLIC_ROUGHNESS = 0, PBR_WORKFLOW_SPECULAR_GLOSINESS = 1 };
 
 	struct PushConstBlockMaterial {
 		glm::vec4 baseColorFactor;
@@ -172,10 +172,10 @@ public:
 		delete ui;
 	}
 
-	void renderNode(vkglTF::Node *node, uint32_t cbIndex, vkglTF::Material::AlphaMode alphaMode) {
+	void renderNode(vkglTF::Node* node, uint32_t cbIndex, vkglTF::Material::AlphaMode alphaMode) {
 		if (node->mesh) {
 			// Render mesh primitives
-			for (vkglTF::Primitive * primitive : node->mesh->primitives) {
+			for (vkglTF::Primitive* primitive : node->mesh->primitives) {
 				if (primitive->material.alphaMode == alphaMode) {
 
 					const std::vector<VkDescriptorSet> descriptorsets = {
@@ -186,7 +186,7 @@ public:
 					vkCmdBindDescriptorSets(commandBuffers[cbIndex], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, static_cast<uint32_t>(descriptorsets.size()), descriptorsets.data(), 0, NULL);
 
 					// Pass material parameters as push constants
-					PushConstBlockMaterial pushConstBlockMaterial{};					
+					PushConstBlockMaterial pushConstBlockMaterial{};
 					pushConstBlockMaterial.emissiveFactor = primitive->material.emissiveFactor;
 					// To save push constant space, availabilty and texture coordiante set are combined
 					// -1 = texture not used for this material, >= 0 texture used and index of texture coordinate set
@@ -222,7 +222,8 @@ public:
 
 					if (primitive->hasIndices) {
 						vkCmdDrawIndexed(commandBuffers[cbIndex], primitive->indexCount, 1, primitive->firstIndex, 0, 0);
-					} else {
+					}
+					else {
 						vkCmdDraw(commandBuffers[cbIndex], primitive->vertexCount, 1, 0, 0);
 					}
 				}
@@ -289,7 +290,7 @@ public:
 
 			vkCmdBindPipeline(currentCB, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelines.pbr);
 
-			vkglTF::Model &model = models.scene;
+			vkglTF::Model& model = models.scene;
 
 			vkCmdBindVertexBuffers(currentCB, 0, 1, &model.vertices.buffer, offsets);
 			if (model.indices.buffer != VK_NULL_HANDLE) {
@@ -367,7 +368,8 @@ public:
 				std::ifstream file(args[i]);
 				if (file.good()) {
 					sceneFile = args[i];
-				} else {
+				}
+				else {
 					std::cout << "could not load \"" << args[i] << "\"" << std::endl;
 				}
 			}
@@ -388,7 +390,7 @@ public:
 		loadEnvironment(envMapFile.c_str());
 	}
 
-	void setupNodeDescriptorSet(vkglTF::Node *node) {
+	void setupNodeDescriptorSet(vkglTF::Node* node) {
 		if (node->mesh) {
 			VkDescriptorSetAllocateInfo descriptorSetAllocInfo{};
 			descriptorSetAllocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
@@ -425,8 +427,8 @@ public:
 		imageSamplerCount += 3;
 
 		std::vector<vkglTF::Model*> modellist = { &models.skybox, &models.scene };
-		for (auto &model : modellist) {
-			for (auto &material : model->materials) {
+		for (auto& model : modellist) {
+			for (auto& material : model->materials) {
 				imageSamplerCount += 5;
 				materialCount++;
 			}
@@ -533,7 +535,7 @@ public:
 			VK_CHECK_RESULT(vkCreateDescriptorSetLayout(device, &descriptorSetLayoutCI, nullptr, &descriptorSetLayouts.material));
 
 			// Per-Material descriptor sets
-			for (auto &material : models.scene.materials) {
+			for (auto& material : models.scene.materials) {
 				VkDescriptorSetAllocateInfo descriptorSetAllocInfo{};
 				descriptorSetAllocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
 				descriptorSetAllocInfo.descriptorPool = descriptorPool;
@@ -594,7 +596,7 @@ public:
 				VK_CHECK_RESULT(vkCreateDescriptorSetLayout(device, &descriptorSetLayoutCI, nullptr, &descriptorSetLayouts.node));
 
 				// Per-Node descriptor set
-				for (auto &node : models.scene.nodes) {
+				for (auto& node : models.scene.nodes) {
 					setupNodeDescriptorSet(node);
 				}
 			}
@@ -795,7 +797,7 @@ public:
 		textures.lutBrdf.deviceMemory = auxImage.getDeviceMemory();
 		textures.lutBrdf.view = auxImage.getView();
 		textures.lutBrdf.sampler = auxImage.getSampler();
-	
+
 		aux::RenderPass auxRenderPass(auxImage);
 
 		VkRenderPass renderpass = *(auxRenderPass.get());
@@ -807,7 +809,7 @@ public:
 		VkPipeline pipeline = auxPipeline.get();
 
 		// Render
-		VkCommandBuffer cmdBuf = vulkanDevice->createCommandBuffer(VK_COMMAND_BUFFER_LEVEL_PRIMARY, true);		
+		VkCommandBuffer cmdBuf = vulkanDevice->createCommandBuffer(VK_COMMAND_BUFFER_LEVEL_PRIMARY, true);
 		auxRenderPass.begin(&cmdBuf, &auxFramebuffer);
 
 		VkViewport viewport{};
@@ -845,7 +847,7 @@ public:
 	}
 
 	/*
-		Offline generation for the cube maps used for PBR lighting		
+		Offline generation for the cube maps used for PBR lighting
 		- Irradiance cube map
 		- Pre-filterd environment cubemap
 	*/
@@ -878,11 +880,11 @@ public:
 
 			// Create target cubemap
 			aux::Image auxCube(format, dim, VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT);
-				cubemap.image = auxCube.getImage();
-				cubemap.deviceMemory = auxCube.getDeviceMemory();				
-				cubemap.view = auxCube.getView();
-				const uint32_t numMips = auxCube.getMipLevels();
-				cubemap.sampler = auxCube.getSampler();
+			cubemap.image = auxCube.getImage();
+			cubemap.deviceMemory = auxCube.getDeviceMemory();
+			cubemap.view = auxCube.getView();
+			const uint32_t numMips = auxCube.getMipLevels();
+			cubemap.sampler = auxCube.getSampler();
 
 			aux::AttachmentDescription auxAttDesc(auxCube);
 			auxAttDesc.finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
@@ -1017,12 +1019,12 @@ public:
 			pushConstantRange.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
 
 			switch (target) {
-				case IRRADIANCE:
-					pushConstantRange.size = sizeof(PushBlockIrradiance);
-					break;
-				case PREFILTEREDENV:
-					pushConstantRange.size = sizeof(PushBlockPrefilterEnv);
-					break;
+			case IRRADIANCE:
+				pushConstantRange.size = sizeof(PushBlockIrradiance);
+				break;
+			case PREFILTEREDENV:
+				pushConstantRange.size = sizeof(PushBlockPrefilterEnv);
+				break;
 			};
 
 			VkPipelineLayoutCreateInfo pipelineLayoutCI{};
@@ -1070,7 +1072,7 @@ public:
 			VkPipelineMultisampleStateCreateInfo multisampleStateCI{};
 			multisampleStateCI.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
 			multisampleStateCI.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
-			
+
 			std::vector<VkDynamicState> dynamicStateEnables = { VK_DYNAMIC_STATE_VIEWPORT, VK_DYNAMIC_STATE_SCISSOR };
 			VkPipelineDynamicStateCreateInfo dynamicStateCI{};
 			dynamicStateCI.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
@@ -1108,12 +1110,12 @@ public:
 
 			shaderStages[0] = loadShader(device, "filtercube.vert.spv", VK_SHADER_STAGE_VERTEX_BIT);
 			switch (target) {
-				case IRRADIANCE:
-					shaderStages[1] = loadShader(device, "irradiancecube.frag.spv", VK_SHADER_STAGE_FRAGMENT_BIT);
-					break;
-				case PREFILTEREDENV:
-					shaderStages[1] = loadShader(device, "prefilterenvmap.frag.spv", VK_SHADER_STAGE_FRAGMENT_BIT);
-					break;
+			case IRRADIANCE:
+				shaderStages[1] = loadShader(device, "irradiancecube.frag.spv", VK_SHADER_STAGE_FRAGMENT_BIT);
+				break;
+			case PREFILTEREDENV:
+				shaderStages[1] = loadShader(device, "prefilterenvmap.frag.spv", VK_SHADER_STAGE_FRAGMENT_BIT);
+				break;
 			};
 			VkPipeline pipeline;
 			VK_CHECK_RESULT(vkCreateGraphicsPipelines(device, pipelineCache, 1, &pipelineCI, nullptr, &pipeline));
@@ -1191,15 +1193,15 @@ public:
 
 					// Pass parameters for current pass using a push constant block
 					switch (target) {
-						case IRRADIANCE:
-							pushBlockIrradiance.mvp = glm::perspective((float)(M_PI / 2.0), 1.0f, 0.1f, 512.0f) * matrices[f];
-							vkCmdPushConstants(cmdBuf, pipelinelayout, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(PushBlockIrradiance), &pushBlockIrradiance);
-							break;
-						case PREFILTEREDENV:
-							pushBlockPrefilterEnv.mvp = glm::perspective((float)(M_PI / 2.0), 1.0f, 0.1f, 512.0f) * matrices[f];
-							pushBlockPrefilterEnv.roughness = (float)m / (float)(numMips - 1);
-							vkCmdPushConstants(cmdBuf, pipelinelayout, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(PushBlockPrefilterEnv), &pushBlockPrefilterEnv);
-							break;
+					case IRRADIANCE:
+						pushBlockIrradiance.mvp = glm::perspective((float)(M_PI / 2.0), 1.0f, 0.1f, 512.0f) * matrices[f];
+						vkCmdPushConstants(cmdBuf, pipelinelayout, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(PushBlockIrradiance), &pushBlockIrradiance);
+						break;
+					case PREFILTEREDENV:
+						pushBlockPrefilterEnv.mvp = glm::perspective((float)(M_PI / 2.0), 1.0f, 0.1f, 512.0f) * matrices[f];
+						pushBlockPrefilterEnv.roughness = (float)m / (float)(numMips - 1);
+						vkCmdPushConstants(cmdBuf, pipelinelayout, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(PushBlockPrefilterEnv), &pushBlockPrefilterEnv);
+						break;
 					};
 
 					vkCmdBindPipeline(cmdBuf, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline);
@@ -1304,13 +1306,13 @@ public:
 			cubemap.device = vulkanDevice;
 
 			switch (target) {
-				case IRRADIANCE:
-					textures.irradianceCube = cubemap;
-					break;
-				case PREFILTEREDENV:
-					textures.prefilteredCube = cubemap;
-					shaderValuesParams.prefilteredCubeMipLevels = static_cast<float>(numMips);
-					break;
+			case IRRADIANCE:
+				textures.irradianceCube = cubemap;
+				break;
+			case PREFILTEREDENV:
+				textures.prefilteredCube = cubemap;
+				shaderValuesParams.prefilteredCubeMipLevels = static_cast<float>(numMips);
+				break;
 			};
 
 			auto tEnd = std::chrono::high_resolution_clock::now();
@@ -1319,12 +1321,12 @@ public:
 		}
 	}
 
-	/* 
+	/*
 		Prepare and initialize uniform buffers containing shader parameters
 	*/
 	void prepareUniformBuffers()
 	{
-		for (auto &uniformBuffer : uniformBuffers) {
+		for (auto& uniformBuffer : uniformBuffers) {
 			uniformBuffer.scene.create(vulkanDevice, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, sizeof(shaderValuesScene));
 			uniformBuffer.skybox.create(vulkanDevice, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, sizeof(shaderValuesSkybox));
 			uniformBuffer.params.create(vulkanDevice, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, sizeof(shaderValuesParams));
@@ -1337,7 +1339,7 @@ public:
 		// Scene
 		shaderValuesScene.projection = camera.matrices.perspective;
 		shaderValuesScene.view = camera.matrices.view;
-		
+
 		// Center and scale model
 		float scale = (1.0f / std::max(models.scene.aabb[0][0], std::max(models.scene.aabb[1][1], models.scene.aabb[2][2]))) * 0.5f;
 		glm::vec3 translate = -glm::vec3(models.scene.aabb[3][0], models.scene.aabb[3][1], models.scene.aabb[3][2]);
@@ -1352,7 +1354,7 @@ public:
 		shaderValuesScene.camPos = glm::vec3(
 			-camera.position.z * sin(glm::radians(camera.rotation.y)) * cos(glm::radians(camera.rotation.x)),
 			-camera.position.z * sin(glm::radians(camera.rotation.x)),
-			 camera.position.z * cos(glm::radians(camera.rotation.y)) * cos(glm::radians(camera.rotation.x))
+			camera.position.z * cos(glm::radians(camera.rotation.y)) * cos(glm::radians(camera.rotation.x))
 		);
 
 		// Skybox
@@ -1397,16 +1399,16 @@ public:
 		uniformBuffers.resize(swapChain.imageCount);
 		descriptorSets.resize(swapChain.imageCount);
 		// Command buffer execution fences
-		for (auto &waitFence : waitFences) {
+		for (auto& waitFence : waitFences) {
 			VkFenceCreateInfo fenceCI{ VK_STRUCTURE_TYPE_FENCE_CREATE_INFO, nullptr, VK_FENCE_CREATE_SIGNALED_BIT };
 			VK_CHECK_RESULT(vkCreateFence(device, &fenceCI, nullptr, &waitFence));
 		}
 		// Queue ordering semaphores
-		for (auto &semaphore : presentCompleteSemaphores) {
+		for (auto& semaphore : presentCompleteSemaphores) {
 			VkSemaphoreCreateInfo semaphoreCI{ VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO, nullptr, 0 };
 			VK_CHECK_RESULT(vkCreateSemaphore(device, &semaphoreCI, nullptr, &semaphore));
 		}
-		for (auto &semaphore : renderCompleteSemaphores) {
+		for (auto& semaphore : renderCompleteSemaphores) {
 			VkSemaphoreCreateInfo semaphoreCI{ VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO, nullptr, 0 };
 			VK_CHECK_RESULT(vkCreateSemaphore(device, &semaphoreCI, nullptr, &semaphore));
 		}
@@ -1497,7 +1499,7 @@ public:
 				}
 #elif defined(__linux__) && !defined(VK_USE_PLATFORM_ANDROID_KHR)
 				char buffer[1024];
-				FILE *file = popen("zenity --title=\"Select a glTF file to load\" --file-filter=\"glTF files | *.gltf *.glb\" --file-selection", "r");
+				FILE* file = popen("zenity --title=\"Select a glTF file to load\" --file-filter=\"glTF files | *.gltf *.glb\" --file-selection", "r");
 				if (file) {
 					while (fgets(buffer, sizeof(buffer), file)) {
 						filename += buffer;
@@ -1707,7 +1709,7 @@ public:
 	}
 };
 
-VulkanExample *vulkanExample;
+VulkanExample* vulkanExample;
 
 // OS specific macros for the example main entry points
 #if defined(_WIN32)
@@ -1748,7 +1750,7 @@ void android_main(android_app* state)
 static void handleEvent()
 {
 }
-int main(const int argc, const char *argv[])
+int main(const int argc, const char* argv[])
 {
 	for (size_t i = 0; i < argc; i++) { VulkanExample::args.push_back(argv[i]); };
 	vulkanExample = new VulkanExample();
@@ -1759,7 +1761,7 @@ int main(const int argc, const char *argv[])
 	return 0;
 }
 #elif defined(VK_USE_PLATFORM_WAYLAND_KHR)
-int main(const int argc, const char *argv[])
+int main(const int argc, const char* argv[])
 {
 	for (size_t i = 0; i < argc; i++) { VulkanExample::args.push_back(argv[i]); };
 	vulkanExample = new VulkanExample();
@@ -1771,14 +1773,14 @@ int main(const int argc, const char *argv[])
 	return 0;
 }
 #elif defined(VK_USE_PLATFORM_XCB_KHR)
-static void handleEvent(const xcb_generic_event_t *event)
+static void handleEvent(const xcb_generic_event_t* event)
 {
 	if (vulkanExample != NULL)
 	{
 		vulkanExample->handleEvent(event);
 	}
 }
-int main(const int argc, const char *argv[])
+int main(const int argc, const char* argv[])
 {
 	for (size_t i = 0; i < argc; i++) { VulkanExample::args.push_back(argv[i]); };
 	vulkanExample = new VulkanExample();
@@ -1790,7 +1792,7 @@ int main(const int argc, const char *argv[])
 	return 0;
 }
 #elif defined(VK_USE_PLATFORM_MACOS_MVK)
-int main(const int argc, const char *argv[])
+int main(const int argc, const char* argv[])
 {
 	@autoreleasepool
 	{
