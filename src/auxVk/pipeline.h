@@ -3,9 +3,19 @@
 #include "device.h"
 #include "pipelineLayout.h"
 #include "renderPass.h"
+#include "shaderDescription.h"
 
 namespace aux
 {
+struct PipelineCI {
+    VkPrimitiveTopology primitiveTopology;
+    std::vector<aux::ShaderDescription> shaders;
+    PipelineCI() {
+        primitiveTopology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
+        shaders = {};
+    }
+};
+
 class Pipeline
 {
     static VkPipelineCache* m_pPipelineCache;
@@ -13,10 +23,12 @@ class Pipeline
     VkPipeline m_pipeline;
     aux::PipelineLayout* m_pPipelineLayout;
     aux::RenderPass* m_pRenderPass;
-
+    std::vector<aux::ShaderDescription> m_shaderList;
+    PipelineCI& m_auxPipelineCI;
 public:
-    explicit Pipeline(aux::PipelineLayout* pPipelineLayout, aux::RenderPass* pRenderPass);
+    explicit Pipeline(aux::PipelineLayout* pPipelineLayout, aux::RenderPass* pRenderPass, PipelineCI &pipelineCI);
     ~Pipeline();
+    void setShaderStages(std::vector<aux::ShaderDescription> &shaders);
     VkPipeline get() { return m_pipeline; }
     static void setCache(VkPipelineCache *cache) {
         Pipeline::m_pPipelineCache = cache;

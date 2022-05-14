@@ -804,8 +804,15 @@ public:
 		aux::Framebuffer auxFramebuffer(auxImage);
 		aux::PipelineLayout auxPipelineLayout(&auxImage);
 		VkPipelineLayout pipelinelayout = auxPipelineLayout.get();
+
 		aux::Pipeline::setCache(&pipelineCache);
-		aux::Pipeline auxPipeline(&auxPipelineLayout, &auxRenderPass);
+		aux::PipelineCI auxPipelineCI{};
+		std::vector<aux::ShaderDescription> shaders = {
+			{"genbrdflut.vert.spv", VK_SHADER_STAGE_VERTEX_BIT},
+			{"genbrdflut.frag.spv", VK_SHADER_STAGE_FRAGMENT_BIT}
+		};
+		auxPipelineCI.shaders = shaders;
+		aux::Pipeline auxPipeline(&auxPipelineLayout, &auxRenderPass, auxPipelineCI);
 		VkPipeline pipeline = auxPipeline.get();
 
 		// Render

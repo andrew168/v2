@@ -5,16 +5,17 @@ namespace aux
 
 VkPipelineCache* Pipeline::m_pPipelineCache;
 
-Pipeline::Pipeline(aux::PipelineLayout* pPipelineLayout, aux::RenderPass* pRenderPass) :
+Pipeline::Pipeline(aux::PipelineLayout* pPipelineLayout, aux::RenderPass* pRenderPass, PipelineCI& auxPipelineCI) :
 	m_pPipelineLayout(pPipelineLayout),
-	m_pRenderPass(pRenderPass)
+	m_pRenderPass(pRenderPass),
+	m_auxPipelineCI (auxPipelineCI)
 {
 	VkDevice* pDevice = aux::Device::get();
 
 	// Pipeline
 	VkPipelineInputAssemblyStateCreateInfo inputAssemblyStateCI{};
 	inputAssemblyStateCI.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
-	inputAssemblyStateCI.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
+	inputAssemblyStateCI.topology = m_auxPipelineCI.primitiveTopology;
 
 	VkPipelineRasterizationStateCreateInfo rasterizationStateCI{};
 	rasterizationStateCI.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
@@ -58,7 +59,11 @@ Pipeline::Pipeline(aux::PipelineLayout* pPipelineLayout, aux::RenderPass* pRende
 	VkPipelineVertexInputStateCreateInfo emptyInputStateCI{};
 	emptyInputStateCI.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
 
-	std::array<VkPipelineShaderStageCreateInfo, 2> shaderStages;
+	std::vector<VkPipelineShaderStageCreateInfo> shaderStages;
+
+	for (auto item : m_auxPipelineCI.shaders) {
+		shaderStages.push_back(loadShader(*pDevice, item.m_fileName, item.m_stage));
+	}
 
 	VkGraphicsPipelineCreateInfo pipelineCI{};
 	pipelineCI.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
@@ -71,20 +76,16 @@ Pipeline::Pipeline(aux::PipelineLayout* pPipelineLayout, aux::RenderPass* pRende
 	pipelineCI.pMultisampleState = &multisampleStateCI;
 	pipelineCI.pViewportState = &viewportStateCI;
 	pipelineCI.pDepthStencilState = &depthStencilStateCI;
-	pipelineCI.pDynamicState = &dynamicStateCI;
-	pipelineCI.stageCount = 2;
+	pipelineCI.pDynamicState = &dynamicStateCI;	
+	pipelineCI.stageCount = static_cast<uint32_t>(shaderStages.size());
 	pipelineCI.pStages = shaderStages.data();
 
-	// Look-up-table (from BRDF) pipeline		
-	shaderStages = {
-		loadShader(*pDevice, "genbrdflut.vert.spv", VK_SHADER_STAGE_VERTEX_BIT),
-		loadShader(*pDevice, "genbrdflut.frag.spv", VK_SHADER_STAGE_FRAGMENT_BIT)
-	};
 	VK_CHECK_RESULT(vkCreateGraphicsPipelines(*pDevice, *(Pipeline::m_pPipelineCache), 1, &pipelineCI, nullptr, &m_pipeline));
 	for (auto shaderStage : shaderStages) { // 在建立Pipeline之后，立即destroy 中间文件shader module
 		vkDestroyShaderModule(*pDevice, shaderStage.module, nullptr);
 	}
 }
+
 Pipeline::~Pipeline()
 {
 	vkDestroyPipeline(*(aux::Device::get()), m_pipeline, nullptr);
