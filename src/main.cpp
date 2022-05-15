@@ -913,45 +913,16 @@ public:
 
 			// Create offscreen framebuffer
 			{
-				// Image
-				VkImageCreateInfo imageCI{};
-				imageCI.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
-				imageCI.imageType = VK_IMAGE_TYPE_2D;
-				imageCI.format = format;
-				imageCI.extent.width = dim;
-				imageCI.extent.height = dim;
-				imageCI.extent.depth = 1;
-				imageCI.mipLevels = 1;
-				imageCI.arrayLayers = 1;
-				imageCI.samples = VK_SAMPLE_COUNT_1_BIT;
-				imageCI.tiling = VK_IMAGE_TILING_OPTIMAL;
+				aux::ImageCI imageCI(format, dim, dim);
 				imageCI.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 				imageCI.usage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
 				imageCI.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
-				VK_CHECK_RESULT(vkCreateImage(device, &imageCI, nullptr, &offscreen.image));
-				VkMemoryRequirements memReqs;
-				vkGetImageMemoryRequirements(device, offscreen.image, &memReqs);
-				VkMemoryAllocateInfo memAllocInfo{};
-				memAllocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-				memAllocInfo.allocationSize = memReqs.size;
-				memAllocInfo.memoryTypeIndex = vulkanDevice->getMemoryType(memReqs.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
-				VK_CHECK_RESULT(vkAllocateMemory(device, &memAllocInfo, nullptr, &offscreen.memory));
-				VK_CHECK_RESULT(vkBindImageMemory(device, offscreen.image, offscreen.memory, 0));
+				aux::Image auxImageOffscreen(imageCI);
 
-				// View
-				VkImageViewCreateInfo viewCI{};
-				viewCI.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-				viewCI.viewType = VK_IMAGE_VIEW_TYPE_2D;
-				viewCI.format = format;
-				viewCI.flags = 0;
-				viewCI.subresourceRange = {};
-				viewCI.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-				viewCI.subresourceRange.baseMipLevel = 0;
-				viewCI.subresourceRange.levelCount = 1;
-				viewCI.subresourceRange.baseArrayLayer = 0;
-				viewCI.subresourceRange.layerCount = 1;
-				viewCI.image = offscreen.image;
-				VK_CHECK_RESULT(vkCreateImageView(device, &viewCI, nullptr, &offscreen.view));
+				offscreen.memory = auxImageOffscreen.getDeviceMemory();
+				offscreen.image = auxImageOffscreen.getImage();
+				offscreen.view = auxImageOffscreen.getView();
+				// no sampler, auxImage.getSampler();
 
 				// Framebuffer
 				VkFramebufferCreateInfo framebufferCI{};

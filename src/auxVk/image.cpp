@@ -42,6 +42,12 @@ void Image::createImageView(ImageCI &auxCi)
     viewCI.subresourceRange.levelCount = auxCi.mipLevels;
     viewCI.subresourceRange.layerCount = auxCi.arrayLayers;
     viewCI.image = m_image;
+    
+    // default value?
+    viewCI.flags = 0;
+    viewCI.subresourceRange.baseMipLevel = 0;
+    viewCI.subresourceRange.baseArrayLayer = 0;
+
     VK_CHECK_RESULT(vkCreateImageView(*Device::get(), &viewCI, nullptr, &m_view));
 }
 
