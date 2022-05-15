@@ -5,9 +5,9 @@ namespace aux
 
 VkPipelineCache* Pipeline::m_pPipelineCache;
 
-Pipeline::Pipeline(aux::PipelineLayout* pPipelineLayout, aux::RenderPass* pRenderPass, PipelineCI& auxPipelineCI) :
-	m_pPipelineLayout(pPipelineLayout),
-	m_pRenderPass(pRenderPass),
+Pipeline::Pipeline(aux::PipelineLayout& pipelineLayout, aux::RenderPass& renderPass, PipelineCI& auxPipelineCI) :
+	m_pipelineLayout(pipelineLayout),
+	m_renderPass(renderPass),
 	m_auxPipelineCI (auxPipelineCI)
 {
 	VkDevice* pDevice = aux::Device::get();
@@ -67,8 +67,8 @@ Pipeline::Pipeline(aux::PipelineLayout* pPipelineLayout, aux::RenderPass* pRende
 
 	VkGraphicsPipelineCreateInfo pipelineCI{};
 	pipelineCI.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
-	pipelineCI.layout = m_pPipelineLayout->get();
-	pipelineCI.renderPass = *(m_pRenderPass->get());
+	pipelineCI.layout = m_pipelineLayout.get();
+	pipelineCI.renderPass = *(m_renderPass.get());
 	pipelineCI.pInputAssemblyState = &inputAssemblyStateCI;
 	pipelineCI.pVertexInputState = &emptyInputStateCI;
 	pipelineCI.pRasterizationState = &rasterizationStateCI;

@@ -812,7 +812,7 @@ public:
 			{"genbrdflut.frag.spv", VK_SHADER_STAGE_FRAGMENT_BIT}
 		};
 		auxPipelineCI.shaders = shaders;
-		aux::Pipeline auxPipeline(&auxPipelineLayout, &auxRenderPass, auxPipelineCI);
+		aux::Pipeline auxPipeline(auxPipelineLayout, auxRenderPass, auxPipelineCI);
 		VkPipeline pipeline = auxPipeline.get();
 
 		// Render

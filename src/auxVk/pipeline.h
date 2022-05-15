@@ -10,9 +10,10 @@ namespace aux
 struct PipelineCI {
     VkPrimitiveTopology primitiveTopology;
     std::vector<aux::ShaderDescription> shaders;
-    PipelineCI() {
-        primitiveTopology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
-        shaders = {};
+    PipelineCI():
+        primitiveTopology(VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST),
+        shaders{}
+    {
     }
 };
 
@@ -21,12 +22,12 @@ class Pipeline
     static VkPipelineCache* m_pPipelineCache;
 
     VkPipeline m_pipeline;
-    aux::PipelineLayout* m_pPipelineLayout;
-    aux::RenderPass* m_pRenderPass;
+    aux::PipelineLayout& m_pipelineLayout;
+    aux::RenderPass& m_renderPass;
     std::vector<aux::ShaderDescription> m_shaderList;
     PipelineCI& m_auxPipelineCI;
 public:
-    explicit Pipeline(aux::PipelineLayout* pPipelineLayout, aux::RenderPass* pRenderPass, PipelineCI &pipelineCI);
+    explicit Pipeline(aux::PipelineLayout& pipelineLayout, aux::RenderPass& renderPass, PipelineCI &pipelineCI);
     ~Pipeline();
     void setShaderStages(std::vector<aux::ShaderDescription> &shaders);
     VkPipeline get() { return m_pipeline; }
