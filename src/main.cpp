@@ -863,7 +863,8 @@ public:
 	{
 		enum Target { IRRADIANCE = 0, PREFILTEREDENV = 1 };
 
-		for (uint32_t target = 0; target < PREFILTEREDENV + 1; target++) {
+		for (uint32_t target = 0; target < PREFILTEREDENV + 1; target++) 
+		{
 
 			vks::TextureCubeMap cubemap;
 
@@ -912,7 +913,7 @@ public:
 			} offscreen;
 
 			// Create offscreen framebuffer
-			{
+			
 				aux::ImageCI imageCI(format, dim, dim);
 				imageCI.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 				imageCI.usage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
@@ -924,16 +925,8 @@ public:
 				offscreen.view = auxImageOffscreen.getView();
 				// no sampler, auxImage.getSampler();
 
-				// Framebuffer
-				VkFramebufferCreateInfo framebufferCI{};
-				framebufferCI.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-				framebufferCI.renderPass = *(auxRenderPass.get());
-				framebufferCI.attachmentCount = 1;
-				framebufferCI.pAttachments = &offscreen.view;
-				framebufferCI.width = dim;
-				framebufferCI.height = dim;
-				framebufferCI.layers = 1;
-				VK_CHECK_RESULT(vkCreateFramebuffer(device, &framebufferCI, nullptr, &offscreen.framebuffer));
+				aux::Framebuffer auxFramebufferOffscreen(auxImageOffscreen, auxRenderPass);
+				offscreen.framebuffer = *(auxFramebufferOffscreen.get());
 
 				VkCommandBuffer layoutCmd = vulkanDevice->createCommandBuffer(VK_COMMAND_BUFFER_LEVEL_PRIMARY, true);
 				VkImageMemoryBarrier imageMemoryBarrier{};
@@ -946,8 +939,7 @@ public:
 				imageMemoryBarrier.subresourceRange = { VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1 };
 				vkCmdPipelineBarrier(layoutCmd, VK_PIPELINE_STAGE_ALL_COMMANDS_BIT, VK_PIPELINE_STAGE_ALL_COMMANDS_BIT, 0, 0, nullptr, 0, nullptr, 1, &imageMemoryBarrier);
 				vulkanDevice->flushCommandBuffer(layoutCmd, queue, true);
-			}
-
+			
 			// Descriptors
 			VkDescriptorSetLayout descriptorsetlayout;
 			VkDescriptorSetLayoutBinding setLayoutBinding = { 0, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1, VK_SHADER_STAGE_FRAGMENT_BIT, nullptr };
@@ -1274,10 +1266,10 @@ public:
 
 
 			// vkDestroyRenderPass(device, renderpass, nullptr);
-			vkDestroyFramebuffer(device, offscreen.framebuffer, nullptr);
-			vkFreeMemory(device, offscreen.memory, nullptr);
-			vkDestroyImageView(device, offscreen.view, nullptr);
-			vkDestroyImage(device, offscreen.image, nullptr);
+			// vkDestroyFramebuffer(device, offscreen.framebuffer, nullptr);
+			// vkFreeMemory(device, offscreen.memory, nullptr);
+			// vkDestroyImageView(device, offscreen.view, nullptr);
+			// vkDestroyImage(device, offscreen.image, nullptr);
 			vkDestroyDescriptorPool(device, descriptorpool, nullptr);
 			vkDestroyDescriptorSetLayout(device, descriptorsetlayout, nullptr);
 			vkDestroyPipeline(device, pipeline, nullptr);
