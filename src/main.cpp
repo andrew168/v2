@@ -968,7 +968,6 @@ public:
 			} pushBlockPrefilterEnv;
 
 			// Pipeline layout
-			VkPipelineLayout pipelinelayout;
 			VkPushConstantRange pushConstantRange{};
 			pushConstantRange.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
 
@@ -981,6 +980,7 @@ public:
 				break;
 			};
 
+			VkPipelineLayout pipelinelayout;
 			VkPipelineLayoutCreateInfo pipelineLayoutCI{};
 			pipelineLayoutCI.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
 			pipelineLayoutCI.setLayoutCount = 1;
