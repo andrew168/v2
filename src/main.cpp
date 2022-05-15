@@ -949,32 +949,11 @@ public:
 			descriptorSetLayoutCI.bindingCount = 1;
 			VK_CHECK_RESULT(vkCreateDescriptorSetLayout(device, &descriptorSetLayoutCI, nullptr, &descriptorsetlayout));
 
-			// Descriptor Pool
-			VkDescriptorPoolSize poolSize = { VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1 };
-			VkDescriptorPoolCreateInfo descriptorPoolCI{};
-			descriptorPoolCI.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
-			descriptorPoolCI.poolSizeCount = 1;
-			descriptorPoolCI.pPoolSizes = &poolSize;
-			descriptorPoolCI.maxSets = 2;
-			VkDescriptorPool descriptorpool;
-			VK_CHECK_RESULT(vkCreateDescriptorPool(device, &descriptorPoolCI, nullptr, &descriptorpool));
+			aux::DescriptorSetCI dsCI{};
+			dsCI.pImageInfo = &textures.environmentCube.descriptor;
+			dsCI.pSetLayouts = &descriptorsetlayout;
 
-			// Descriptor sets
-			VkDescriptorSet descriptorset;
-			VkDescriptorSetAllocateInfo descriptorSetAllocInfo{};
-			descriptorSetAllocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
-			descriptorSetAllocInfo.descriptorPool = descriptorpool;
-			descriptorSetAllocInfo.pSetLayouts = &descriptorsetlayout;
-			descriptorSetAllocInfo.descriptorSetCount = 1;
-			VK_CHECK_RESULT(vkAllocateDescriptorSets(device, &descriptorSetAllocInfo, &descriptorset));
-			VkWriteDescriptorSet writeDescriptorSet{};
-			writeDescriptorSet.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-			writeDescriptorSet.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-			writeDescriptorSet.descriptorCount = 1;
-			writeDescriptorSet.dstSet = descriptorset;
-			writeDescriptorSet.dstBinding = 0;
-			writeDescriptorSet.pImageInfo = &textures.environmentCube.descriptor;
-			vkUpdateDescriptorSets(device, 1, &writeDescriptorSet, 0, nullptr);
+			aux::DescriptorSet auxDescriptorSet(dsCI);
 
 			struct PushBlockIrradiance {
 				glm::mat4 mvp;
@@ -1180,7 +1159,7 @@ public:
 					};
 
 					vkCmdBindPipeline(cmdBuf, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline);
-					vkCmdBindDescriptorSets(cmdBuf, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelinelayout, 0, 1, &descriptorset, 0, NULL);
+					vkCmdBindDescriptorSets(cmdBuf, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelinelayout, 0, 1, auxDescriptorSet.get(), 0, NULL);
 
 					VkDeviceSize offsets[1] = { 0 };
 
@@ -1270,7 +1249,7 @@ public:
 			// vkFreeMemory(device, offscreen.memory, nullptr);
 			// vkDestroyImageView(device, offscreen.view, nullptr);
 			// vkDestroyImage(device, offscreen.image, nullptr);
-			vkDestroyDescriptorPool(device, descriptorpool, nullptr);
+			// vkDestroyDescriptorPool(device, descriptorpool, nullptr);
 			vkDestroyDescriptorSetLayout(device, descriptorsetlayout, nullptr);
 			vkDestroyPipeline(device, pipeline, nullptr);
 			vkDestroyPipelineLayout(device, pipelinelayout, nullptr);

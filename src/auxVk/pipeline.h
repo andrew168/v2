@@ -7,6 +7,7 @@
 
 namespace aux
 {
+class RenderPass;
 struct PipelineCI {
     VkPrimitiveTopology primitiveTopology;
     std::vector<aux::ShaderDescription> shaders;

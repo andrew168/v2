@@ -322,6 +322,7 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
   <ItemGroup>
     <ClCompile Include="auxVk\attachmentDescription.cpp" />
     <ClCompile Include="auxVk\auxVk.cpp" />
+    <ClCompile Include="auxVk\descriptorSet.cpp" />
     <ClCompile Include="auxVk\device.cpp" />
     <ClCompile Include="auxVk\Framebuffer.cpp" />
     <ClCompile Include="auxVk\image.cpp" />
@@ -361,6 +362,7 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
   <ItemGroup>
     <ClInclude Include="auxVk\attachmentDescription.h" />
     <ClInclude Include="auxVk\auxVk.h" />
+    <ClInclude Include="auxVk\descriptorSet.h" />
     <ClInclude Include="auxVk\device.h" />
     <ClInclude Include="auxVk\Framebuffer.h" />
     <ClInclude Include="auxVk\image.h" />
