@@ -802,7 +802,7 @@ public:
 		aux::RenderPass auxRenderPass(auxImage);
 
 		VkRenderPass renderpass = *(auxRenderPass.get());
-		aux::Framebuffer auxFramebuffer(auxImage);
+		aux::Framebuffer auxFramebuffer(auxImage, auxRenderPass);
 		aux::PipelineLayout auxPipelineLayout(&auxImage);
 		VkPipelineLayout pipelinelayout = auxPipelineLayout.get();
 

@@ -8,11 +8,10 @@ class RenderPass;
 
 
 class Framebuffer {
-    aux::RenderPass* m_pAuxRenderPass;
     VkFramebuffer m_framebuffer;
 
 public:
-    Framebuffer(aux::Image& image);
+    Framebuffer(aux::Image& image, aux::RenderPass& auxRenderPass);
     ~Framebuffer();
     VkFramebuffer* get() { return &m_framebuffer; }
 };

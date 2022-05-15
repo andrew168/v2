@@ -3,14 +3,11 @@
 
 namespace aux
 {
-Framebuffer::Framebuffer(aux::Image& image)
+Framebuffer::Framebuffer(aux::Image& image, aux::RenderPass& auxRenderPass)
 {
-    m_pAuxRenderPass = new aux::RenderPass(image);
-
-    auto rp = new aux::RenderPass(image);
     VkFramebufferCreateInfo framebufferCI{};
     framebufferCI.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-    framebufferCI.renderPass = *(m_pAuxRenderPass->get());
+    framebufferCI.renderPass = *(auxRenderPass.get());
     framebufferCI.attachmentCount = 1;
     framebufferCI.pAttachments = image.getViewP();
     framebufferCI.width = image.getWidth();
