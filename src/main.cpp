@@ -863,7 +863,7 @@ public:
 	{
 		enum Target { IRRADIANCE = 0, PREFILTEREDENV = 1 };
 
-		for (uint32_t target = 0; target < PREFILTEREDENV + 1; target++) 
+		for (uint32_t target = 0; target < PREFILTEREDENV + 1; target++)
 		{
 
 			vks::TextureCubeMap cubemap;
@@ -913,33 +913,33 @@ public:
 			} offscreen;
 
 			// Create offscreen framebuffer
-			
-				aux::ImageCI imageCI(format, dim, dim);
-				imageCI.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-				imageCI.usage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
-				imageCI.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
-				aux::Image auxImageOffscreen(imageCI);
 
-				offscreen.memory = auxImageOffscreen.getDeviceMemory();
-				offscreen.image = auxImageOffscreen.getImage();
-				offscreen.view = auxImageOffscreen.getView();
-				// no sampler, auxImage.getSampler();
+			aux::ImageCI imageCI(format, dim, dim);
+			imageCI.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+			imageCI.usage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
+			imageCI.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+			aux::Image auxImageOffscreen(imageCI);
 
-				aux::Framebuffer auxFramebufferOffscreen(auxImageOffscreen, auxRenderPass);
-				offscreen.framebuffer = *(auxFramebufferOffscreen.get());
+			offscreen.memory = auxImageOffscreen.getDeviceMemory();
+			offscreen.image = auxImageOffscreen.getImage();
+			offscreen.view = auxImageOffscreen.getView();
+			// no sampler, auxImage.getSampler();
 
-				VkCommandBuffer layoutCmd = vulkanDevice->createCommandBuffer(VK_COMMAND_BUFFER_LEVEL_PRIMARY, true);
-				VkImageMemoryBarrier imageMemoryBarrier{};
-				imageMemoryBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
-				imageMemoryBarrier.image = offscreen.image;
-				imageMemoryBarrier.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-				imageMemoryBarrier.newLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-				imageMemoryBarrier.srcAccessMask = 0;
-				imageMemoryBarrier.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-				imageMemoryBarrier.subresourceRange = { VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1 };
-				vkCmdPipelineBarrier(layoutCmd, VK_PIPELINE_STAGE_ALL_COMMANDS_BIT, VK_PIPELINE_STAGE_ALL_COMMANDS_BIT, 0, 0, nullptr, 0, nullptr, 1, &imageMemoryBarrier);
-				vulkanDevice->flushCommandBuffer(layoutCmd, queue, true);
-			
+			aux::Framebuffer auxFramebufferOffscreen(auxImageOffscreen, auxRenderPass);
+			offscreen.framebuffer = *(auxFramebufferOffscreen.get());
+
+			VkCommandBuffer layoutCmd = vulkanDevice->createCommandBuffer(VK_COMMAND_BUFFER_LEVEL_PRIMARY, true);
+			VkImageMemoryBarrier imageMemoryBarrier{};
+			imageMemoryBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+			imageMemoryBarrier.image = offscreen.image;
+			imageMemoryBarrier.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+			imageMemoryBarrier.newLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+			imageMemoryBarrier.srcAccessMask = 0;
+			imageMemoryBarrier.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+			imageMemoryBarrier.subresourceRange = { VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1 };
+			vkCmdPipelineBarrier(layoutCmd, VK_PIPELINE_STAGE_ALL_COMMANDS_BIT, VK_PIPELINE_STAGE_ALL_COMMANDS_BIT, 0, 0, nullptr, 0, nullptr, 1, &imageMemoryBarrier);
+			vulkanDevice->flushCommandBuffer(layoutCmd, queue, true);
+
 			// Descriptors
 			VkDescriptorSetLayout descriptorsetlayout;
 			VkDescriptorSetLayoutBinding setLayoutBinding = { 0, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1, VK_SHADER_STAGE_FRAGMENT_BIT, nullptr };
