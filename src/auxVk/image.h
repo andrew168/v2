@@ -1,8 +1,34 @@
-#pragma once
+﻿#pragma once
 #include "..\vk.h"
 
 namespace aux
 {
+
+struct ImageCI: public VkImageCreateInfo
+{
+    bool isCubemap;
+    ImageCI(VkFormat _format = VK_FORMAT_R32G32B32A32_SFLOAT, 
+        int32_t _width = 1, 
+        int32_t _height = 1,
+        int32_t _mipLevels = 1,
+        int32_t _arrayLayers = 1) :
+        VkImageCreateInfo()
+    {
+        sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
+        imageType = VK_IMAGE_TYPE_2D;
+        format = _format;
+        extent.width = _width;
+        extent.height = _height;
+        extent.depth = 1;
+        mipLevels = _mipLevels;
+        arrayLayers = _arrayLayers;
+        samples = VK_SAMPLE_COUNT_1_BIT; // 1个sample 每pixel 
+        tiling = VK_IMAGE_TILING_OPTIMAL;
+        usage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
+        isCubemap = false;
+    }
+};
+
 class Image {
     uint32_t m_width;
     uint32_t m_height;
@@ -17,8 +43,7 @@ class Image {
     VkSampler m_sampler;
 
 public:
-    Image(VkFormat format, int32_t width, int32_t height);
-    Image(VkFormat format, int32_t cubeLength, VkImageCreateFlagBits flags);
+    Image(ImageCI &ci);
     VkFormat getFormat() { return m_format; }
     VkImage getImage() { return m_image; }
     VkDeviceMemory getDeviceMemory() { return m_deviceMemory; }
@@ -30,11 +55,8 @@ public:
     uint32_t getWidth() { return m_width; }
     uint32_t getHeight() { return m_height; }
 private:
-    VkImageCreateInfo getDefaultCI();
-    void createImage();
-    void createCubemap();
-    void allocMemory();
-    void createImageView();
-    void createSampler();
+    void allocMemory(ImageCI& auxCi);
+    void createImageView(ImageCI& auxCi);
+    void createSampler(ImageCI& auxCi);
 };
 }

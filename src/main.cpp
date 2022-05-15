@@ -792,7 +792,8 @@ public:
 		aux::Device::setVksDevice(vulkanDevice);
 		aux::Device::set(&device);
 
-		aux::Image auxImage(format, dim, dim);
+		aux::ImageCI auxImageCI(format, dim, dim);
+		aux::Image auxImage(auxImageCI);
 		textures.lutBrdf.image = auxImage.getImage();
 		textures.lutBrdf.deviceMemory = auxImage.getDeviceMemory();
 		textures.lutBrdf.view = auxImage.getView();
@@ -886,11 +887,15 @@ public:
 			aux::Device::set(&device);
 
 			// Create target cubemap
-			aux::Image auxCube(format, dim, VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT);
+			const uint32_t numMips = static_cast<uint32_t>(floor(log2(dim))) + 1;
+			aux::ImageCI auxImageCI(format, dim, dim, numMips, 6);
+			auxImageCI.usage = VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT;
+			auxImageCI.flags = VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT;
+			auxImageCI.isCubemap = true;
+			aux::Image auxCube(auxImageCI);
 			cubemap.image = auxCube.getImage();
 			cubemap.deviceMemory = auxCube.getDeviceMemory();
 			cubemap.view = auxCube.getView();
-			const uint32_t numMips = auxCube.getMipLevels();
 			cubemap.sampler = auxCube.getSampler();
 
 			aux::AttachmentDescription auxAttDesc(auxCube);
