@@ -299,17 +299,17 @@ public:
 
 			// Opaque primitives first
 			for (auto node : model.nodes) {
-				renderNode(node, i, vkglTF::Material::ALPHAMODE_OPAQUE);
+				renderNode(node, (uint32_t)i, vkglTF::Material::ALPHAMODE_OPAQUE);
 			}
 			// Alpha masked primitives
 			for (auto node : model.nodes) {
-				renderNode(node, i, vkglTF::Material::ALPHAMODE_MASK);
+				renderNode(node, (uint32_t)i, vkglTF::Material::ALPHAMODE_MASK);
 			}
 			// Transparent primitives
 			// TODO: Correct depth sorting
 			vkCmdBindPipeline(currentCB, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelines.pbrAlphaBlend);
 			for (auto node : model.nodes) {
-				renderNode(node, i, vkglTF::Material::ALPHAMODE_BLEND);
+				renderNode(node, (uint32_t)i, vkglTF::Material::ALPHAMODE_BLEND);
 			}
 
 			// User interface
@@ -1556,14 +1556,14 @@ public:
 				"none", "Base color", "Normal", "Occlusion", "Emissive", "Metallic", "Roughness"
 			};
 			if (ui->combo("Inputs", &debugViewInputs, debugNamesInputs)) {
-				shaderValuesParams.debugViewInputs = debugViewInputs;
+				shaderValuesParams.debugViewInputs = (float)debugViewInputs;
 				updateShaderParams = true;
 			}
 			const std::vector<std::string> debugNamesEquation = {
 				"none", "Diff (l,n)", "F (l,h)", "G (l,v,h)", "D (h)", "Specular"
 			};
 			if (ui->combo("PBR equation", &debugViewEquation, debugNamesEquation)) {
-				shaderValuesParams.debugViewEquation = debugViewEquation;
+				shaderValuesParams.debugViewEquation = (float)debugViewEquation;
 				updateShaderParams = true;
 			}
 		}
