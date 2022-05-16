@@ -5,10 +5,10 @@ namespace aux
 
 VkPipelineCache* Pipeline::m_pPipelineCache;
 
-Pipeline::Pipeline(aux::PipelineLayout& pipelineLayout, aux::RenderPass& renderPass, PipelineCI& auxPipelineCI) :
+Pipeline::Pipeline(aux::PipelineLayout& pipelineLayout, aux::RenderPass& renderPass, PipelineCI& auxci) :
 	m_pipelineLayout(pipelineLayout),
 	m_renderPass(renderPass),
-	m_auxPipelineCI (auxPipelineCI)
+	m_auxPipelineCI (auxci)
 {
 	VkDevice* pDevice = aux::Device::get();
 
@@ -56,8 +56,18 @@ Pipeline::Pipeline(aux::PipelineLayout& pipelineLayout, aux::RenderPass& renderP
 	dynamicStateCI.pDynamicStates = dynamicStateEnables.data();
 	dynamicStateCI.dynamicStateCount = static_cast<uint32_t>(dynamicStateEnables.size());
 
-	VkPipelineVertexInputStateCreateInfo emptyInputStateCI{};
-	emptyInputStateCI.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
+	VkPipelineVertexInputStateCreateInfo viStateCI{};
+	viStateCI.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
+
+	if (auxci.pVertexInputBinding != nullptr) {
+		viStateCI.vertexBindingDescriptionCount = 1;
+		viStateCI.pVertexBindingDescriptions = auxci.pVertexInputBinding;
+	}
+
+	if (auxci.pVertexInputAttribute != nullptr) {
+		viStateCI.vertexAttributeDescriptionCount = 1;
+		viStateCI.pVertexAttributeDescriptions = auxci.pVertexInputAttribute;
+	}
 
 	std::vector<VkPipelineShaderStageCreateInfo> shaderStages;
 
@@ -70,7 +80,7 @@ Pipeline::Pipeline(aux::PipelineLayout& pipelineLayout, aux::RenderPass& renderP
 	pipelineCI.layout = m_pipelineLayout.get();
 	pipelineCI.renderPass = *(m_renderPass.get());
 	pipelineCI.pInputAssemblyState = &inputAssemblyStateCI;
-	pipelineCI.pVertexInputState = &emptyInputStateCI;
+	pipelineCI.pVertexInputState = &viStateCI;
 	pipelineCI.pRasterizationState = &rasterizationStateCI;
 	pipelineCI.pColorBlendState = &colorBlendStateCI;
 	pipelineCI.pMultisampleState = &multisampleStateCI;

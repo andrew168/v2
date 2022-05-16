@@ -11,9 +11,14 @@ class RenderPass;
 struct PipelineCI {
     VkPrimitiveTopology primitiveTopology;
     std::vector<aux::ShaderDescription> shaders;
+    VkVertexInputBindingDescription* pVertexInputBinding;
+    VkVertexInputAttributeDescription* pVertexInputAttribute;
+
     PipelineCI():
         primitiveTopology(VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST),
-        shaders{}
+        shaders{},
+        pVertexInputBinding(nullptr),
+        pVertexInputAttribute(nullptr)
     {
     }
 };
