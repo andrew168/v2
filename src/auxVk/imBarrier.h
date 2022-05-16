@@ -13,6 +13,9 @@ public:
     static void colorAttachment2Transfer(aux::Image& auxImage,
         VkCommandBuffer& cmdBuf);
 
+    static void transfer2ColorAttachment(aux::Image& auxImage,
+        VkCommandBuffer& cmdBuf);
+
     static void toColorAttachment(aux::Image& auxImage,
         VkQueue& queue);
 
