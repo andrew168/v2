@@ -840,11 +840,6 @@ public:
 
 		vkQueueWaitIdle(queue);
 
-		// vkDestroyPipelineLayout(device, pipelinelayout, nullptr);
-		// vkDestroyRenderPass(device, renderpass, nullptr);
-		// vkDestroyFramebuffer(device, auxFramebuffer.get(), nullptr);
-		// vkDestroyDescriptorSetLayout by dtor();
-
 		textures.lutBrdf.descriptor.imageView = textures.lutBrdf.view;
 		textures.lutBrdf.descriptor.sampler = textures.lutBrdf.sampler;
 		textures.lutBrdf.descriptor.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
@@ -1232,17 +1227,6 @@ public:
 				vkCmdPipelineBarrier(cmdBuf, VK_PIPELINE_STAGE_ALL_COMMANDS_BIT, VK_PIPELINE_STAGE_ALL_COMMANDS_BIT, 0, 0, nullptr, 0, nullptr, 1, &imageMemoryBarrier);
 				vulkanDevice->flushCommandBuffer(cmdBuf, queue, false);
 			}
-
-
-			// vkDestroyRenderPass(device, renderpass, nullptr);
-			// vkDestroyFramebuffer(device, offscreen.framebuffer, nullptr);
-			// vkFreeMemory(device, offscreen.memory, nullptr);
-			// vkDestroyImageView(device, offscreen.view, nullptr);
-			// vkDestroyImage(device, offscreen.image, nullptr);
-			// vkDestroyDescriptorPool(device, descriptorpool, nullptr);
-			// vkDestroyDescriptorSetLayout(device, descriptorsetlayout, nullptr);
-			// vkDestroyPipeline(device, pipeline, nullptr);
-			// vkDestroyPipelineLayout(device, pipelinelayout, nullptr);
 
 			cubemap.descriptor.imageView = cubemap.view;
 			cubemap.descriptor.sampler = cubemap.sampler;
