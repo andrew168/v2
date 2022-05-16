@@ -803,7 +803,8 @@ public:
 
 		VkRenderPass renderpass = *(auxRenderPass.get());
 		aux::Framebuffer auxFramebuffer(auxImage, auxRenderPass);
-		aux::PipelineLayout auxPipelineLayout(&auxImage);
+		aux::PipelineLayoutCI auxPlCi{};
+		aux::PipelineLayout auxPipelineLayout(auxPlCi);
 		VkPipelineLayout pipelinelayout = auxPipelineLayout.get();
 
 		aux::Pipeline::setCache(&pipelineCache);
@@ -940,21 +941,6 @@ public:
 			vkCmdPipelineBarrier(layoutCmd, VK_PIPELINE_STAGE_ALL_COMMANDS_BIT, VK_PIPELINE_STAGE_ALL_COMMANDS_BIT, 0, 0, nullptr, 0, nullptr, 1, &imageMemoryBarrier);
 			vulkanDevice->flushCommandBuffer(layoutCmd, queue, true);
 
-			// Descriptors
-			VkDescriptorSetLayout descriptorsetlayout;
-			VkDescriptorSetLayoutBinding setLayoutBinding = { 0, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1, VK_SHADER_STAGE_FRAGMENT_BIT, nullptr };
-			VkDescriptorSetLayoutCreateInfo descriptorSetLayoutCI{};
-			descriptorSetLayoutCI.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-			descriptorSetLayoutCI.pBindings = &setLayoutBinding;
-			descriptorSetLayoutCI.bindingCount = 1;
-			VK_CHECK_RESULT(vkCreateDescriptorSetLayout(device, &descriptorSetLayoutCI, nullptr, &descriptorsetlayout));
-
-			aux::DescriptorSetCI dsCI{};
-			dsCI.pImageInfo = &textures.environmentCube.descriptor;
-			dsCI.pSetLayouts = &descriptorsetlayout;
-
-			aux::DescriptorSet auxDescriptorSet(dsCI);
-
 			struct PushBlockIrradiance {
 				glm::mat4 mvp;
 				float deltaPhi = (2.0f * float(M_PI)) / 180.0f;
@@ -980,14 +966,18 @@ public:
 				break;
 			};
 
-			VkPipelineLayout pipelinelayout;
-			VkPipelineLayoutCreateInfo pipelineLayoutCI{};
-			pipelineLayoutCI.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-			pipelineLayoutCI.setLayoutCount = 1;
-			pipelineLayoutCI.pSetLayouts = &descriptorsetlayout;
-			pipelineLayoutCI.pushConstantRangeCount = 1;
-			pipelineLayoutCI.pPushConstantRanges = &pushConstantRange;
-			VK_CHECK_RESULT(vkCreatePipelineLayout(device, &pipelineLayoutCI, nullptr, &pipelinelayout));
+
+			// Descriptors
+			VkDescriptorSetLayoutBinding setLayoutBinding = { 0, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1, VK_SHADER_STAGE_FRAGMENT_BIT, nullptr };
+
+			aux::PipelineLayoutCI auxPipelineLayoutCI{};
+			auxPipelineLayoutCI.pDslBindings = &setLayoutBinding;
+			auxPipelineLayoutCI.pImageInfo = &textures.environmentCube.descriptor;
+			// auxPipelineLayoutCI.pSetLayouts = &descriptorsetlayout;
+			auxPipelineLayoutCI.pPushConstantRanges = &pushConstantRange;
+			
+			aux::PipelineLayout auxPipelineLayout(auxPipelineLayoutCI);
+			VkPipelineLayout pipelinelayout = auxPipelineLayout.get();
 
 			// Pipeline
 			VkPipelineInputAssemblyStateCreateInfo inputAssemblyStateCI{};
@@ -1159,7 +1149,7 @@ public:
 					};
 
 					vkCmdBindPipeline(cmdBuf, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline);
-					vkCmdBindDescriptorSets(cmdBuf, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelinelayout, 0, 1, auxDescriptorSet.get(), 0, NULL);
+					vkCmdBindDescriptorSets(cmdBuf, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelinelayout, 0, 1, (auxPipelineLayout.getDSet()->get()), 0, NULL);
 
 					VkDeviceSize offsets[1] = { 0 };
 
@@ -1250,9 +1240,9 @@ public:
 			// vkDestroyImageView(device, offscreen.view, nullptr);
 			// vkDestroyImage(device, offscreen.image, nullptr);
 			// vkDestroyDescriptorPool(device, descriptorpool, nullptr);
-			vkDestroyDescriptorSetLayout(device, descriptorsetlayout, nullptr);
-			vkDestroyPipeline(device, pipeline, nullptr);
-			vkDestroyPipelineLayout(device, pipelinelayout, nullptr);
+			// vkDestroyDescriptorSetLayout(device, descriptorsetlayout, nullptr);
+			// vkDestroyPipeline(device, pipeline, nullptr);
+			// vkDestroyPipelineLayout(device, pipelinelayout, nullptr);
 
 			cubemap.descriptor.imageView = cubemap.view;
 			cubemap.descriptor.sampler = cubemap.sampler;

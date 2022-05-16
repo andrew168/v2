@@ -1,11 +1,11 @@
 #pragma once
 #include "..\vk.h"
-#include "image.h"
-#include "Framebuffer.h"
 
 namespace aux
 {
 class AttachmentDescription;
+class Image;
+class Framebuffer;
 
 class RenderPass
 {

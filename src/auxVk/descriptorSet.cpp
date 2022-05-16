@@ -2,8 +2,6 @@
 
 namespace aux
 {
-
-
 DescriptorSet::DescriptorSet(DescriptorSetCI &ci)
 {
 	VkDevice* pDevice = aux::Device::get();

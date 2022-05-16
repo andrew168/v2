@@ -1,9 +1,6 @@
 #pragma once
 #include "..\vk.h"
 #include "device.h"
-#include "pipelineLayout.h"
-#include "renderPass.h"
-#include "shaderDescription.h"
 
 namespace aux
 {
@@ -18,12 +15,10 @@ class DescriptorSet
     VkDescriptorSet m_descriptorset;
 
 public:
-    explicit DescriptorSet(DescriptorSetCI &ci);
+    explicit DescriptorSet(aux::DescriptorSetCI &ci);
     ~DescriptorSet();
 
     VkDescriptorSet* get() { return &m_descriptorset; }
-
-private:
 };
 
 }

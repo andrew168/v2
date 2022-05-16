@@ -1,6 +1,5 @@
 #pragma once
 #include "auxVk.h"
-#include "renderPass.h"
 
 namespace aux
 {
