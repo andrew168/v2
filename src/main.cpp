@@ -901,28 +901,16 @@ public:
 			aux::SubpassDescription auxSubpassDescription(auxCube);
 			aux::RenderPass auxRenderPass(auxCube);
 
-			struct Offscreen {
-				VkImage image;
-				VkImageView view;
-				VkDeviceMemory memory;
-				VkFramebuffer framebuffer;
-			} offscreen;
-
 			// Create offscreen framebuffer
-
 			aux::ImageCI imageCI(format, dim, dim);
 			imageCI.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 			imageCI.usage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
 			imageCI.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 			aux::Image auxImageOffscreen(imageCI);
 
-			offscreen.memory = auxImageOffscreen.getDeviceMemory();
-			offscreen.image = auxImageOffscreen.getImage();
-			offscreen.view = auxImageOffscreen.getView();
 			// no sampler, auxImage.getSampler();
 
 			aux::Framebuffer auxFramebufferOffscreen(auxImageOffscreen, auxRenderPass);
-			offscreen.framebuffer = *(auxFramebufferOffscreen.get());
 			aux::IMBarrier::toColorAttachment(auxImageOffscreen, queue);
 		
 			struct PushBlockIrradiance {
@@ -1069,7 +1057,7 @@ public:
 
 					vkCmdCopyImage(
 						cmdBuf,
-						offscreen.image,
+						auxImageOffscreen.getImage(),
 						VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
 						cubemap.image,
 						VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
