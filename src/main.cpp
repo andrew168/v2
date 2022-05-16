@@ -1051,23 +1051,7 @@ public:
 
 					vkCmdEndRenderPass(cmdBuf);
 
-					VkImageSubresourceRange subresourceRange = { VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1 };
-					subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-					subresourceRange.baseMipLevel = 0;
-					subresourceRange.levelCount = numMips;
-					subresourceRange.layerCount = 6;
-
-					{
-						VkImageMemoryBarrier imageMemoryBarrier{};
-						imageMemoryBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
-						imageMemoryBarrier.image = offscreen.image;
-						imageMemoryBarrier.oldLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-						imageMemoryBarrier.newLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
-						imageMemoryBarrier.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-						imageMemoryBarrier.dstAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
-						imageMemoryBarrier.subresourceRange = { VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1 };
-						vkCmdPipelineBarrier(cmdBuf, VK_PIPELINE_STAGE_ALL_COMMANDS_BIT, VK_PIPELINE_STAGE_ALL_COMMANDS_BIT, 0, 0, nullptr, 0, nullptr, 1, &imageMemoryBarrier);
-					}
+					aux::IMBarrier::colorAttachment2Transfer(auxImageOffscreen, cmdBuf);
 
 					// Copy region for transfer from framebuffer to cube face
 					VkImageCopy copyRegion{};

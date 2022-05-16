@@ -7,9 +7,14 @@ namespace aux
 class IMBarrier {
 public:
     static void convertLayoutToTransfer(aux::Image& auxImage,
-        VkCommandBuffer& cmbBuf, 
+        VkCommandBuffer& cmdBuf, 
         VkQueue& queue);
+
+    static void colorAttachment2Transfer(aux::Image& auxImage,
+        VkCommandBuffer& cmdBuf);
+
     static void toColorAttachment(aux::Image& auxImage,
         VkQueue& queue);
+
 };
 }
