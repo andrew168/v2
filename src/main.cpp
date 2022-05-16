@@ -1000,19 +1000,6 @@ public:
 			aux::Pipeline auxPipeline(auxPipelineLayout, auxRenderPass, auxPipelineCI);
 			VkPipeline pipeline = auxPipeline.get();
 
-			// Render cubemap
-			VkClearValue clearValues[1];
-			clearValues[0].color = { { 0.0f, 0.0f, 0.2f, 0.0f } };
-
-			VkRenderPassBeginInfo renderPassBeginInfo{};
-			renderPassBeginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-			renderPassBeginInfo.renderPass = *(auxRenderPass.get());
-			renderPassBeginInfo.framebuffer = offscreen.framebuffer;
-			renderPassBeginInfo.renderArea.extent.width = dim;
-			renderPassBeginInfo.renderArea.extent.height = dim;
-			renderPassBeginInfo.clearValueCount = 1;
-			renderPassBeginInfo.pClearValues = clearValues;
-
 			std::vector<glm::mat4> matrices = {
 				glm::rotate(glm::rotate(glm::mat4(1.0f), glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f)), glm::radians(180.0f), glm::vec3(1.0f, 0.0f, 0.0f)),
 				glm::rotate(glm::rotate(glm::mat4(1.0f), glm::radians(-90.0f), glm::vec3(0.0f, 1.0f, 0.0f)), glm::radians(180.0f), glm::vec3(1.0f, 0.0f, 0.0f)),
@@ -1066,8 +1053,7 @@ public:
 					vkCmdSetScissor(cmdBuf, 0, 1, &scissor);
 
 					// Render scene from cube face's point of view
-					vkCmdBeginRenderPass(cmdBuf, &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
-
+					auxRenderPass.begin(&cmdBuf, &auxFramebufferOffscreen, { 0.0f, 0.0f, 0.2f, 0.0f });
 					// Pass parameters for current pass using a push constant block
 					switch (target) {
 					case IRRADIANCE:
