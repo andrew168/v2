@@ -16,6 +16,9 @@ public:
     static void transfer2ColorAttachment(aux::Image& auxImage,
         VkCommandBuffer& cmdBuf);
 
+    static void transfer2ShaderRead(aux::Image& auxImage,
+        VkCommandBuffer& cmdBuf);
+
     static void toColorAttachment(aux::Image& auxImage,
         VkQueue& queue);
 
