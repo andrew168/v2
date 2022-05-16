@@ -923,19 +923,8 @@ public:
 
 			aux::Framebuffer auxFramebufferOffscreen(auxImageOffscreen, auxRenderPass);
 			offscreen.framebuffer = *(auxFramebufferOffscreen.get());
-
-			VkCommandBuffer layoutCmd = vulkanDevice->createCommandBuffer(VK_COMMAND_BUFFER_LEVEL_PRIMARY, true);
-			VkImageMemoryBarrier imageMemoryBarrier{};
-			imageMemoryBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
-			imageMemoryBarrier.image = offscreen.image;
-			imageMemoryBarrier.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-			imageMemoryBarrier.newLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-			imageMemoryBarrier.srcAccessMask = 0;
-			imageMemoryBarrier.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-			imageMemoryBarrier.subresourceRange = { VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1 };
-			vkCmdPipelineBarrier(layoutCmd, VK_PIPELINE_STAGE_ALL_COMMANDS_BIT, VK_PIPELINE_STAGE_ALL_COMMANDS_BIT, 0, 0, nullptr, 0, nullptr, 1, &imageMemoryBarrier);
-			vulkanDevice->flushCommandBuffer(layoutCmd, queue, true);
-
+			aux::IMBarrier::toColorAttachment(auxImageOffscreen, queue);
+		
 			struct PushBlockIrradiance {
 				glm::mat4 mvp;
 				float deltaPhi = (2.0f * float(M_PI)) / 180.0f;

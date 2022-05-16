@@ -9,5 +9,7 @@ public:
     static void convertLayoutToTransfer(aux::Image& auxImage,
         VkCommandBuffer& cmbBuf, 
         VkQueue& queue);
+    static void toColorAttachment(aux::Image& auxImage,
+        VkQueue& queue);
 };
 }
