@@ -326,6 +326,7 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     <ClCompile Include="auxVk\device.cpp" />
     <ClCompile Include="auxVk\Framebuffer.cpp" />
     <ClCompile Include="auxVk\image.cpp" />
+    <ClCompile Include="auxVk\imBarrier.cpp" />
     <ClCompile Include="auxVk\pipeline.cpp" />
     <ClCompile Include="auxVk\pipelineLayout.cpp" />
     <ClCompile Include="auxVk\renderPass.cpp" />
@@ -366,6 +367,7 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     <ClInclude Include="auxVk\device.h" />
     <ClInclude Include="auxVk\Framebuffer.h" />
     <ClInclude Include="auxVk\image.h" />
+    <ClInclude Include="auxVk\imBarrier.h" />
     <ClInclude Include="auxVk\pipeline.h" />
     <ClInclude Include="auxVk\pipelineLayout.h" />
     <ClInclude Include="auxVk\renderPass.h" />

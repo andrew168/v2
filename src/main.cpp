@@ -1026,21 +1026,7 @@ public:
 			subresourceRange.baseMipLevel = 0;
 			subresourceRange.levelCount = numMips;
 			subresourceRange.layerCount = 6;
-
-			// Change image layout for all cubemap faces to transfer destination
-			{
-				vulkanDevice->beginCommandBuffer(cmdBuf);
-				VkImageMemoryBarrier imageMemoryBarrier{};
-				imageMemoryBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
-				imageMemoryBarrier.image = cubemap.image;
-				imageMemoryBarrier.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-				imageMemoryBarrier.newLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
-				imageMemoryBarrier.srcAccessMask = 0;
-				imageMemoryBarrier.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
-				imageMemoryBarrier.subresourceRange = subresourceRange;
-				vkCmdPipelineBarrier(cmdBuf, VK_PIPELINE_STAGE_ALL_COMMANDS_BIT, VK_PIPELINE_STAGE_ALL_COMMANDS_BIT, 0, 0, nullptr, 0, nullptr, 1, &imageMemoryBarrier);
-				vulkanDevice->flushCommandBuffer(cmdBuf, queue, false);
-			}
+			aux::IMBarrier::convertLayoutToTransfer(auxCube, cmdBuf, queue);
 
 			for (uint32_t m = 0; m < numMips; m++) {
 				for (uint32_t f = 0; f < 6; f++) {
