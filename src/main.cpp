@@ -1035,35 +1035,10 @@ public:
 					vkCmdEndRenderPass(cmdBuf);
 
 					aux::IMBarrier::colorAttachment2Transfer(auxImageOffscreen, cmdBuf);
-
-					// Copy region for transfer from framebuffer to cube face
-					VkImageCopy copyRegion{};
-
-					copyRegion.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-					copyRegion.srcSubresource.baseArrayLayer = 0;
-					copyRegion.srcSubresource.mipLevel = 0;
-					copyRegion.srcSubresource.layerCount = 1;
-					copyRegion.srcOffset = { 0, 0, 0 };
-
-					copyRegion.dstSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-					copyRegion.dstSubresource.baseArrayLayer = f;
-					copyRegion.dstSubresource.mipLevel = m;
-					copyRegion.dstSubresource.layerCount = 1;
-					copyRegion.dstOffset = { 0, 0, 0 };
-
-					copyRegion.extent.width = static_cast<uint32_t>(viewport.width);
-					copyRegion.extent.height = static_cast<uint32_t>(viewport.height);
-					copyRegion.extent.depth = 1;
-
-					vkCmdCopyImage(
-						cmdBuf,
-						auxImageOffscreen.getImage(),
-						VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
-						cubemap.image,
-						VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-						1,
-						&copyRegion);
-
+					VkExtent3D region;
+					region.height = viewport.height;
+					region.width = viewport.width;
+					aux::Image::copyOneMip2Cube(cmdBuf, auxImageOffscreen, region, auxCube, f, m);
 					aux::IMBarrier::transfer2ColorAttachment(auxImageOffscreen, cmdBuf);
 					vulkanDevice->flushCommandBuffer(cmdBuf, queue, false);
 				}

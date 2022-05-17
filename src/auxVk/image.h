@@ -43,6 +43,13 @@ class Image {
     VkSampler m_sampler;
 
 public:
+    static void copyOneMip2Cube(
+        VkCommandBuffer& cmdBuf, 
+        aux::Image& auxImage,
+        VkExtent3D& region,
+        aux::Image& cube, 
+        uint32_t arrayLayers,
+        uint32_t mipLevels);
     Image(ImageCI &ci);
     VkFormat getFormat() { return m_format; }
     VkImage getImage() { return m_image; }

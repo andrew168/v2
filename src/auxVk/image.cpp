@@ -66,4 +66,41 @@ void Image::createSampler(ImageCI& auxCi) {
     samplerCI.borderColor = VK_BORDER_COLOR_FLOAT_OPAQUE_WHITE;
     VK_CHECK_RESULT(vkCreateSampler(*Device::get(), &samplerCI, nullptr, &m_sampler));
 }
+
+void Image::copyOneMip2Cube(
+    VkCommandBuffer& cmdBuf,
+    aux::Image& auxImage,
+    VkExtent3D& region,
+    aux::Image& cube,
+    uint32_t arrayLayers,
+    uint32_t mipLevels)
+{
+    // Copy region for transfer from framebuffer to cube face
+    VkImageCopy copyRegion{};
+
+    copyRegion.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+    copyRegion.srcSubresource.baseArrayLayer = 0;
+    copyRegion.srcSubresource.mipLevel = 0;
+    copyRegion.srcSubresource.layerCount = 1;
+    copyRegion.srcOffset = { 0, 0, 0 };
+
+    copyRegion.dstSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+    copyRegion.dstSubresource.baseArrayLayer = arrayLayers;
+    copyRegion.dstSubresource.mipLevel = mipLevels;
+    copyRegion.dstSubresource.layerCount = 1;
+    copyRegion.dstOffset = { 0, 0, 0 };
+
+    copyRegion.extent.width = static_cast<uint32_t>(region.width);
+    copyRegion.extent.height = static_cast<uint32_t>(region.height);
+    copyRegion.extent.depth = 1;
+
+    vkCmdCopyImage(
+        cmdBuf,
+        auxImage.getImage(),
+        VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+        cube.getImage(),
+        VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+        1,
+        &copyRegion);
+}
 }
