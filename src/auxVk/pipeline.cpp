@@ -96,7 +96,20 @@ Pipeline::Pipeline(aux::PipelineLayout& pipelineLayout, aux::RenderPass& renderP
 	}
 }
 
-void Pipeline::bindToGraphic(VkCommandBuffer& cmdBuf, uint32_t vpWidth, uint32_t vpHeight)
+void Pipeline::bindToGraphic(
+	VkCommandBuffer& cmdBuf,
+	uint32_t ssWidth,
+	uint32_t ssHeight)
+{
+	bindToGraphic(cmdBuf, ssWidth, ssHeight, ssWidth, ssHeight);
+}
+
+void Pipeline::bindToGraphic(
+	VkCommandBuffer& cmdBuf, 
+	uint32_t ssWidth, 
+	uint32_t ssHeight, 
+	uint32_t vpWidth, 
+	uint32_t vpHeight)
 {
 	VkViewport viewport{};
 	viewport.width = (float)vpWidth;
@@ -105,8 +118,8 @@ void Pipeline::bindToGraphic(VkCommandBuffer& cmdBuf, uint32_t vpWidth, uint32_t
 	viewport.maxDepth = 1.0f;
 
 	VkRect2D scissor{};
-	scissor.extent.width = vpWidth;
-	scissor.extent.height = vpHeight;
+	scissor.extent.width = ssWidth;
+	scissor.extent.height = ssHeight;
 
 	vkCmdSetViewport(cmdBuf, 0, 1, &viewport);
 	vkCmdSetScissor(cmdBuf, 0, 1, &scissor);

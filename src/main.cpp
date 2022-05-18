@@ -968,28 +968,13 @@ public:
 			};
 
 			VkCommandBuffer cmdBuf = vulkanDevice->createCommandBuffer(VK_COMMAND_BUFFER_LEVEL_PRIMARY, false);
-
-			VkViewport viewport{};
-			viewport.width = (float)dim;
-			viewport.height = (float)dim;
-			viewport.minDepth = 0.0f;
-			viewport.maxDepth = 1.0f;
-
-			VkRect2D scissor{};
-			scissor.extent.width = dim;
-			scissor.extent.height = dim;
-
+			
 			aux::IMBarrier::convertLayoutToTransfer(auxCube, cmdBuf, queue);
 
 			for (uint32_t m = 0; m < numMips; m++) {
 				for (uint32_t f = 0; f < 6; f++) {
 
 					vulkanDevice->beginCommandBuffer(cmdBuf);
-
-					viewport.width = static_cast<float>(dim * std::pow(0.5f, m));
-					viewport.height = static_cast<float>(dim * std::pow(0.5f, m));
-					vkCmdSetViewport(cmdBuf, 0, 1, &viewport);
-					vkCmdSetScissor(cmdBuf, 0, 1, &scissor);
 
 					// Render scene from cube face's point of view
 					auxRenderPass.begin(&cmdBuf, &auxFramebufferOffscreen, { 0.0f, 0.0f, 0.2f, 0.0f });
@@ -1006,7 +991,8 @@ public:
 						break;
 					};
 
-					vkCmdBindPipeline(cmdBuf, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline);
+					uint32_t vpDim = static_cast<uint32_t>(dim * std::pow(0.5f, m));
+					auxPipeline.bindToGraphic(cmdBuf, dim, dim, vpDim, vpDim);
 					vkCmdBindDescriptorSets(cmdBuf, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelinelayout, 0, 1, (auxPipelineLayout.getDSet()->get()), 0, NULL);
 
 					VkDeviceSize offsets[1] = { 0 };
@@ -1017,8 +1003,8 @@ public:
 
 					aux::IMBarrier::colorAttachment2Transfer(auxImageOffscreen, cmdBuf);
 					VkExtent3D region;
-					region.height = viewport.height;
-					region.width = viewport.width;
+					region.height = vpDim;
+					region.width = vpDim;
 					aux::Image::copyOneMip2Cube(cmdBuf, auxImageOffscreen, region, auxCube, f, m);
 					aux::IMBarrier::transfer2ColorAttachment(auxImageOffscreen, cmdBuf);
 					vulkanDevice->flushCommandBuffer(cmdBuf, queue, false);
