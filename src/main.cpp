@@ -789,9 +789,6 @@ public:
 		const VkFormat format = VK_FORMAT_R16G16_SFLOAT;
 		const int32_t dim = 512;
 
-		aux::Device::setVksDevice(vulkanDevice);
-		aux::Device::set(&device);
-
 		aux::ImageCI auxImageCI(format, dim, dim);
 		aux::Image auxImage(auxImageCI);
 		textures.lutBrdf.image = auxImage.getImage();
@@ -879,9 +876,6 @@ public:
 				dim = 512;
 				break;
 			};
-
-			aux::Device::setVksDevice(vulkanDevice);
-			aux::Device::set(&device);
 
 			// Create target cubemap
 			const uint32_t numMips = static_cast<uint32_t>(floor(log2(dim))) + 1;
@@ -1133,6 +1127,9 @@ public:
 	void prepare()
 	{
 		VulkanExampleBase::prepare();
+
+		aux::Device::setVksDevice(vulkanDevice);
+		aux::Device::set(&device);
 
 		camera.type = Camera::CameraType::lookat;
 
