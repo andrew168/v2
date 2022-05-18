@@ -817,20 +817,7 @@ public:
 		// Render
 		VkCommandBuffer cmdBuf = vulkanDevice->createCommandBuffer(VK_COMMAND_BUFFER_LEVEL_PRIMARY, true);
 		auxRenderPass.begin(&cmdBuf, &auxFramebuffer);
-
-		VkViewport viewport{};
-		viewport.width = (float)dim;
-		viewport.height = (float)dim;
-		viewport.minDepth = 0.0f;
-		viewport.maxDepth = 1.0f;
-
-		VkRect2D scissor{};
-		scissor.extent.width = dim;
-		scissor.extent.height = dim;
-
-		vkCmdSetViewport(cmdBuf, 0, 1, &viewport);
-		vkCmdSetScissor(cmdBuf, 0, 1, &scissor);
-		vkCmdBindPipeline(cmdBuf, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline);
+		auxPipeline.bindToGraphic(cmdBuf, dim, dim);
 		vkCmdDraw(cmdBuf, 3, 1, 0, 0);
 		vkCmdEndRenderPass(cmdBuf);
 		vulkanDevice->flushCommandBuffer(cmdBuf, queue);

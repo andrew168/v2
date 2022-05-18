@@ -96,6 +96,23 @@ Pipeline::Pipeline(aux::PipelineLayout& pipelineLayout, aux::RenderPass& renderP
 	}
 }
 
+void Pipeline::bindToGraphic(VkCommandBuffer& cmdBuf, uint32_t vpWidth, uint32_t vpHeight)
+{
+	VkViewport viewport{};
+	viewport.width = (float)vpWidth;
+	viewport.height = (float)vpHeight;
+	viewport.minDepth = 0.0f;
+	viewport.maxDepth = 1.0f;
+
+	VkRect2D scissor{};
+	scissor.extent.width = vpWidth;
+	scissor.extent.height = vpHeight;
+
+	vkCmdSetViewport(cmdBuf, 0, 1, &viewport);
+	vkCmdSetScissor(cmdBuf, 0, 1, &scissor);
+	vkCmdBindPipeline(cmdBuf, VK_PIPELINE_BIND_POINT_GRAPHICS, get());
+}
+
 Pipeline::~Pipeline()
 {
 	vkDestroyPipeline(*(aux::Device::get()), m_pipeline, nullptr);

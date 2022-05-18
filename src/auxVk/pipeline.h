@@ -35,6 +35,7 @@ class Pipeline
 public:
     explicit Pipeline(aux::PipelineLayout& pipelineLayout, aux::RenderPass& renderPass, PipelineCI &pipelineCI);
     ~Pipeline();
+    void bindToGraphic(VkCommandBuffer& cmdBuf, uint32_t vpWidth, uint32_t vpHeight);
     void setShaderStages(std::vector<aux::ShaderDescription> &shaders);
     VkPipeline get() { return m_pipeline; }
     static void setCache(VkPipelineCache *cache) {
