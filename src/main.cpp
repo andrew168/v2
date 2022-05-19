@@ -48,12 +48,7 @@ public:
 	aux::Pipeline* pAuxPipelineBlend;
 	aux::Pipeline* pAuxPipelinePbr;
 	aux::Pipeline* pAuxPipelineSkybox;
-	struct Pipelines {
-		VkPipeline skybox;
-		VkPipeline pbr;
-		VkPipeline pbrAlphaBlend;
-	} pipelines;
-
+	
 	struct DescriptorSetLayouts {
 		VkDescriptorSetLayout scene;
 		VkDescriptorSetLayout material;
@@ -286,11 +281,11 @@ public:
 
 			if (displayBackground) {
 				vkCmdBindDescriptorSets(currentCB, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, 1, &descriptorSets[i].skybox, 0, nullptr);
-				vkCmdBindPipeline(currentCB, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelines.skybox);
+				pAuxPipelineSkybox->bindToGraphic(currentCB);
 				models.skybox.draw(currentCB);
 			}
 
-			vkCmdBindPipeline(currentCB, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelines.pbr);
+			pAuxPipelinePbr->bindToGraphic(currentCB);
 
 			vkglTF::Model& model = models.scene;
 
@@ -309,7 +304,7 @@ public:
 			}
 			// Transparent primitives
 			// TODO: Correct depth sorting
-			vkCmdBindPipeline(currentCB, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelines.pbrAlphaBlend);
+			pAuxPipelineBlend->bindToGraphic(currentCB);
 			for (auto node : model.nodes) {
 				renderNode(node, (uint32_t)i, vkglTF::Material::ALPHAMODE_BLEND);
 			}
@@ -692,7 +687,6 @@ public:
 		};
 		auxPipelineCI.shaders = shadersSkybox;
 		pAuxPipelineSkybox = new aux::Pipeline(*pAuxPipelineLayout, renderPass, auxPipelineCI);
-		pipelines.skybox = pAuxPipelineSkybox->get();
 		
 		// PBR pipeline
 		std::vector<aux::ShaderDescription> shadersPbr = {
@@ -702,10 +696,8 @@ public:
 
 		auxPipelineCI.shaders = shadersPbr;
 		auxPipelineCI.depthWriteEnable = VK_TRUE;
-		auxPipelineCI.depthTestEnable = VK_TRUE;
-		
+		auxPipelineCI.depthTestEnable = VK_TRUE;	
 		pAuxPipelinePbr = new aux::Pipeline(*pAuxPipelineLayout, renderPass, auxPipelineCI);
-		pipelines.pbr = pAuxPipelinePbr->get();
 
 		auxPipelineCI.cullMode = VK_CULL_MODE_NONE;
 		auxPipelineCI.blendEnable = VK_TRUE;
@@ -716,9 +708,7 @@ public:
 		auxPipelineCI.srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
 		auxPipelineCI.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
 		auxPipelineCI.alphaBlendOp = VK_BLEND_OP_ADD;
-
 		pAuxPipelineBlend = new aux::Pipeline(*pAuxPipelineLayout, renderPass, auxPipelineCI);
-		pipelines.pbrAlphaBlend = pAuxPipelineBlend->get();
 	}
 
 	/*

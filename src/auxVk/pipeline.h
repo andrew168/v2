@@ -60,6 +60,7 @@ class Pipeline
 public:
     explicit Pipeline(aux::PipelineLayout& pipelineLayout, VkRenderPass& renderPass, PipelineCI &pipelineCI);
     ~Pipeline();
+    void bindToGraphic(VkCommandBuffer& cmdBuf);
     void bindToGraphic(VkCommandBuffer& cmdBuf, uint32_t ssWidth, uint32_t ssHeight);
     void bindToGraphic(VkCommandBuffer& cmdBuf, uint32_t ssWidth, uint32_t ssHeight, uint32_t vpWidth, uint32_t vpHeight);
     void setShaderStages(std::vector<aux::ShaderDescription> &shaders);

@@ -136,6 +136,11 @@ void Pipeline::bindToGraphic(
 	vkCmdBindPipeline(cmdBuf, VK_PIPELINE_BIND_POINT_GRAPHICS, get());
 }
 
+void Pipeline::bindToGraphic(VkCommandBuffer& cmdBuf)
+{
+	vkCmdBindPipeline(cmdBuf, VK_PIPELINE_BIND_POINT_GRAPHICS, get());
+}
+
 Pipeline::~Pipeline()
 {
 	vkDestroyPipeline(*(aux::Device::get()), m_pipeline, nullptr);
