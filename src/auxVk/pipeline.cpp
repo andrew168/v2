@@ -5,11 +5,12 @@ namespace aux
 
 VkPipelineCache* Pipeline::m_pPipelineCache;
 
-Pipeline::Pipeline(aux::PipelineLayout& pipelineLayout, aux::RenderPass& renderPass, PipelineCI& auxci) :
+Pipeline::Pipeline(aux::PipelineLayout& pipelineLayout, VkRenderPass& renderPass, PipelineCI& auxci) :
 	m_pipelineLayout(pipelineLayout),
 	m_renderPass(renderPass),
 	m_auxPipelineCI (auxci)
 {
+	auto auxCI = m_auxPipelineCI;
 	VkDevice* pDevice = aux::Device::get();
 
 	// Pipeline
@@ -20,13 +21,21 @@ Pipeline::Pipeline(aux::PipelineLayout& pipelineLayout, aux::RenderPass& renderP
 	VkPipelineRasterizationStateCreateInfo rasterizationStateCI{};
 	rasterizationStateCI.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
 	rasterizationStateCI.polygonMode = VK_POLYGON_MODE_FILL;
-	rasterizationStateCI.cullMode = VK_CULL_MODE_NONE;
+	rasterizationStateCI.cullMode = m_auxPipelineCI.cullMode;
 	rasterizationStateCI.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
 	rasterizationStateCI.lineWidth = 1.0f;
 
 	VkPipelineColorBlendAttachmentState blendAttachmentState{};
 	blendAttachmentState.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
-	blendAttachmentState.blendEnable = VK_FALSE;
+	blendAttachmentState.blendEnable = auxCI.blendEnable;
+	if (blendAttachmentState.blendEnable) {
+		blendAttachmentState.srcColorBlendFactor = auxCI.srcColorBlendFactor;
+		blendAttachmentState.dstColorBlendFactor = auxCI.dstColorBlendFactor;
+		blendAttachmentState.colorBlendOp = auxCI.colorBlendOp;
+		blendAttachmentState.srcAlphaBlendFactor = auxCI.srcAlphaBlendFactor;
+		blendAttachmentState.dstAlphaBlendFactor = auxCI.dstAlphaBlendFactor;
+		blendAttachmentState.alphaBlendOp = auxCI.alphaBlendOp;
+	}
 
 	VkPipelineColorBlendStateCreateInfo colorBlendStateCI{};
 	colorBlendStateCI.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
@@ -35,8 +44,8 @@ Pipeline::Pipeline(aux::PipelineLayout& pipelineLayout, aux::RenderPass& renderP
 
 	VkPipelineDepthStencilStateCreateInfo depthStencilStateCI{};
 	depthStencilStateCI.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
-	depthStencilStateCI.depthTestEnable = VK_FALSE;
-	depthStencilStateCI.depthWriteEnable = VK_FALSE;
+	depthStencilStateCI.depthTestEnable = auxCI.depthTestEnable;
+	depthStencilStateCI.depthWriteEnable = auxCI.depthWriteEnable;
 	depthStencilStateCI.depthCompareOp = VK_COMPARE_OP_LESS_OR_EQUAL;
 	depthStencilStateCI.front = depthStencilStateCI.back;
 	depthStencilStateCI.back.compareOp = VK_COMPARE_OP_ALWAYS;
@@ -48,9 +57,12 @@ Pipeline::Pipeline(aux::PipelineLayout& pipelineLayout, aux::RenderPass& renderP
 
 	VkPipelineMultisampleStateCreateInfo multisampleStateCI{};
 	multisampleStateCI.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
-	multisampleStateCI.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
+	multisampleStateCI.rasterizationSamples = m_auxPipelineCI.rasterizationSamples;
 
-	std::vector<VkDynamicState> dynamicStateEnables = { VK_DYNAMIC_STATE_VIEWPORT, VK_DYNAMIC_STATE_SCISSOR };
+	std::vector<VkDynamicState> dynamicStateEnables = {
+		VK_DYNAMIC_STATE_VIEWPORT, 
+		VK_DYNAMIC_STATE_SCISSOR 
+	};
 	VkPipelineDynamicStateCreateInfo dynamicStateCI{};
 	dynamicStateCI.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
 	dynamicStateCI.pDynamicStates = dynamicStateEnables.data();
@@ -58,15 +70,13 @@ Pipeline::Pipeline(aux::PipelineLayout& pipelineLayout, aux::RenderPass& renderP
 
 	VkPipelineVertexInputStateCreateInfo viStateCI{};
 	viStateCI.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-
-	if (auxci.pVertexInputBinding != nullptr) {
-		viStateCI.vertexBindingDescriptionCount = 1;
-		viStateCI.pVertexBindingDescriptions = auxci.pVertexInputBinding;
+	if (auxci.pVertexInputBindings != nullptr) {
+		viStateCI.vertexBindingDescriptionCount = static_cast<uint32_t>(auxci.pVertexInputBindings->size());
+		viStateCI.pVertexBindingDescriptions = auxci.pVertexInputBindings->data();
 	}
-
-	if (auxci.pVertexInputAttribute != nullptr) {
-		viStateCI.vertexAttributeDescriptionCount = 1;
-		viStateCI.pVertexAttributeDescriptions = auxci.pVertexInputAttribute;
+	if (auxci.pVertexInputAttributes != nullptr) {
+		viStateCI.vertexAttributeDescriptionCount = static_cast <uint32_t>(auxci.pVertexInputAttributes->size());
+		viStateCI.pVertexAttributeDescriptions = auxci.pVertexInputAttributes->data();
 	}
 
 	std::vector<VkPipelineShaderStageCreateInfo> shaderStages;
@@ -78,7 +88,7 @@ Pipeline::Pipeline(aux::PipelineLayout& pipelineLayout, aux::RenderPass& renderP
 	VkGraphicsPipelineCreateInfo pipelineCI{};
 	pipelineCI.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
 	pipelineCI.layout = m_pipelineLayout.get();
-	pipelineCI.renderPass = *(m_renderPass.get());
+	pipelineCI.renderPass = m_renderPass;
 	pipelineCI.pInputAssemblyState = &inputAssemblyStateCI;
 	pipelineCI.pVertexInputState = &viStateCI;
 	pipelineCI.pRasterizationState = &rasterizationStateCI;

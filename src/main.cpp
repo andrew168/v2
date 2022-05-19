@@ -811,7 +811,7 @@ public:
 			{"genbrdflut.frag.spv", VK_SHADER_STAGE_FRAGMENT_BIT}
 		};
 		auxPipelineCI.shaders = shaders;
-		aux::Pipeline auxPipeline(auxPipelineLayout, auxRenderPass, auxPipelineCI);
+		aux::Pipeline auxPipeline(auxPipelineLayout, *auxRenderPass.get(), auxPipelineCI);
 
 		// Render
 		VkCommandBuffer cmdBuf = vulkanDevice->createCommandBuffer(VK_COMMAND_BUFFER_LEVEL_PRIMARY, true);
@@ -950,11 +950,15 @@ public:
 
 
 			// Vertex input state
-			VkVertexInputBindingDescription vertexInputBinding = { 0, sizeof(vkglTF::Model::Vertex), VK_VERTEX_INPUT_RATE_VERTEX };
-			VkVertexInputAttributeDescription vertexInputAttribute = { 0, 0, VK_FORMAT_R32G32B32_SFLOAT, 0 };
-			auxPipelineCI.pVertexInputBinding = &vertexInputBinding;
-			auxPipelineCI.pVertexInputAttribute = &vertexInputAttribute;
-			aux::Pipeline auxPipeline(auxPipelineLayout, auxRenderPass, auxPipelineCI);
+			std::vector<VkVertexInputBindingDescription> vertexInputBindings = {
+				{ 0, sizeof(vkglTF::Model::Vertex), VK_VERTEX_INPUT_RATE_VERTEX }
+			};
+			std::vector<VkVertexInputAttributeDescription> vertexInputAttributes = {
+				{ 0, 0, VK_FORMAT_R32G32B32_SFLOAT, 0 }
+			};
+			auxPipelineCI.pVertexInputBindings = &vertexInputBindings;
+			auxPipelineCI.pVertexInputAttributes = &vertexInputAttributes;
+			aux::Pipeline auxPipeline(auxPipelineLayout, *auxRenderPass.get(), auxPipelineCI);
 
 			std::vector<glm::mat4> matrices = {
 				glm::rotate(glm::rotate(glm::mat4(1.0f), glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f)), glm::radians(180.0f), glm::vec3(1.0f, 0.0f, 0.0f)),
