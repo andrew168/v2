@@ -44,7 +44,7 @@ public:
 	} shaderValuesParams;
 
 	VkPipelineLayout pipelineLayout;
-
+	aux::PipelineLayout *pAuxPipelineLayout;
 	struct Pipelines {
 		VkPipeline skybox;
 		VkPipeline pbr;
@@ -140,7 +140,7 @@ public:
 		vkDestroyPipeline(device, pipelines.pbr, nullptr);
 		vkDestroyPipeline(device, pipelines.pbrAlphaBlend, nullptr);
 
-		vkDestroyPipelineLayout(device, pipelineLayout, nullptr);
+		delete pAuxPipelineLayout;
 		vkDestroyDescriptorSetLayout(device, descriptorSetLayouts.scene, nullptr);
 		vkDestroyDescriptorSetLayout(device, descriptorSetLayouts.material, nullptr);
 		vkDestroyDescriptorSetLayout(device, descriptorSetLayouts.node, nullptr);
@@ -694,16 +694,16 @@ public:
 		const std::vector<VkDescriptorSetLayout> setLayouts = {
 			descriptorSetLayouts.scene, descriptorSetLayouts.material, descriptorSetLayouts.node
 		};
-		VkPipelineLayoutCreateInfo pipelineLayoutCI{};
-		pipelineLayoutCI.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-		pipelineLayoutCI.setLayoutCount = static_cast<uint32_t>(setLayouts.size());
-		pipelineLayoutCI.pSetLayouts = setLayouts.data();
+
 		VkPushConstantRange pushConstantRange{};
 		pushConstantRange.size = sizeof(PushConstBlockMaterial);
 		pushConstantRange.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
-		pipelineLayoutCI.pushConstantRangeCount = 1;
-		pipelineLayoutCI.pPushConstantRanges = &pushConstantRange;
-		VK_CHECK_RESULT(vkCreatePipelineLayout(device, &pipelineLayoutCI, nullptr, &pipelineLayout));
+
+		aux::PipelineLayoutCI auxPipelineLayoutCI{ &pushConstantRange };
+		auxPipelineLayoutCI.pSetLayouts = &setLayouts;
+
+		pAuxPipelineLayout = new aux::PipelineLayout(auxPipelineLayoutCI);
+		pipelineLayout = pAuxPipelineLayout->get();
 
 		// Vertex bindings an attributes
 		VkVertexInputBindingDescription vertexInputBinding = { 0, sizeof(vkglTF::Model::Vertex), VK_VERTEX_INPUT_RATE_VERTEX };

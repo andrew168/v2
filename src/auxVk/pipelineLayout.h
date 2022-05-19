@@ -14,12 +14,14 @@ struct PipelineLayoutCI : public VkPipelineLayoutCreateInfo
     const VkDescriptorSetLayoutBinding* pDslBindings;
     const VkPushConstantRange* pPcRange;
     const VkDescriptorImageInfo* pImageInfo;
+    const std::vector<VkDescriptorSetLayout> *pSetLayouts;
     PipelineLayoutCI(const VkPushConstantRange* _pPcRange = nullptr, 
         VkDescriptorSetLayoutBinding* _pDslBindings = nullptr,
         VkDescriptorImageInfo* _pImageInfo = nullptr) :
         pPcRange(_pPcRange),
         pDslBindings(_pDslBindings),
-        pImageInfo(_pImageInfo)
+        pImageInfo(_pImageInfo),
+        pSetLayouts(nullptr)
     {
     }
 };

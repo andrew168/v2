@@ -5,23 +5,31 @@ namespace aux
 class Image;
 
 PipelineLayout::PipelineLayout(PipelineLayoutCI &ci):
-	m_pDescriptorSet(nullptr)
+	m_pDescriptorSet(nullptr),
+	m_descriptorSetLayout(nullptr)
 {
 	VkDevice *pDevice = aux::Device::get();
 
 	// Desriptors
-	VkDescriptorSetLayoutCreateInfo descriptorSetLayoutCI{};
-	descriptorSetLayoutCI.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-	if (ci.pDslBindings != nullptr) {
-		descriptorSetLayoutCI.pBindings = ci.pDslBindings;
-		descriptorSetLayoutCI.bindingCount = 1;
-	}
-	VK_CHECK_RESULT(vkCreateDescriptorSetLayout(*pDevice, &descriptorSetLayoutCI, nullptr, &m_descriptorSetLayout));
 
 	VkPipelineLayoutCreateInfo pipelineLayoutCI{};
 	pipelineLayoutCI.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-	pipelineLayoutCI.setLayoutCount = 1;
-	pipelineLayoutCI.pSetLayouts = &m_descriptorSetLayout;
+
+	if (ci.pSetLayouts == nullptr) {
+		VkDescriptorSetLayoutCreateInfo descriptorSetLayoutCI{};
+		descriptorSetLayoutCI.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+		if (ci.pDslBindings != nullptr) {
+			descriptorSetLayoutCI.pBindings = ci.pDslBindings;
+			descriptorSetLayoutCI.bindingCount = 1;
+		}
+		VK_CHECK_RESULT(vkCreateDescriptorSetLayout(*pDevice, &descriptorSetLayoutCI, nullptr, &m_descriptorSetLayout));
+		pipelineLayoutCI.setLayoutCount = 1;
+		pipelineLayoutCI.pSetLayouts = &m_descriptorSetLayout;
+	}
+	else {
+		pipelineLayoutCI.setLayoutCount = static_cast<uint32_t> (ci.pSetLayouts->size());
+		pipelineLayoutCI.pSetLayouts = ci.pSetLayouts->data();
+	}
 	if (ci.pPcRange != nullptr) {
 		pipelineLayoutCI.pushConstantRangeCount = 1;  // ToDo:: Support N>1 cases
 		pipelineLayoutCI.pPushConstantRanges = ci.pPcRange;
@@ -41,8 +49,15 @@ PipelineLayout::PipelineLayout(PipelineLayoutCI &ci):
 PipelineLayout::~PipelineLayout()
 {
 	vkDestroyPipelineLayout(*(aux::Device::get()), m_pipelineLayout, nullptr);
-	vkDestroyDescriptorSetLayout(*(aux::Device::get()), m_descriptorSetLayout, nullptr);
-	delete m_pDescriptorSet;
-	m_pDescriptorSet = nullptr;
+
+	if (m_descriptorSetLayout != nullptr) {
+		vkDestroyDescriptorSetLayout(*(aux::Device::get()), m_descriptorSetLayout, nullptr);
+		m_descriptorSetLayout = nullptr;
+	}
+
+	if (m_pDescriptorSet != nullptr) {
+		delete m_pDescriptorSet;
+		m_pDescriptorSet = nullptr;
+	}
 }
 }
