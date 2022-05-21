@@ -541,7 +541,6 @@ public:
 		else {
 			Assert(0, "which value?");
 		}
-/////
 
 		// Pipeline layout
 		const std::vector<VkDescriptorSetLayout> setLayouts = {
