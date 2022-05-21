@@ -12,3 +12,4 @@
 #include "imBarrier.h"
 #include "descriptorSetLayout.h"
 #include "describe.h"
+#include "descriptorPool.h"

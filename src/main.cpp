@@ -436,12 +436,8 @@ public:
 			{ VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, (4 + meshCount) * swapChain.imageCount },
 			{ VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, imageSamplerCount * swapChain.imageCount }
 		};
-		VkDescriptorPoolCreateInfo descriptorPoolCI{};
-		descriptorPoolCI.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
-		descriptorPoolCI.poolSizeCount = 2;
-		descriptorPoolCI.pPoolSizes = poolSizes.data();
-		descriptorPoolCI.maxSets = (2 + materialCount + meshCount) * swapChain.imageCount;
-		VK_CHECK_RESULT(vkCreateDescriptorPool(device, &descriptorPoolCI, nullptr, &descriptorPool));
+		uint32_t maxSets = (2 + materialCount + meshCount) * swapChain.imageCount;
+		aux::DescriptorPool::create(descriptorPool, poolSizes, maxSets);
 
 		/*
 			Descriptor sets
