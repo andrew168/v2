@@ -4,7 +4,7 @@ namespace aux
 {
 DescriptorSet::DescriptorSet(DescriptorSetCI &ci)
 {
-	VkDevice* pDevice = aux::Device::get();
+	const VkDevice& device = Device::getR();
 
 	VkDescriptorPoolSize poolSize = { VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1 };
 
@@ -14,7 +14,7 @@ DescriptorSet::DescriptorSet(DescriptorSetCI &ci)
 	descriptorPoolCI.pPoolSizes = &poolSize;
 	descriptorPoolCI.maxSets = 2;
 
-	VK_CHECK_RESULT(vkCreateDescriptorPool(*pDevice, &descriptorPoolCI, nullptr, &m_descriptorPool));
+	VK_CHECK_RESULT(vkCreateDescriptorPool(device, &descriptorPoolCI, nullptr, &m_descriptorPool));
 
 	DescriptorSet::allocate(m_descriptorset, m_descriptorPool, ci.pSetLayouts);
 	
@@ -25,7 +25,7 @@ DescriptorSet::DescriptorSet(DescriptorSetCI &ci)
 	writeDescriptorSet.dstSet = m_descriptorset;
 	writeDescriptorSet.dstBinding = 0;
 	writeDescriptorSet.pImageInfo = ci.pImageInfo ;
-	vkUpdateDescriptorSets(*pDevice, 1, &writeDescriptorSet, 0, nullptr);
+	vkUpdateDescriptorSets(device, 1, &writeDescriptorSet, 0, nullptr);
 }
 
 void DescriptorSet::allocate(VkDescriptorSet& dSet, 
@@ -37,11 +37,11 @@ void DescriptorSet::allocate(VkDescriptorSet& dSet,
 	ai.descriptorPool = pool;
 	ai.pSetLayouts = pLayout;
 	ai.descriptorSetCount = 1;
-	VK_CHECK_RESULT(vkAllocateDescriptorSets(*(Device::get()), &ai, &dSet));
+	VK_CHECK_RESULT(vkAllocateDescriptorSets(Device::getR(), &ai, &dSet));
 }
 
 DescriptorSet::~DescriptorSet()
 {
-	vkDestroyDescriptorPool(*(aux::Device::get()), m_descriptorPool, nullptr);
+	vkDestroyDescriptorPool(Device::getR(), m_descriptorPool, nullptr);
 }
 }

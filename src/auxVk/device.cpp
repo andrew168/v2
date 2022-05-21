@@ -2,6 +2,6 @@
 
 namespace aux 
 {
-    VkDevice* Device::m_device = nullptr;
+    VkDevice* Device::m_pDevice = nullptr;
     vks::VulkanDevice* Device::m_vksDevice = nullptr;
 }
