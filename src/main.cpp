@@ -386,17 +386,9 @@ public:
 	void setupNodeDescriptorSet(vkglTF::Node* node) {
 		if (node->mesh) {
 			aux::DescriptorSet::allocate(node->mesh->uniformBuffer.descriptorSet,
-			 descriptorPool, pAuxDSLayoutNode->get());
-			
-			VkWriteDescriptorSet writeDescriptorSet{};
-			writeDescriptorSet.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-			writeDescriptorSet.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-			writeDescriptorSet.descriptorCount = 1;
-			writeDescriptorSet.dstSet = node->mesh->uniformBuffer.descriptorSet;
-			writeDescriptorSet.dstBinding = 0;
-			writeDescriptorSet.pBufferInfo = &node->mesh->uniformBuffer.descriptor;
-
-			vkUpdateDescriptorSets(device, 1, &writeDescriptorSet, 0, nullptr);
+			 descriptorPool, pAuxDSLayoutNode->get());			
+			aux::Describe::bufferUpdate(node->mesh->uniformBuffer.descriptorSet,
+				0, &node->mesh->uniformBuffer.descriptor);
 		}
 		for (auto& child : node->children) {
 			setupNodeDescriptorSet(child);

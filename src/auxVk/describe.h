@@ -16,6 +16,10 @@ public:
         VkDescriptorSet& dstSet,
         uint32_t dstBinding,
         const VkDescriptorBufferInfo* pBufferInfo);
+
+    static void Describe::bufferUpdate(VkDescriptorSet& dstSet,
+        uint32_t dstBinding,
+        const VkDescriptorBufferInfo* pBufferInfo);
 };
 
 }
