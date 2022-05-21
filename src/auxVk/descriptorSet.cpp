@@ -16,14 +16,8 @@ DescriptorSet::DescriptorSet(DescriptorSetCI &ci)
 
 	VK_CHECK_RESULT(vkCreateDescriptorPool(*pDevice, &descriptorPoolCI, nullptr, &m_descriptorPool));
 
-	// Descriptor sets
-	VkDescriptorSetAllocateInfo descriptorSetAllocInfo{};
-	descriptorSetAllocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
-	descriptorSetAllocInfo.descriptorPool = m_descriptorPool;
-	descriptorSetAllocInfo.pSetLayouts = ci.pSetLayouts;
-	descriptorSetAllocInfo.descriptorSetCount = 1;
-	VK_CHECK_RESULT(vkAllocateDescriptorSets(*pDevice, &descriptorSetAllocInfo, &m_descriptorset));
-
+	DescriptorSet::allocate(m_descriptorset, m_descriptorPool, ci.pSetLayouts);
+	
 	VkWriteDescriptorSet writeDescriptorSet{};
 	writeDescriptorSet.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
 	writeDescriptorSet.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
@@ -34,7 +28,9 @@ DescriptorSet::DescriptorSet(DescriptorSetCI &ci)
 	vkUpdateDescriptorSets(*pDevice, 1, &writeDescriptorSet, 0, nullptr);
 }
 
-void DescriptorSet::allocate(VkDescriptorSet &dSet, VkDescriptorPool &pool, VkDescriptorSetLayout *pLayout)
+void DescriptorSet::allocate(VkDescriptorSet& dSet, 
+	const VkDescriptorPool& pool, 
+	const VkDescriptorSetLayout* pLayout) 
 {
 	VkDescriptorSetAllocateInfo ai{};
 	ai.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;

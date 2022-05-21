@@ -17,7 +17,9 @@ class DescriptorSet
 public:
     explicit DescriptorSet(aux::DescriptorSetCI &ci);
     ~DescriptorSet();
-    static void allocate(VkDescriptorSet& dSet, VkDescriptorPool& pool, VkDescriptorSetLayout* pLayout);
+    static void allocate(VkDescriptorSet& dSet, 
+        const VkDescriptorPool& pool, 
+        const VkDescriptorSetLayout* pLayout);
     VkDescriptorSet* get() { return &m_descriptorset; }
 };
 
