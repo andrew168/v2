@@ -968,16 +968,7 @@ public:
 			VkSemaphoreCreateInfo semaphoreCI{ VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO, nullptr, 0 };
 			VK_CHECK_RESULT(vkCreateSemaphore(device, &semaphoreCI, nullptr, &semaphore));
 		}
-		// Command buffers
-		{
-			VkCommandBufferAllocateInfo cmdBufAllocateInfo{};
-			cmdBufAllocateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-			cmdBufAllocateInfo.commandPool = cmdPool;
-			cmdBufAllocateInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-			cmdBufAllocateInfo.commandBufferCount = static_cast<uint32_t>(commandBuffers.size());
-			VK_CHECK_RESULT(vkAllocateCommandBuffers(device, &cmdBufAllocateInfo, commandBuffers.data()));
-		}
-
+		aux::CommandBuffer::allocate(cmdPool, commandBuffers);		
 		loadAssets();
 		generateBRDFLUT();
 		generateCubemaps();
