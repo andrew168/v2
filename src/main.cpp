@@ -258,20 +258,12 @@ public:
 			renderPassBeginInfo.framebuffer = frameBuffers[i];
 
 			VkCommandBuffer currentCB = commandBuffers[i];
+			aux::CommandBuffer auxCmdBuf(currentCB);
 
 			VK_CHECK_RESULT(vkBeginCommandBuffer(currentCB, &cmdBufferBeginInfo));
 			vkCmdBeginRenderPass(currentCB, &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
-
-			VkViewport viewport{};
-			viewport.width = (float)width;
-			viewport.height = (float)height;
-			viewport.minDepth = 0.0f;
-			viewport.maxDepth = 1.0f;
-			vkCmdSetViewport(currentCB, 0, 1, &viewport);
-
-			VkRect2D scissor{};
-			scissor.extent = { width, height };
-			vkCmdSetScissor(currentCB, 0, 1, &scissor);
+			auxCmdBuf.setViewport(width, height);
+			auxCmdBuf.setScissor(width, height);
 
 			VkDeviceSize offsets[1] = { 0 };
 
@@ -650,7 +642,10 @@ public:
 		// Render
 		VkCommandBuffer cmdBuf = vulkanDevice->createCommandBuffer(VK_COMMAND_BUFFER_LEVEL_PRIMARY, true);
 		auxRenderPass.begin(&cmdBuf, &auxFramebuffer);
-		auxPipeline.bindToGraphic(cmdBuf, dim, dim);
+		aux::CommandBuffer auxCmdBuf(cmdBuf);
+		auxCmdBuf.setViewport(dim, dim);
+		auxCmdBuf.setScissor(dim, dim);
+		auxPipeline.bindToGraphic(cmdBuf);
 		vkCmdDraw(cmdBuf, 3, 1, 0, 0);
 		vkCmdEndRenderPass(cmdBuf);
 		vulkanDevice->flushCommandBuffer(cmdBuf, queue);
@@ -828,7 +823,10 @@ public:
 					};
 
 					uint32_t vpDim = static_cast<uint32_t>(dim * std::pow(0.5f, m));
-					auxPipeline.bindToGraphic(cmdBuf, dim, dim, vpDim, vpDim);
+					aux::CommandBuffer auxCmdBuf(cmdBuf);
+					auxCmdBuf.setViewport(vpDim, vpDim);
+					auxCmdBuf.setScissor(dim, dim);
+					auxPipeline.bindToGraphic(cmdBuf);
 					vkCmdBindDescriptorSets(cmdBuf, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelinelayout, 0, 1, (auxPipelineLayout.getDSet()->get()), 0, NULL);
 
 					VkDeviceSize offsets[1] = { 0 };
