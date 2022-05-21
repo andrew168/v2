@@ -426,7 +426,7 @@ public:
 		std::vector<vkglTF::Model*> modellist = { &models.skybox, &models.scene };
 		for (auto& model : modellist) {
 			for (auto& material : model->materials) {
-				imageSamplerCount += 5;
+				imageSamplerCount += 5;  // 每种PBR材质有5个texture作为sampler
 				materialCount++;
 			}
 			for (auto node : model->linearNodes) {
