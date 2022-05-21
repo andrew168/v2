@@ -497,12 +497,7 @@ public:
 				writeDescriptorSets[3].dstBinding = 3;
 				writeDescriptorSets[3].pImageInfo = &textures.prefilteredCube.descriptor;
 
-				writeDescriptorSets[4].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-				writeDescriptorSets[4].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-				writeDescriptorSets[4].descriptorCount = 1;
-				writeDescriptorSets[4].dstSet = descriptorSets[i].scene;
-				writeDescriptorSets[4].dstBinding = 4;
-				writeDescriptorSets[4].pImageInfo = &textures.lutBrdf.descriptor;
+				aux::Describe::image(writeDescriptorSets[4], descriptorSets[i].scene, 4, &textures.lutBrdf.descriptor);
 
 				vkUpdateDescriptorSets(device, static_cast<uint32_t>(writeDescriptorSets.size()), writeDescriptorSets.data(), 0, NULL);
 			}
