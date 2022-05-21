@@ -11,6 +11,6 @@ void DescriptorPool::create(VkDescriptorPool &descriptorPool,
 	descriptorPoolCI.poolSizeCount = 2;
 	descriptorPoolCI.pPoolSizes = poolSizes.data();
 	descriptorPoolCI.maxSets = maxSets;
-	VK_CHECK_RESULT(vkCreateDescriptorPool(*(Device::get()), &descriptorPoolCI, nullptr, &descriptorPool));
+	VK_CHECK_RESULT(vkCreateDescriptorPool(Device::getR(), &descriptorPoolCI, nullptr, &descriptorPool));
 }
 }

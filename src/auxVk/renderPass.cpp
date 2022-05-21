@@ -43,7 +43,7 @@ void RenderPass::createRenderPass()
     renderPassCI.dependencyCount = 2;
     renderPassCI.pDependencies = dependencies.data();
 
-    VK_CHECK_RESULT(vkCreateRenderPass(*aux::Device::get(), &renderPassCI, nullptr, &m_renderPass));
+    VK_CHECK_RESULT(vkCreateRenderPass(Device::getR(), &renderPassCI, nullptr, &m_renderPass));
 }
 
 void RenderPass::begin(VkCommandBuffer *pCmdBuf, aux::Framebuffer *auxFramebuffer, VkClearColorValue color)
@@ -69,6 +69,6 @@ RenderPass::~RenderPass()
 {
     delete m_pRenderPassBeginInfo;
     m_pRenderPassBeginInfo = nullptr;
-    vkDestroyRenderPass(*(aux::Device::get()), m_renderPass, nullptr);
+    vkDestroyRenderPass(Device::getR(), m_renderPass, nullptr);
 }
 }

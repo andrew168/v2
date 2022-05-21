@@ -14,12 +14,12 @@ Framebuffer::Framebuffer(aux::Image& image, aux::RenderPass& auxRenderPass)
     framebufferCI.height = image.getHeight();
     framebufferCI.layers = image.getArrayLayers();
 
-    VK_CHECK_RESULT(vkCreateFramebuffer(*Device::get(), &framebufferCI, nullptr, &m_framebuffer));
+    VK_CHECK_RESULT(vkCreateFramebuffer(Device::getR(), &framebufferCI, nullptr, &m_framebuffer));
 };
 
 
 Framebuffer::~Framebuffer()
 {
-    vkDestroyFramebuffer(*(aux::Device::get()), m_framebuffer, nullptr);
+    vkDestroyFramebuffer(Device::getR(), m_framebuffer, nullptr);
 }
 }

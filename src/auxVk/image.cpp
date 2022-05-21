@@ -7,10 +7,10 @@ Image::Image(ImageCI& auxCi):
     m_deviceMemory(nullptr),
     m_view(nullptr)
 {
-    VK_CHECK_RESULT(vkCreateImage(*(Device::get()), static_cast<VkImageCreateInfo *>(&auxCi), nullptr, &m_image));
+    VK_CHECK_RESULT(vkCreateImage(Device::getR(), static_cast<VkImageCreateInfo *>(&auxCi), nullptr, &m_image));
 
     allocMemory(auxCi);
-    VK_CHECK_RESULT(vkBindImageMemory(*(Device::get()), m_image, m_deviceMemory, 0));
+    VK_CHECK_RESULT(vkBindImageMemory(Device::getR(), m_image, m_deviceMemory, 0));
     createImageView(auxCi);
     createSampler(auxCi);
 
@@ -23,12 +23,12 @@ Image::Image(ImageCI& auxCi):
 
 void Image::allocMemory(ImageCI& auxCi) {
     VkMemoryRequirements memReqs;
-    vkGetImageMemoryRequirements(*Device::get(), m_image, &memReqs);
+    vkGetImageMemoryRequirements(Device::getR(), m_image, &memReqs);
     VkMemoryAllocateInfo memAllocInfo{};
     memAllocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
     memAllocInfo.allocationSize = memReqs.size;
     memAllocInfo.memoryTypeIndex = Device::getVksDevice()->getMemoryType(memReqs.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
-    VK_CHECK_RESULT(vkAllocateMemory(*Device::get(), &memAllocInfo, nullptr, &m_deviceMemory));
+    VK_CHECK_RESULT(vkAllocateMemory(Device::getR(), &memAllocInfo, nullptr, &m_deviceMemory));
 }
 
 void Image::createImageView(ImageCI &auxCi)
@@ -48,7 +48,7 @@ void Image::createImageView(ImageCI &auxCi)
     viewCI.subresourceRange.baseMipLevel = 0;
     viewCI.subresourceRange.baseArrayLayer = 0;
 
-    VK_CHECK_RESULT(vkCreateImageView(*Device::get(), &viewCI, nullptr, &m_view));
+    VK_CHECK_RESULT(vkCreateImageView(Device::getR(), &viewCI, nullptr, &m_view));
 }
 
 void Image::createSampler(ImageCI& auxCi) {
@@ -64,7 +64,7 @@ void Image::createSampler(ImageCI& auxCi) {
     samplerCI.maxLod = static_cast<float>(auxCi.mipLevels);
     samplerCI.maxAnisotropy = 1.0f;
     samplerCI.borderColor = VK_BORDER_COLOR_FLOAT_OPAQUE_WHITE;
-    VK_CHECK_RESULT(vkCreateSampler(*Device::get(), &samplerCI, nullptr, &m_sampler));
+    VK_CHECK_RESULT(vkCreateSampler(Device::getR(), &samplerCI, nullptr, &m_sampler));
 }
 
 void Image::copyOneMip2Cube(

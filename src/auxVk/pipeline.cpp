@@ -11,7 +11,7 @@ Pipeline::Pipeline(aux::PipelineLayout& pipelineLayout, VkRenderPass& renderPass
 	m_auxPipelineCI (auxci)
 {
 	auto auxCI = m_auxPipelineCI;
-	VkDevice* pDevice = aux::Device::get();
+	const VkDevice& device = Device::getR();
 
 	// Pipeline
 	VkPipelineInputAssemblyStateCreateInfo inputAssemblyStateCI{};
@@ -82,7 +82,7 @@ Pipeline::Pipeline(aux::PipelineLayout& pipelineLayout, VkRenderPass& renderPass
 	std::vector<VkPipelineShaderStageCreateInfo> shaderStages;
 
 	for (auto item : m_auxPipelineCI.shaders) {
-		shaderStages.push_back(loadShader(*pDevice, item.m_fileName, item.m_stage));
+		shaderStages.push_back(loadShader(device, item.m_fileName, item.m_stage));
 	}
 
 	VkGraphicsPipelineCreateInfo pipelineCI{};
@@ -100,9 +100,9 @@ Pipeline::Pipeline(aux::PipelineLayout& pipelineLayout, VkRenderPass& renderPass
 	pipelineCI.stageCount = static_cast<uint32_t>(shaderStages.size());
 	pipelineCI.pStages = shaderStages.data();
 
-	VK_CHECK_RESULT(vkCreateGraphicsPipelines(*pDevice, *(Pipeline::m_pPipelineCache), 1, &pipelineCI, nullptr, &m_pipeline));
+	VK_CHECK_RESULT(vkCreateGraphicsPipelines(device, *(Pipeline::m_pPipelineCache), 1, &pipelineCI, nullptr, &m_pipeline));
 	for (auto shaderStage : shaderStages) { // 在建立Pipeline之后，立即destroy 中间文件shader module
-		vkDestroyShaderModule(*pDevice, shaderStage.module, nullptr);
+		vkDestroyShaderModule(device, shaderStage.module, nullptr);
 	}
 }
 
@@ -143,6 +143,6 @@ void Pipeline::bindToGraphic(VkCommandBuffer& cmdBuf)
 
 Pipeline::~Pipeline()
 {
-	vkDestroyPipeline(*(aux::Device::get()), m_pipeline, nullptr);
+	vkDestroyPipeline(Device::getR(), m_pipeline, nullptr);
 }
 }

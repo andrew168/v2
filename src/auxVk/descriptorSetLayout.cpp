@@ -9,11 +9,11 @@ DescriptorSetLayout::DescriptorSetLayout(
 	descriptorSetLayoutCI.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
 	descriptorSetLayoutCI.pBindings = dslBindings.data();
 	descriptorSetLayoutCI.bindingCount = static_cast<uint32_t>(dslBindings.size());
-	VK_CHECK_RESULT(vkCreateDescriptorSetLayout(*(Device::get()), &descriptorSetLayoutCI, nullptr, &m_dsLayout));
+	VK_CHECK_RESULT(vkCreateDescriptorSetLayout(Device::getR(), &descriptorSetLayoutCI, nullptr, &m_dsLayout));
 }
 
 DescriptorSetLayout::~DescriptorSetLayout()
 {
-	vkDestroyDescriptorSetLayout(*(Device::get()), m_dsLayout, nullptr);
+	vkDestroyDescriptorSetLayout(Device::getR(), m_dsLayout, nullptr);
 }
 }

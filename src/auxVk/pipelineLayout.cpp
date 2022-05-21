@@ -8,7 +8,7 @@ PipelineLayout::PipelineLayout(PipelineLayoutCI &ci):
 	m_pDescriptorSet(nullptr),
 	m_descriptorSetLayout(nullptr)
 {
-	VkDevice *pDevice = aux::Device::get();
+	const VkDevice& device = Device::getR();
 
 	// Desriptors
 
@@ -22,7 +22,7 @@ PipelineLayout::PipelineLayout(PipelineLayoutCI &ci):
 			descriptorSetLayoutCI.pBindings = ci.pDslBindings;
 			descriptorSetLayoutCI.bindingCount = 1;
 		}
-		VK_CHECK_RESULT(vkCreateDescriptorSetLayout(*pDevice, &descriptorSetLayoutCI, nullptr, &m_descriptorSetLayout));
+		VK_CHECK_RESULT(vkCreateDescriptorSetLayout(device, &descriptorSetLayoutCI, nullptr, &m_descriptorSetLayout));
 		pipelineLayoutCI.setLayoutCount = 1;
 		pipelineLayoutCI.pSetLayouts = &m_descriptorSetLayout;
 	}
@@ -35,7 +35,7 @@ PipelineLayout::PipelineLayout(PipelineLayoutCI &ci):
 		pipelineLayoutCI.pPushConstantRanges = ci.pPcRange;
 	}
 
-	VK_CHECK_RESULT(vkCreatePipelineLayout(*pDevice, &pipelineLayoutCI, nullptr, &m_pipelineLayout));
+	VK_CHECK_RESULT(vkCreatePipelineLayout(device, &pipelineLayoutCI, nullptr, &m_pipelineLayout));
 
 	if (ci.pImageInfo != nullptr) {
 		aux::DescriptorSetCI dsci{};
@@ -48,10 +48,10 @@ PipelineLayout::PipelineLayout(PipelineLayoutCI &ci):
 
 PipelineLayout::~PipelineLayout()
 {
-	vkDestroyPipelineLayout(*(aux::Device::get()), m_pipelineLayout, nullptr);
+	vkDestroyPipelineLayout(Device::getR(), m_pipelineLayout, nullptr);
 
 	if (m_descriptorSetLayout != nullptr) {
-		vkDestroyDescriptorSetLayout(*(aux::Device::get()), m_descriptorSetLayout, nullptr);
+		vkDestroyDescriptorSetLayout(Device::getR(), m_descriptorSetLayout, nullptr);
 		m_descriptorSetLayout = nullptr;
 	}
 
