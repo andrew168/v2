@@ -34,6 +34,16 @@ DescriptorSet::DescriptorSet(DescriptorSetCI &ci)
 	vkUpdateDescriptorSets(*pDevice, 1, &writeDescriptorSet, 0, nullptr);
 }
 
+void DescriptorSet::allocate(VkDescriptorSet &dSet, VkDescriptorPool &pool, VkDescriptorSetLayout *pLayout)
+{
+	VkDescriptorSetAllocateInfo ai{};
+	ai.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+	ai.descriptorPool = pool;
+	ai.pSetLayouts = pLayout;
+	ai.descriptorSetCount = 1;
+	VK_CHECK_RESULT(vkAllocateDescriptorSets(*(Device::get()), &ai, &dSet));
+}
+
 DescriptorSet::~DescriptorSet()
 {
 	vkDestroyDescriptorPool(*(aux::Device::get()), m_descriptorPool, nullptr);
