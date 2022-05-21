@@ -451,14 +451,9 @@ public:
 			pAuxDSLayoutScene = new aux::DescriptorSetLayout(setLayoutBindings);
 
 			for (auto i = 0; i < descriptorSets.size(); i++) {
-
-				VkDescriptorSetAllocateInfo descriptorSetAllocInfo{};
-				descriptorSetAllocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
-				descriptorSetAllocInfo.descriptorPool = descriptorPool;
-				descriptorSetAllocInfo.pSetLayouts = pAuxDSLayoutScene->get();
-				descriptorSetAllocInfo.descriptorSetCount = 1;
-				VK_CHECK_RESULT(vkAllocateDescriptorSets(device, &descriptorSetAllocInfo, &descriptorSets[i].scene));
-
+				aux::DescriptorSet::allocate(descriptorSets[i].scene,
+					descriptorPool, pAuxDSLayoutScene->get());
+				
 				std::array<VkWriteDescriptorSet, 5> writeDescriptorSets{};
 				aux::Describe::buffer(writeDescriptorSets[0], descriptorSets[i].scene, 0, &uniformBuffers[i].scene.descriptor);
 				aux::Describe::buffer(writeDescriptorSets[1], descriptorSets[i].scene, 1, &uniformBuffers[i].params.descriptor);
@@ -483,13 +478,8 @@ public:
 
 			// Per-Material descriptor sets
 			for (auto& material : models.scene.materials) {
-				VkDescriptorSetAllocateInfo descriptorSetAllocInfo{};
-				descriptorSetAllocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
-				descriptorSetAllocInfo.descriptorPool = descriptorPool;
-				descriptorSetAllocInfo.pSetLayouts = pAuxDSLayoutMaterial->get();
-				descriptorSetAllocInfo.descriptorSetCount = 1;
-				VK_CHECK_RESULT(vkAllocateDescriptorSets(device, &descriptorSetAllocInfo, &material.descriptorSet));
-
+				aux::DescriptorSet::allocate(material.descriptorSet, 
+					descriptorPool, pAuxDSLayoutMaterial->get());				
 				std::vector<VkDescriptorImageInfo> imageDescriptors = {
 					textures.empty.descriptor,
 					textures.empty.descriptor,
@@ -544,12 +534,8 @@ public:
 
 		// Skybox (fixed set)
 		for (auto i = 0; i < uniformBuffers.size(); i++) {
-			VkDescriptorSetAllocateInfo descriptorSetAllocInfo{};
-			descriptorSetAllocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
-			descriptorSetAllocInfo.descriptorPool = descriptorPool;
-			descriptorSetAllocInfo.pSetLayouts = pAuxDSLayoutScene->get();
-			descriptorSetAllocInfo.descriptorSetCount = 1;
-			VK_CHECK_RESULT(vkAllocateDescriptorSets(device, &descriptorSetAllocInfo, &descriptorSets[i].skybox));
+			aux::DescriptorSet::allocate(descriptorSets[i].skybox, 
+				descriptorPool, pAuxDSLayoutScene->get());
 
 			std::array<VkWriteDescriptorSet, 3> writeDescriptorSets{};
 			aux::Describe::buffer(writeDescriptorSets[0], descriptorSets[i].skybox, 0, &uniformBuffers[i].skybox.descriptor);
