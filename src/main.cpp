@@ -48,9 +48,8 @@ public:
 	aux::Pipeline* pAuxPipelineBlend;
 	aux::Pipeline* pAuxPipelinePbr;
 	aux::Pipeline* pAuxPipelineSkybox;
-	
+	aux::DescriptorSetLayout* pAuxDSLayoutScene;
 	struct DescriptorSetLayouts {
-		VkDescriptorSetLayout scene;
 		VkDescriptorSetLayout material;
 		VkDescriptorSetLayout node;
 	} descriptorSetLayouts;
@@ -138,7 +137,7 @@ public:
 		delete pAuxPipelinePbr;
 		delete pAuxPipelineSkybox;
 		delete pAuxPipelineLayout;
-		vkDestroyDescriptorSetLayout(device, descriptorSetLayouts.scene, nullptr);
+		delete pAuxDSLayoutScene;
 		vkDestroyDescriptorSetLayout(device, descriptorSetLayouts.material, nullptr);
 		vkDestroyDescriptorSetLayout(device, descriptorSetLayouts.node, nullptr);
 
@@ -460,18 +459,14 @@ public:
 				{ 3, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1, VK_SHADER_STAGE_FRAGMENT_BIT, nullptr },
 				{ 4, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1, VK_SHADER_STAGE_FRAGMENT_BIT, nullptr },
 			};
-			VkDescriptorSetLayoutCreateInfo descriptorSetLayoutCI{};
-			descriptorSetLayoutCI.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-			descriptorSetLayoutCI.pBindings = setLayoutBindings.data();
-			descriptorSetLayoutCI.bindingCount = static_cast<uint32_t>(setLayoutBindings.size());
-			VK_CHECK_RESULT(vkCreateDescriptorSetLayout(device, &descriptorSetLayoutCI, nullptr, &descriptorSetLayouts.scene));
+			pAuxDSLayoutScene = new aux::DescriptorSetLayout(setLayoutBindings);
 
 			for (auto i = 0; i < descriptorSets.size(); i++) {
 
 				VkDescriptorSetAllocateInfo descriptorSetAllocInfo{};
 				descriptorSetAllocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
 				descriptorSetAllocInfo.descriptorPool = descriptorPool;
-				descriptorSetAllocInfo.pSetLayouts = &descriptorSetLayouts.scene;
+				descriptorSetAllocInfo.pSetLayouts = pAuxDSLayoutScene->get();
 				descriptorSetAllocInfo.descriptorSetCount = 1;
 				VK_CHECK_RESULT(vkAllocateDescriptorSets(device, &descriptorSetAllocInfo, &descriptorSets[i].scene));
 
@@ -605,7 +600,7 @@ public:
 			VkDescriptorSetAllocateInfo descriptorSetAllocInfo{};
 			descriptorSetAllocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
 			descriptorSetAllocInfo.descriptorPool = descriptorPool;
-			descriptorSetAllocInfo.pSetLayouts = &descriptorSetLayouts.scene;
+			descriptorSetAllocInfo.pSetLayouts = pAuxDSLayoutScene->get();
 			descriptorSetAllocInfo.descriptorSetCount = 1;
 			VK_CHECK_RESULT(vkAllocateDescriptorSets(device, &descriptorSetAllocInfo, &descriptorSets[i].skybox));
 
@@ -651,7 +646,7 @@ public:
 
 		// Pipeline layout
 		const std::vector<VkDescriptorSetLayout> setLayouts = {
-			descriptorSetLayouts.scene, descriptorSetLayouts.material, descriptorSetLayouts.node
+			*(pAuxDSLayoutScene->get()), descriptorSetLayouts.material, descriptorSetLayouts.node
 		};
 
 		VkPushConstantRange pushConstantRange{};
