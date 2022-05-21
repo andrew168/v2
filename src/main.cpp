@@ -282,17 +282,15 @@ public:
 				vkCmdBindIndexBuffer(currentCB, model.indices.buffer, 0, VK_INDEX_TYPE_UINT32);
 			}
 
-			// Opaque primitives first
+			// 先普通材质，alpha mask, 最后透明体
 			for (auto node : model.nodes) {
 				renderNode(node, (uint32_t)i, vkglTF::Material::ALPHAMODE_OPAQUE);
 			}
-			// Alpha masked primitives
 			for (auto node : model.nodes) {
 				renderNode(node, (uint32_t)i, vkglTF::Material::ALPHAMODE_MASK);
 			}
-			// Transparent primitives
 			// TODO: Correct depth sorting
-			pAuxPipelineBlend->bindToGraphic(currentCB);
+			pAuxPipelineBlend->bindToGraphic(currentCB); // 透明体才需要blend
 			for (auto node : model.nodes) {
 				renderNode(node, (uint32_t)i, vkglTF::Material::ALPHAMODE_BLEND);
 			}
