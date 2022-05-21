@@ -397,6 +397,7 @@ public:
 		// Environment samplers (radiance, irradiance, brdf lut)
 		imageSamplerCount += 3;
 
+		// 每一个GLTF模型都有自己的材质列表和mesh列表
 		std::vector<vkglTF::Model*> modellist = { &models.skybox, &models.scene };
 		for (auto& model : modellist) {
 			for (auto& material : model->materials) {
@@ -771,10 +772,7 @@ public:
 				shaders.push_back({ "prefilterenvmap.frag.spv", VK_SHADER_STAGE_FRAGMENT_BIT });
 				break;
 			};
-
 			auxPipelineCI.shaders = shaders;
-
-
 			// Vertex input state
 			std::vector<VkVertexInputBindingDescription> vertexInputBindings = {
 				{ 0, sizeof(vkglTF::Model::Vertex), VK_VERTEX_INPUT_RATE_VERTEX }
