@@ -482,21 +482,8 @@ public:
 				writeDescriptorSets[1].dstSet = descriptorSets[i].scene;
 				writeDescriptorSets[1].dstBinding = 1;
 				writeDescriptorSets[1].pBufferInfo = &uniformBuffers[i].params.descriptor;
-
-				writeDescriptorSets[2].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-				writeDescriptorSets[2].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-				writeDescriptorSets[2].descriptorCount = 1;
-				writeDescriptorSets[2].dstSet = descriptorSets[i].scene;
-				writeDescriptorSets[2].dstBinding = 2;
-				writeDescriptorSets[2].pImageInfo = &textures.irradianceCube.descriptor;
-
-				writeDescriptorSets[3].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-				writeDescriptorSets[3].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-				writeDescriptorSets[3].descriptorCount = 1;
-				writeDescriptorSets[3].dstSet = descriptorSets[i].scene;
-				writeDescriptorSets[3].dstBinding = 3;
-				writeDescriptorSets[3].pImageInfo = &textures.prefilteredCube.descriptor;
-
+				aux::Describe::image(writeDescriptorSets[2], descriptorSets[i].scene, 2, &textures.irradianceCube.descriptor);
+				aux::Describe::image(writeDescriptorSets[3], descriptorSets[i].scene, 3, &textures.prefilteredCube.descriptor);
 				aux::Describe::image(writeDescriptorSets[4], descriptorSets[i].scene, 4, &textures.lutBrdf.descriptor);
 
 				vkUpdateDescriptorSets(device, static_cast<uint32_t>(writeDescriptorSets.size()), writeDescriptorSets.data(), 0, NULL);
@@ -553,12 +540,8 @@ public:
 
 				std::array<VkWriteDescriptorSet, 5> writeDescriptorSets{};
 				for (size_t i = 0; i < imageDescriptors.size(); i++) {
-					writeDescriptorSets[i].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-					writeDescriptorSets[i].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-					writeDescriptorSets[i].descriptorCount = 1;
-					writeDescriptorSets[i].dstSet = material.descriptorSet;
-					writeDescriptorSets[i].dstBinding = static_cast<uint32_t>(i);
-					writeDescriptorSets[i].pImageInfo = &imageDescriptors[i];
+					aux::Describe::image(writeDescriptorSets[i], material.descriptorSet, 
+						static_cast<uint32_t>(i), &imageDescriptors[i]);
 				}
 
 				vkUpdateDescriptorSets(device, static_cast<uint32_t>(writeDescriptorSets.size()), writeDescriptorSets.data(), 0, NULL);
@@ -604,13 +587,9 @@ public:
 			writeDescriptorSets[1].dstBinding = 1;
 			writeDescriptorSets[1].pBufferInfo = &uniformBuffers[i].params.descriptor;
 
-			writeDescriptorSets[2].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-			writeDescriptorSets[2].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-			writeDescriptorSets[2].descriptorCount = 1;
-			writeDescriptorSets[2].dstSet = descriptorSets[i].skybox;
-			writeDescriptorSets[2].dstBinding = 2;
-			writeDescriptorSets[2].pImageInfo = &textures.prefilteredCube.descriptor;
-
+			aux::Describe::image(writeDescriptorSets[2], descriptorSets[i].skybox,
+				2, &textures.prefilteredCube.descriptor);
+			
 			vkUpdateDescriptorSets(device, static_cast<uint32_t>(writeDescriptorSets.size()), writeDescriptorSets.data(), 0, nullptr);
 		}
 	}
