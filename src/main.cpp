@@ -49,11 +49,8 @@ public:
 	aux::Pipeline* pAuxPipelinePbr;
 	aux::Pipeline* pAuxPipelineSkybox;
 	aux::DescriptorSetLayout* pAuxDSLayoutScene;
-	struct DescriptorSetLayouts {
-		VkDescriptorSetLayout material;
-		VkDescriptorSetLayout node;
-	} descriptorSetLayouts;
-
+	aux::DescriptorSetLayout* pAuxDSLayoutMaterial;
+	aux::DescriptorSetLayout* pAuxDSLayoutNode;
 	struct DescriptorSets {
 		VkDescriptorSet scene;
 		VkDescriptorSet skybox;
@@ -138,8 +135,8 @@ public:
 		delete pAuxPipelineSkybox;
 		delete pAuxPipelineLayout;
 		delete pAuxDSLayoutScene;
-		vkDestroyDescriptorSetLayout(device, descriptorSetLayouts.material, nullptr);
-		vkDestroyDescriptorSetLayout(device, descriptorSetLayouts.node, nullptr);
+		delete pAuxDSLayoutMaterial;
+		delete pAuxDSLayoutNode;
 
 		models.scene.destroy(device);
 		models.skybox.destroy(device);
@@ -391,7 +388,7 @@ public:
 			VkDescriptorSetAllocateInfo descriptorSetAllocInfo{};
 			descriptorSetAllocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
 			descriptorSetAllocInfo.descriptorPool = descriptorPool;
-			descriptorSetAllocInfo.pSetLayouts = &descriptorSetLayouts.node;
+			descriptorSetAllocInfo.pSetLayouts = pAuxDSLayoutNode->get();
 			descriptorSetAllocInfo.descriptorSetCount = 1;
 			VK_CHECK_RESULT(vkAllocateDescriptorSets(device, &descriptorSetAllocInfo, &node->mesh->uniformBuffer.descriptorSet));
 
@@ -520,18 +517,14 @@ public:
 				{ 3, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1, VK_SHADER_STAGE_FRAGMENT_BIT, nullptr },
 				{ 4, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1, VK_SHADER_STAGE_FRAGMENT_BIT, nullptr },
 			};
-			VkDescriptorSetLayoutCreateInfo descriptorSetLayoutCI{};
-			descriptorSetLayoutCI.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-			descriptorSetLayoutCI.pBindings = setLayoutBindings.data();
-			descriptorSetLayoutCI.bindingCount = static_cast<uint32_t>(setLayoutBindings.size());
-			VK_CHECK_RESULT(vkCreateDescriptorSetLayout(device, &descriptorSetLayoutCI, nullptr, &descriptorSetLayouts.material));
+			pAuxDSLayoutMaterial = new aux::DescriptorSetLayout(setLayoutBindings);
 
 			// Per-Material descriptor sets
 			for (auto& material : models.scene.materials) {
 				VkDescriptorSetAllocateInfo descriptorSetAllocInfo{};
 				descriptorSetAllocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
 				descriptorSetAllocInfo.descriptorPool = descriptorPool;
-				descriptorSetAllocInfo.pSetLayouts = &descriptorSetLayouts.material;
+				descriptorSetAllocInfo.pSetLayouts = pAuxDSLayoutMaterial->get();
 				descriptorSetAllocInfo.descriptorSetCount = 1;
 				VK_CHECK_RESULT(vkAllocateDescriptorSets(device, &descriptorSetAllocInfo, &material.descriptorSet));
 
@@ -581,11 +574,7 @@ public:
 				std::vector<VkDescriptorSetLayoutBinding> setLayoutBindings = {
 					{ 0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1, VK_SHADER_STAGE_VERTEX_BIT, nullptr },
 				};
-				VkDescriptorSetLayoutCreateInfo descriptorSetLayoutCI{};
-				descriptorSetLayoutCI.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-				descriptorSetLayoutCI.pBindings = setLayoutBindings.data();
-				descriptorSetLayoutCI.bindingCount = static_cast<uint32_t>(setLayoutBindings.size());
-				VK_CHECK_RESULT(vkCreateDescriptorSetLayout(device, &descriptorSetLayoutCI, nullptr, &descriptorSetLayouts.node));
+				pAuxDSLayoutNode = new aux::DescriptorSetLayout(setLayoutBindings);
 
 				// Per-Node descriptor set
 				for (auto& node : models.scene.nodes) {
@@ -646,7 +635,7 @@ public:
 
 		// Pipeline layout
 		const std::vector<VkDescriptorSetLayout> setLayouts = {
-			*(pAuxDSLayoutScene->get()), descriptorSetLayouts.material, descriptorSetLayouts.node
+			*(pAuxDSLayoutScene->get()), *(pAuxDSLayoutMaterial->get()), *(pAuxDSLayoutNode->get())
 		};
 
 		VkPushConstantRange pushConstantRange{};
