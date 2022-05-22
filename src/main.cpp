@@ -272,7 +272,8 @@ public:
 			VkDeviceSize offsets[1] = { 0 };
 
 			if (displayBackground) {
-				vkCmdBindDescriptorSets(currentCB, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, 1, &descriptorSets[i].skybox, 0, nullptr);
+				aux::DescriptorSet auxds(descriptorSets[i].skybox);
+				auxds.bindToGraphics(currentCB, pipelineLayout);
 				pAuxPipelineSkybox->bindToGraphic(currentCB);
 				models.skybox.draw(currentCB);
 			}

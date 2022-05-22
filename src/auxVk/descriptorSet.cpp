@@ -2,6 +2,13 @@
 
 namespace aux
 {
+DescriptorSet::DescriptorSet(VkDescriptorSet& ds):
+	m_pDescriptorset(&ds),
+	m_pDescriptorPool(nullptr),
+	m_isVK(true)
+{
+}
+
 DescriptorSet::DescriptorSet(DescriptorSetCI &ci)
 {
 	const VkDevice& device = Device::getR();
@@ -62,9 +69,16 @@ void DescriptorSet::allocate(VkDescriptorSet& dSet,
 
 DescriptorSet::~DescriptorSet()
 {
+	if (m_isVK) {
+		// 从Vk实体转化来的， 不能delete
+		return;
+	}
+	
 	vkDestroyDescriptorPool(Device::getR(), *m_pDescriptorPool, nullptr);
-
 	delete m_pDescriptorPool;	m_pDescriptorPool = nullptr;
-	delete m_pDescriptorset;	m_pDescriptorset = nullptr;
+	
+	if (m_pDescriptorset != nullptr) {
+		delete m_pDescriptorset;	m_pDescriptorset = nullptr;
+	}
 }
 }

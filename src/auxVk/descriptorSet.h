@@ -13,8 +13,11 @@ class DescriptorSet
 {
     VkDescriptorPool* m_pDescriptorPool;
     VkDescriptorSet* m_pDescriptorset;
+private:
+    bool m_isVK = false;
 
 public:
+    explicit DescriptorSet(VkDescriptorSet &ds);
     explicit DescriptorSet(aux::DescriptorSetCI &ci);
     ~DescriptorSet();
     void bindToGraphics(VkCommandBuffer& cmdBuf,
