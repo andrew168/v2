@@ -7,6 +7,16 @@ CommandBuffer::CommandBuffer(VkCommandBuffer& cmdBuf) :
 {
 }
 
+void CommandBuffer::begin(const VkCommandBufferBeginInfo* pBeginInfo)
+{
+	VK_CHECK_RESULT(vkBeginCommandBuffer(*m_pCmdBuf, pBeginInfo));
+}
+
+void CommandBuffer::end()
+{
+	VK_CHECK_RESULT(vkEndCommandBuffer(*m_pCmdBuf));
+}
+
 void CommandBuffer::setViewport(uint32_t width,
 	uint32_t height)
 {

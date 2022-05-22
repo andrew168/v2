@@ -265,8 +265,7 @@ public:
 
 			VkCommandBuffer currentCB = commandBuffers[i];
 			aux::CommandBuffer auxCmdBuf(currentCB);
-
-			VK_CHECK_RESULT(vkBeginCommandBuffer(currentCB, &cmdBufferBeginInfo));
+			auxCmdBuf.begin(&cmdBufferBeginInfo);
 			auxRenderPass.begin(currentCB, renderPassBeginInfo);
 			auxCmdBuf.setViewport(width, height);
 			auxCmdBuf.setScissor(width, height);
@@ -307,7 +306,7 @@ public:
 			ui->draw(currentCB);
 
 			auxRenderPass.end();
-			VK_CHECK_RESULT(vkEndCommandBuffer(currentCB));
+			auxCmdBuf.end();
 		}
 	}
 

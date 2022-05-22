@@ -10,6 +10,8 @@ class CommandBuffer
 
 public:
     CommandBuffer(VkCommandBuffer& cmdBuf);
+    void begin(const VkCommandBufferBeginInfo* pBeginInfo);
+    void end();
     void setViewport(uint32_t width, uint32_t height);
     void setScissor(uint32_t width, uint32_t height);
     void pushConstantsToFS(VkPipelineLayout layout,
