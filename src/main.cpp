@@ -1,6 +1,8 @@
 ﻿#include "v2\v2.h"
 #include "auxVk\auxVk.h"
 
+using namespace aux;
+
 /*
 	PBR example main class
 */
@@ -444,14 +446,14 @@ public:
 				aux::DescriptorSet::allocate(descriptorSets[i].scene,
 					descriptorPool, pAuxDSLayoutScene->get());
 				
-				std::array<VkWriteDescriptorSet, 5> writeDescriptorSets{};
+				std::vector<VkWriteDescriptorSet> writeDescriptorSets(5);
 				aux::Describe::buffer(writeDescriptorSets[0], descriptorSets[i].scene, 0, &uniformBuffers[i].scene.descriptor);
 				aux::Describe::buffer(writeDescriptorSets[1], descriptorSets[i].scene, 1, &uniformBuffers[i].params.descriptor);
 				aux::Describe::image(writeDescriptorSets[2], descriptorSets[i].scene, 2, &textures.irradianceCube.descriptor);
 				aux::Describe::image(writeDescriptorSets[3], descriptorSets[i].scene, 3, &textures.prefilteredCube.descriptor);
 				aux::Describe::image(writeDescriptorSets[4], descriptorSets[i].scene, 4, &textures.lutBrdf.descriptor);
 
-				vkUpdateDescriptorSets(device, static_cast<uint32_t>(writeDescriptorSets.size()), writeDescriptorSets.data(), 0, NULL);
+				aux::DescriptorSet::updateW(writeDescriptorSets);
 			}
 		}
 
@@ -498,13 +500,13 @@ public:
 					}
 				}
 
-				std::array<VkWriteDescriptorSet, 5> writeDescriptorSets{};
+				std::vector<VkWriteDescriptorSet> writeDescriptorSets(5);
 				for (size_t i = 0; i < imageDescriptors.size(); i++) {
 					aux::Describe::image(writeDescriptorSets[i], material.descriptorSet, 
 						static_cast<uint32_t>(i), &imageDescriptors[i]);
 				}
 
-				vkUpdateDescriptorSets(device, static_cast<uint32_t>(writeDescriptorSets.size()), writeDescriptorSets.data(), 0, NULL);
+				DescriptorSet::updateW(writeDescriptorSets);
 			}
 
 			// Model node (matrices)
@@ -527,12 +529,11 @@ public:
 			aux::DescriptorSet::allocate(descriptorSets[i].skybox, 
 				descriptorPool, pAuxDSLayoutScene->get());
 
-			std::array<VkWriteDescriptorSet, 3> writeDescriptorSets{};
+			std::vector<VkWriteDescriptorSet> writeDescriptorSets(3);
 			aux::Describe::buffer(writeDescriptorSets[0], descriptorSets[i].skybox, 0, &uniformBuffers[i].skybox.descriptor);
 			aux::Describe::buffer(writeDescriptorSets[1], descriptorSets[i].skybox, 1, &uniformBuffers[i].params.descriptor);
-			aux::Describe::image(writeDescriptorSets[2], descriptorSets[i].skybox, 2, &textures.prefilteredCube.descriptor);
-			
-			vkUpdateDescriptorSets(device, static_cast<uint32_t>(writeDescriptorSets.size()), writeDescriptorSets.data(), 0, nullptr);
+			aux::Describe::image(writeDescriptorSets[2], descriptorSets[i].skybox, 2, &textures.prefilteredCube.descriptor);			
+			DescriptorSet::updateW(writeDescriptorSets);
 		}
 	}
 

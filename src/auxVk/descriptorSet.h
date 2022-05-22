@@ -32,6 +32,10 @@ public:
     static void allocate(VkDescriptorSet& dSet,
         const VkDescriptorPool& pool, 
         const VkDescriptorSetLayout* pLayout);
+
+    static void updateW(std::vector<VkWriteDescriptorSet> sets);
+    static void updateC(std::vector<VkCopyDescriptorSet> sets);
+
     VkDescriptorSet* get() { return m_pDescriptorset; }
 };
 

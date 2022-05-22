@@ -67,6 +67,18 @@ void DescriptorSet::allocate(VkDescriptorSet& dSet,
 	VK_CHECK_RESULT(vkAllocateDescriptorSets(Device::getR(), &ai, &dSet));
 }
 
+void DescriptorSet::updateW(std::vector<VkWriteDescriptorSet> sets)
+{
+	vkUpdateDescriptorSets(Device::getR(),
+		static_cast<uint32_t>(sets.size()), sets.data(), 0, NULL);
+}
+
+void DescriptorSet::updateC(std::vector<VkCopyDescriptorSet> sets)
+{
+	vkUpdateDescriptorSets(Device::getR(), 0, NULL,
+		static_cast<uint32_t>(sets.size()), sets.data());
+}
+
 DescriptorSet::~DescriptorSet()
 {
 	if (m_isVK) {
