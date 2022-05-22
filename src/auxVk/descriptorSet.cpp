@@ -28,6 +28,25 @@ DescriptorSet::DescriptorSet(DescriptorSetCI &ci)
 	vkUpdateDescriptorSets(device, 1, &writeDescriptorSet, 0, nullptr);
 }
 
+void DescriptorSet::bindToGraphics(VkCommandBuffer &cmdBuf,
+		VkPipelineLayout layout,
+		uint32_t dynamicOffsetCount,
+		const uint32_t* pDynamicOffsets) 
+{
+	vkCmdBindDescriptorSets(cmdBuf, VK_PIPELINE_BIND_POINT_GRAPHICS, 
+		layout, 0, 1, get(), dynamicOffsetCount, pDynamicOffsets);
+}
+
+void DescriptorSet::bindToGraphics(const std::vector<VkDescriptorSet> &sets, 
+	VkCommandBuffer& cmdBuf,
+	VkPipelineLayout &layout,
+	uint32_t dynamicOffsetCount,
+	const uint32_t* pDynamicOffsets)
+{
+	vkCmdBindDescriptorSets(cmdBuf, VK_PIPELINE_BIND_POINT_GRAPHICS,
+		layout, 0, static_cast<uint32_t>(sets.size()), sets.data(), dynamicOffsetCount, pDynamicOffsets);
+}
+
 void DescriptorSet::allocate(VkDescriptorSet& dSet, 
 	const VkDescriptorPool& pool, 
 	const VkDescriptorSetLayout* pLayout) 

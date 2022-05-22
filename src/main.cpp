@@ -176,7 +176,9 @@ public:
 						primitive->material.descriptorSet,
 						node->mesh->uniformBuffer.descriptorSet,
 					};
-					vkCmdBindDescriptorSets(commandBuffers[cbIndex], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, static_cast<uint32_t>(descriptorsets.size()), descriptorsets.data(), 0, NULL);
+					aux::DescriptorSet::bindToGraphics(descriptorsets,
+						commandBuffers[cbIndex], 
+						pipelineLayout);
 
 					// Pass material parameters as push constants
 					PushConstBlockMaterial pushConstBlockMaterial{};
@@ -824,8 +826,8 @@ public:
 					uint32_t vpDim = static_cast<uint32_t>(dim * std::pow(0.5f, m));
 					auxCmdBuf.setViewport(vpDim, vpDim);
 					auxCmdBuf.setScissor(dim, dim);
-					auxPipeline.bindToGraphic(cmdBuf);
-					vkCmdBindDescriptorSets(cmdBuf, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelinelayout, 0, 1, (auxPipelineLayout.getDSet()->get()), 0, NULL);
+					auxPipeline.bindToGraphic(cmdBuf);					
+					auxPipelineLayout.getDSet()->bindToGraphics(cmdBuf, pipelinelayout);
 
 					VkDeviceSize offsets[1] = { 0 };
 
