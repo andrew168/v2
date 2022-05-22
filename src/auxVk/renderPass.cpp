@@ -4,7 +4,7 @@
 namespace aux
 {
 RenderPass::RenderPass(aux::Image& image) :
-    m_image(image),
+    m_pImage(&image),
     m_format(image.getFormat()),
     m_pRenderPassBeginInfo(nullptr)
 {
@@ -30,8 +30,8 @@ void RenderPass::createRenderPass()
     dependencies[1].dstAccessMask = VK_ACCESS_MEMORY_READ_BIT;
     dependencies[1].dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
 
-    aux::AttachmentDescription auxAttDesc(m_image);
-    aux::SubpassDescription auxSubpassDescription(m_image);
+    aux::AttachmentDescription auxAttDesc(*m_pImage);
+    aux::SubpassDescription auxSubpassDescription(*m_pImage);
 
     // Create the actual renderpass
     VkRenderPassCreateInfo renderPassCI{};
@@ -42,8 +42,8 @@ void RenderPass::createRenderPass()
     renderPassCI.pSubpasses = auxSubpassDescription.get();
     renderPassCI.dependencyCount = 2;
     renderPassCI.pDependencies = dependencies.data();
-
-    VK_CHECK_RESULT(vkCreateRenderPass(Device::getR(), &renderPassCI, nullptr, &m_renderPass));
+    m_pRenderPass = new VkRenderPass();
+    VK_CHECK_RESULT(vkCreateRenderPass(Device::getR(), &renderPassCI, nullptr, m_pRenderPass));
 }
 
 void RenderPass::begin(VkCommandBuffer *pCmdBuf, 
@@ -56,9 +56,9 @@ void RenderPass::begin(VkCommandBuffer *pCmdBuf,
     if (m_pRenderPassBeginInfo == nullptr) {
         m_pRenderPassBeginInfo = new VkRenderPassBeginInfo{};
         m_pRenderPassBeginInfo->sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-        m_pRenderPassBeginInfo->renderPass = m_renderPass;
-        m_pRenderPassBeginInfo->renderArea.extent.width = m_image.getWidth();
-        m_pRenderPassBeginInfo->renderArea.extent.height = m_image.getHeight();
+        m_pRenderPassBeginInfo->renderPass = *m_pRenderPass;
+        m_pRenderPassBeginInfo->renderArea.extent.width = m_pImage->getWidth();
+        m_pRenderPassBeginInfo->renderArea.extent.height = m_pImage->getHeight();
         m_pRenderPassBeginInfo->framebuffer = *(auxFramebuffer->get());
     }
 
@@ -80,8 +80,16 @@ void RenderPass::end()
 
 RenderPass::~RenderPass()
 {
-    delete m_pRenderPassBeginInfo;
-    m_pRenderPassBeginInfo = nullptr;
-    vkDestroyRenderPass(Device::getR(), m_renderPass, nullptr);
+    if (!isVK) {
+        delete m_pRenderPassBeginInfo;
+        m_pRenderPassBeginInfo = nullptr;
+        
+        vkDestroyRenderPass(Device::getR(), *m_pRenderPass, nullptr);
+        delete m_pRenderPass;
+    }
+    else {
+    }
+
+    m_pRenderPass = nullptr;
 }
 }
