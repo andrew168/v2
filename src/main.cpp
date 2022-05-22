@@ -954,12 +954,10 @@ public:
 		}
 		// Queue ordering semaphores
 		for (auto& semaphore : presentCompleteSemaphores) {
-			VkSemaphoreCreateInfo semaphoreCI{ VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO, nullptr, 0 };
-			VK_CHECK_RESULT(vkCreateSemaphore(device, &semaphoreCI, nullptr, &semaphore));
+			aux::Semaphore::create(semaphore);
 		}
 		for (auto& semaphore : renderCompleteSemaphores) {
-			VkSemaphoreCreateInfo semaphoreCI{ VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO, nullptr, 0 };
-			VK_CHECK_RESULT(vkCreateSemaphore(device, &semaphoreCI, nullptr, &semaphore));
+			aux::Semaphore::create(semaphore);
 		}
 		aux::CommandBuffer::allocate(cmdPool, commandBuffers);		
 		loadAssets();
