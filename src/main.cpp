@@ -210,8 +210,10 @@ public:
 						pushConstBlockMaterial.diffuseFactor = primitive->material.extension.diffuseFactor;
 						pushConstBlockMaterial.specularFactor = glm::vec4(primitive->material.extension.specularFactor, 1.0f);
 					}
-
-					vkCmdPushConstants(commandBuffers[cbIndex], pipelineLayout, VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(PushConstBlockMaterial), &pushConstBlockMaterial);
+					aux::CommandBuffer auxCmdBuf(commandBuffers[cbIndex]);
+					auxCmdBuf.pushConstantsToFS(pipelineLayout, 0, 
+						sizeof(PushConstBlockMaterial), 
+						&pushConstBlockMaterial);
 
 					if (primitive->hasIndices) {
 						vkCmdDrawIndexed(commandBuffers[cbIndex], primitive->indexCount, 1, primitive->firstIndex, 0, 0);
@@ -805,20 +807,21 @@ public:
 					// Render scene from cube face's point of view
 					auxRenderPass.begin(&cmdBuf, &auxFramebufferOffscreen, { 0.0f, 0.0f, 0.2f, 0.0f });
 					// Pass parameters for current pass using a push constant block
+					aux::CommandBuffer auxCmdBuf(cmdBuf);
+
 					switch (target) {
 					case IRRADIANCE:
-						pushBlockIrradiance.mvp = glm::perspective((float)(M_PI / 2.0), 1.0f, 0.1f, 512.0f) * matrices[f];
-						vkCmdPushConstants(cmdBuf, pipelinelayout, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(PushBlockIrradiance), &pushBlockIrradiance);
+						pushBlockIrradiance.mvp = glm::perspective((float)(M_PI / 2.0), 1.0f, 0.1f, 512.0f) * matrices[f];						
+						auxCmdBuf.pushConstantsToVsFs(pipelinelayout, 0, sizeof(PushBlockIrradiance), &pushBlockIrradiance);
 						break;
 					case PREFILTEREDENV:
 						pushBlockPrefilterEnv.mvp = glm::perspective((float)(M_PI / 2.0), 1.0f, 0.1f, 512.0f) * matrices[f];
 						pushBlockPrefilterEnv.roughness = (float)m / (float)(numMips - 1);
-						vkCmdPushConstants(cmdBuf, pipelinelayout, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(PushBlockPrefilterEnv), &pushBlockPrefilterEnv);
+						auxCmdBuf.pushConstantsToVsFs(pipelinelayout, 0, sizeof(PushBlockPrefilterEnv), &pushBlockPrefilterEnv);
 						break;
 					};
 
 					uint32_t vpDim = static_cast<uint32_t>(dim * std::pow(0.5f, m));
-					aux::CommandBuffer auxCmdBuf(cmdBuf);
 					auxCmdBuf.setViewport(vpDim, vpDim);
 					auxCmdBuf.setScissor(dim, dim);
 					auxPipeline.bindToGraphic(cmdBuf);

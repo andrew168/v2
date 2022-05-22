@@ -18,7 +18,7 @@ void CommandBuffer::setViewport(uint32_t width,
 	vkCmdSetViewport(*m_pCmdBuf, 0, 1, &viewport);
 }
 
-void CommandBuffer::setScissor(uint32_t width, 
+void CommandBuffer::setScissor(uint32_t width,
 	uint32_t height)
 {
 	VkRect2D scissor{};
@@ -27,7 +27,7 @@ void CommandBuffer::setScissor(uint32_t width,
 }
 
 void CommandBuffer::allocate(
-	VkCommandPool &cmdPool, 
+	VkCommandPool& cmdPool,
 	std::vector<VkCommandBuffer>& cmdBufs)
 {
 	VkCommandBufferAllocateInfo ai{};
@@ -36,5 +36,24 @@ void CommandBuffer::allocate(
 	ai.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
 	ai.commandBufferCount = static_cast<uint32_t>(cmdBufs.size());
 	VK_CHECK_RESULT(vkAllocateCommandBuffers(Device::getR(), &ai, cmdBufs.data()));
+}
+
+void CommandBuffer::pushConstantsToFS(VkPipelineLayout layout,
+	uint32_t offset,
+	uint32_t size,
+	const void* pConstants) 
+{
+	vkCmdPushConstants(*m_pCmdBuf, layout, VK_SHADER_STAGE_FRAGMENT_BIT,
+		offset, size, pConstants);
+}
+
+void CommandBuffer::pushConstantsToVsFs(VkPipelineLayout layout,
+	uint32_t offset,
+	uint32_t size,
+	const void* pConstants)
+{
+	vkCmdPushConstants(*m_pCmdBuf, layout, 
+		VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
+		offset, size, pConstants);
 }
 }
