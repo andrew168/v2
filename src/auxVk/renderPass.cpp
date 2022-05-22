@@ -46,7 +46,9 @@ void RenderPass::createRenderPass()
     VK_CHECK_RESULT(vkCreateRenderPass(Device::getR(), &renderPassCI, nullptr, &m_renderPass));
 }
 
-void RenderPass::begin(VkCommandBuffer *pCmdBuf, aux::Framebuffer *auxFramebuffer, VkClearColorValue color)
+void RenderPass::begin(VkCommandBuffer *pCmdBuf, 
+    aux::Framebuffer *auxFramebuffer, 
+    VkClearColorValue color)
 {
     m_rCurrentCB = pCmdBuf;
     VkClearValue clearValues[1];

@@ -248,6 +248,7 @@ public:
 			clearValues[1].depthStencil = { 1.0f, 0 };
 		}
 
+		// 1个RenderPass， 1个BeginInfo，被多个CmdBuf使用
 		VkRenderPassBeginInfo renderPassBeginInfo{};
 		renderPassBeginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
 		renderPassBeginInfo.renderPass = renderPass;
@@ -272,8 +273,9 @@ public:
 			VkDeviceSize offsets[1] = { 0 };
 
 			if (displayBackground) {
-				aux::DescriptorSet auxds(descriptorSets[i].skybox);
-				auxds.bindToGraphics(currentCB, pipelineLayout);
+				//skybox绘制： 先绑定 ds和pipeline，再绘制
+				aux::DescriptorSet dsSkybox(descriptorSets[i].skybox);
+				dsSkybox.bindToGraphics(currentCB, pipelineLayout);
 				pAuxPipelineSkybox->bindToGraphic(currentCB);
 				models.skybox.draw(currentCB);
 			}
