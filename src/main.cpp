@@ -992,8 +992,8 @@ public:
 
 		updateOverlay();
 
-		VK_CHECK_RESULT(vkWaitForFences(device, 1, &waitFences[frameIndex], VK_TRUE, UINT64_MAX));
-		VK_CHECK_RESULT(vkResetFences(device, 1, &waitFences[frameIndex]));
+		aux::Fence::wait(waitFences[frameIndex]);
+		aux::Fence::reset(waitFences[frameIndex]);
 
 		VkResult acquire = swapChain.acquireNextImage(presentCompleteSemaphores[frameIndex], &currentBuffer);
 		if ((acquire == VK_ERROR_OUT_OF_DATE_KHR) || (acquire == VK_SUBOPTIMAL_KHR)) {

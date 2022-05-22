@@ -9,4 +9,17 @@ void Fence::create(VkFence& fence, bool signaled)
 		signaled? VK_FENCE_CREATE_SIGNALED_BIT:0 };
 	VK_CHECK_RESULT(vkCreateFence(Device::getR(), &fenceCI, nullptr, &fence));
 }
+
+void Fence::wait(const VkFence& fence,
+    VkBool32 waitAll,
+    uint64_t timeout)
+{
+    VK_CHECK_RESULT(vkWaitForFences(Device::getR(), 1, &fence, waitAll, timeout));
+}
+
+void Fence::reset(VkFence& fence)
+{
+	VK_CHECK_RESULT(vkResetFences(Device::getR(), 1, &fence));
+}
+
 }
