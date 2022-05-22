@@ -285,9 +285,9 @@ public:
 
 			vkglTF::Model& model = models.scene;
 
-			vkCmdBindVertexBuffers(currentCB, 0, 1, &model.vertices.buffer, offsets);
+			auxCmdBuf.bindVertexBuffers(0, 1, &model.vertices.buffer, offsets);
 			if (model.indices.buffer != VK_NULL_HANDLE) {
-				vkCmdBindIndexBuffer(currentCB, model.indices.buffer, 0, VK_INDEX_TYPE_UINT32);
+				auxCmdBuf.bindIndexBuffer(model.indices.buffer);
 			}
 
 			// 先普通材质，alpha mask, 最后透明体
@@ -652,7 +652,7 @@ public:
 		auxCmdBuf.setViewport(dim, dim);
 		auxCmdBuf.setScissor(dim, dim);
 		auxPipeline.bindToGraphic(cmdBuf);
-		vkCmdDraw(cmdBuf, 3, 1, 0, 0);
+		auxCmdBuf.draw(3, 1, 0, 0);
 		auxRenderPass.end();
 		vulkanDevice->flushCommandBuffer(cmdBuf, queue);
 

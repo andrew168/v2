@@ -73,4 +73,23 @@ void CommandBuffer::drawIndexed(
 {
 	vkCmdDrawIndexed(*m_pCmdBuf, indexCount, instanceCount, firstIndex, vertexOffset, firstInstance);
 }
+
+void CommandBuffer::bindVertexBuffers(
+	uint32_t firstBinding,
+	uint32_t bindingCount,
+	const VkBuffer* pBuffers,
+	const VkDeviceSize* pOffsets)
+{
+	vkCmdBindVertexBuffers(*m_pCmdBuf, firstBinding, bindingCount,
+		pBuffers, pOffsets);
+}
+
+void CommandBuffer::bindIndexBuffer(
+	VkBuffer        buffer,
+	VkDeviceSize    offset,
+	VkIndexType     indexType) 
+{
+	vkCmdBindIndexBuffer(*m_pCmdBuf, buffer, offset, indexType);
+}
+
 }

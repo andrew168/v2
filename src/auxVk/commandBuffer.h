@@ -33,6 +33,18 @@ public:
         int32_t   vertexOffset = 0,
         uint32_t  firstInstance = 0);
 
+
+    void bindVertexBuffers(
+        uint32_t firstBinding,
+        uint32_t bindingCount,
+        const VkBuffer* pBuffers,
+        const VkDeviceSize* pOffsets);
+
+    void bindIndexBuffer(
+        VkBuffer        buffer,
+        VkDeviceSize    offset = 0,
+        VkIndexType     indexType = VK_INDEX_TYPE_UINT32);
+
     static void CommandBuffer::allocate(
         VkCommandPool& cmdPool, 
         std::vector<VkCommandBuffer>& cmdBufs);
