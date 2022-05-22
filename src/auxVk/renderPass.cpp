@@ -48,6 +48,7 @@ void RenderPass::createRenderPass()
 
 void RenderPass::begin(VkCommandBuffer *pCmdBuf, aux::Framebuffer *auxFramebuffer, VkClearColorValue color)
 {
+    m_rCurrentCB = pCmdBuf;
     VkClearValue clearValues[1];
     clearValues[0].color = { color };    
     if (m_pRenderPassBeginInfo == nullptr) {
@@ -63,6 +64,16 @@ void RenderPass::begin(VkCommandBuffer *pCmdBuf, aux::Framebuffer *auxFramebuffe
     m_pRenderPassBeginInfo->pClearValues = clearValues;
 
     vkCmdBeginRenderPass(*pCmdBuf, m_pRenderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
+}
+
+void RenderPass::end()
+{
+    if (!m_rCurrentCB) {
+        Assert(0, "Must Begin before end!");
+    }
+
+    vkCmdEndRenderPass(*m_rCurrentCB);
+    m_rCurrentCB = nullptr;
 }
 
 RenderPass::~RenderPass()

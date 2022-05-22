@@ -650,7 +650,7 @@ public:
 		auxCmdBuf.setScissor(dim, dim);
 		auxPipeline.bindToGraphic(cmdBuf);
 		vkCmdDraw(cmdBuf, 3, 1, 0, 0);
-		vkCmdEndRenderPass(cmdBuf);
+		auxRenderPass.end();
 		vulkanDevice->flushCommandBuffer(cmdBuf, queue);
 
 		vkQueueWaitIdle(queue);
@@ -833,8 +833,7 @@ public:
 					VkDeviceSize offsets[1] = { 0 };
 
 					models.skybox.draw(cmdBuf);
-
-					vkCmdEndRenderPass(cmdBuf);
+					auxRenderPass.end();
 
 					aux::IMBarrier::colorAttachment2Transfer(auxImageOffscreen, cmdBuf);
 					VkExtent3D region;
