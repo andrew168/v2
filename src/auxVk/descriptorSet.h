@@ -11,8 +11,8 @@ struct DescriptorSetCI {
 
 class DescriptorSet
 {
-    VkDescriptorPool m_descriptorPool;
-    VkDescriptorSet m_descriptorset;
+    VkDescriptorPool* m_pDescriptorPool;
+    VkDescriptorSet* m_pDescriptorset;
 
 public:
     explicit DescriptorSet(aux::DescriptorSetCI &ci);
@@ -29,7 +29,7 @@ public:
     static void allocate(VkDescriptorSet& dSet,
         const VkDescriptorPool& pool, 
         const VkDescriptorSetLayout* pLayout);
-    VkDescriptorSet* get() { return &m_descriptorset; }
+    VkDescriptorSet* get() { return m_pDescriptorset; }
 };
 
 }
