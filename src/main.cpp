@@ -539,7 +539,6 @@ public:
 
 	void preparePipelines()
 	{
-		aux::Pipeline::setCache(&pipelineCache);
 		aux::PipelineCI auxPipelineCI{};
 		auxPipelineCI.cullMode = VK_CULL_MODE_BACK_BIT;
 		if (settings.multiSampling) {
@@ -636,7 +635,6 @@ public:
 		aux::PipelineLayout auxPipelineLayout(auxPlCi);
 		VkPipelineLayout pipelinelayout = auxPipelineLayout.get();
 
-		aux::Pipeline::setCache(&pipelineCache);
 		aux::PipelineCI auxPipelineCI{};
 		std::vector<aux::ShaderDescription> shaders = {
 			{"genbrdflut.vert.spv", VK_SHADER_STAGE_VERTEX_BIT},
@@ -766,7 +764,6 @@ public:
 			aux::PipelineLayout auxPipelineLayout(auxPipelineLayoutCI);
 			VkPipelineLayout pipelinelayout = auxPipelineLayout.get();
 
-			aux::Pipeline::setCache(&pipelineCache);
 			aux::PipelineCI auxPipelineCI{};
 			std::vector<aux::ShaderDescription> shaders = {
 				{"filtercube.vert.spv", VK_SHADER_STAGE_VERTEX_BIT},
@@ -940,6 +937,7 @@ public:
 
 		aux::Device::setVksDevice(vulkanDevice);
 		aux::Device::set(&device);
+		aux::Pipeline::setCache(&pipelineCache);
 
 		camera.type = Camera::CameraType::lookat;
 
