@@ -957,8 +957,7 @@ public:
 		descriptorSets.resize(swapChain.imageCount);
 		// Command buffer execution fences
 		for (auto& waitFence : waitFences) {
-			VkFenceCreateInfo fenceCI{ VK_STRUCTURE_TYPE_FENCE_CREATE_INFO, nullptr, VK_FENCE_CREATE_SIGNALED_BIT };
-			VK_CHECK_RESULT(vkCreateFence(device, &fenceCI, nullptr, &waitFence));
+			aux::Fence::create(waitFence, true);
 		}
 		// Queue ordering semaphores
 		for (auto& semaphore : presentCompleteSemaphores) {

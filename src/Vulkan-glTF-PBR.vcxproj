@@ -328,6 +328,7 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     <ClCompile Include="auxVk\descriptorSet.cpp" />
     <ClCompile Include="auxVk\descriptorSetLayout.cpp" />
     <ClCompile Include="auxVk\device.cpp" />
+    <ClCompile Include="auxVk\fence.cpp" />
     <ClCompile Include="auxVk\Framebuffer.cpp" />
     <ClCompile Include="auxVk\image.cpp" />
     <ClCompile Include="auxVk\imBarrier.cpp" />
@@ -375,6 +376,7 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     <ClInclude Include="auxVk\descriptorSet.h" />
     <ClInclude Include="auxVk\descriptorSetLayout.h" />
     <ClInclude Include="auxVk\device.h" />
+    <ClInclude Include="auxVk\fence.h" />
     <ClInclude Include="auxVk\Framebuffer.h" />
     <ClInclude Include="auxVk\image.h" />
     <ClInclude Include="auxVk\imBarrier.h" />

@@ -16,3 +16,4 @@
 #include "commandBuffer.h"
 #include "semaphore.h"
 #include "queue.h"
+#include "fence.h"
