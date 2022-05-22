@@ -17,8 +17,10 @@ class RenderPass
     bool isVK = false;
 public:
     explicit RenderPass(aux::Image& image);
+    explicit RenderPass(VkRenderPass& renderpass);
     ~RenderPass();
     void begin(VkCommandBuffer* pCmdBuf, aux::Framebuffer* auxFramebuffer, VkClearColorValue color = { 0.0f, 0.0f, 0.0f, 1.0f });
+    void begin(VkCommandBuffer& cmdBuf, VkRenderPassBeginInfo& beginInfo);
     void end();
     VkRenderPass* get() { return m_pRenderPass; }
 private:

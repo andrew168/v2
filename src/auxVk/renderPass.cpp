@@ -3,6 +3,15 @@
 
 namespace aux
 {
+RenderPass::RenderPass(VkRenderPass &renderpass) :
+    m_pRenderPass(&renderpass),
+    m_pImage(nullptr),
+    m_format(VK_FORMAT_UNDEFINED),
+    m_pRenderPassBeginInfo(nullptr),
+    isVK(true)
+{
+}
+
 RenderPass::RenderPass(aux::Image& image) :
     m_pImage(&image),
     m_format(image.getFormat()),
@@ -46,6 +55,13 @@ void RenderPass::createRenderPass()
     VK_CHECK_RESULT(vkCreateRenderPass(Device::getR(), &renderPassCI, nullptr, m_pRenderPass));
 }
 
+void RenderPass::begin(VkCommandBuffer& cmdBuf,
+    VkRenderPassBeginInfo &beginInfo)
+{
+    m_rCurrentCB = &cmdBuf;
+    vkCmdBeginRenderPass(cmdBuf, &beginInfo, VK_SUBPASS_CONTENTS_INLINE);
+}
+
 void RenderPass::begin(VkCommandBuffer *pCmdBuf, 
     aux::Framebuffer *auxFramebuffer, 
     VkClearColorValue color)
@@ -86,8 +102,6 @@ RenderPass::~RenderPass()
         
         vkDestroyRenderPass(Device::getR(), *m_pRenderPass, nullptr);
         delete m_pRenderPass;
-    }
-    else {
     }
 
     m_pRenderPass = nullptr;

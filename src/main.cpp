@@ -259,6 +259,7 @@ public:
 		renderPassBeginInfo.clearValueCount = settings.multiSampling ? 3 : 2;
 		renderPassBeginInfo.pClearValues = clearValues;
 
+		aux::RenderPass auxRenderPass(renderPass);
 		for (size_t i = 0; i < commandBuffers.size(); ++i) {
 			renderPassBeginInfo.framebuffer = frameBuffers[i];
 
@@ -266,7 +267,7 @@ public:
 			aux::CommandBuffer auxCmdBuf(currentCB);
 
 			VK_CHECK_RESULT(vkBeginCommandBuffer(currentCB, &cmdBufferBeginInfo));
-			vkCmdBeginRenderPass(currentCB, &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
+			auxRenderPass.begin(currentCB, renderPassBeginInfo);
 			auxCmdBuf.setViewport(width, height);
 			auxCmdBuf.setScissor(width, height);
 
@@ -305,7 +306,7 @@ public:
 			// User interface
 			ui->draw(currentCB);
 
-			vkCmdEndRenderPass(currentCB);
+			auxRenderPass.end();
 			VK_CHECK_RESULT(vkEndCommandBuffer(currentCB));
 		}
 	}
