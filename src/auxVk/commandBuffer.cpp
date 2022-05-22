@@ -41,7 +41,7 @@ void CommandBuffer::allocate(
 void CommandBuffer::pushConstantsToFS(VkPipelineLayout layout,
 	uint32_t offset,
 	uint32_t size,
-	const void* pConstants) 
+	const void* pConstants)
 {
 	vkCmdPushConstants(*m_pCmdBuf, layout, VK_SHADER_STAGE_FRAGMENT_BIT,
 		offset, size, pConstants);
@@ -52,8 +52,25 @@ void CommandBuffer::pushConstantsToVsFs(VkPipelineLayout layout,
 	uint32_t size,
 	const void* pConstants)
 {
-	vkCmdPushConstants(*m_pCmdBuf, layout, 
+	vkCmdPushConstants(*m_pCmdBuf, layout,
 		VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
 		offset, size, pConstants);
+}
+void CommandBuffer::draw(uint32_t  vertexCount,
+	uint32_t  instanceCount,
+	uint32_t  firstVertex,
+	uint32_t  firstInstance)
+{
+	vkCmdDraw(*m_pCmdBuf, vertexCount, instanceCount, firstVertex, firstInstance);
+}
+
+void CommandBuffer::drawIndexed(
+	uint32_t  indexCount,
+	uint32_t  instanceCount,
+	uint32_t  firstIndex,
+	int32_t   vertexOffset,
+	uint32_t  firstInstance)
+{
+	vkCmdDrawIndexed(*m_pCmdBuf, indexCount, instanceCount, firstIndex, vertexOffset, firstInstance);
 }
 }

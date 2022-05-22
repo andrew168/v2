@@ -218,10 +218,10 @@ public:
 						&pushConstBlockMaterial);
 
 					if (primitive->hasIndices) {
-						vkCmdDrawIndexed(commandBuffers[cbIndex], primitive->indexCount, 1, primitive->firstIndex, 0, 0);
+						auxCmdBuf.drawIndexed(primitive->indexCount, 1, primitive->firstIndex);
 					}
 					else {
-						vkCmdDraw(commandBuffers[cbIndex], primitive->vertexCount, 1, 0, 0);
+						auxCmdBuf.draw(primitive->vertexCount);
 					}
 				}
 			}

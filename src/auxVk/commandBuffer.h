@@ -16,12 +16,27 @@ public:
         uint32_t offset,
         uint32_t size,
         const void* pConstants);
+
     void pushConstantsToVsFs(VkPipelineLayout layout,
         uint32_t offset,
         uint32_t size,
         const void* pConstants);
+
+    void draw(uint32_t  vertexCount,
+        uint32_t  instanceCount = 1,
+        uint32_t  firstVertex = 0,
+        uint32_t  firstInstance = 0);
+
+    void drawIndexed(uint32_t  indexCount,
+        uint32_t  instanceCount = 1,
+        uint32_t  firstIndex = 0,
+        int32_t   vertexOffset = 0,
+        uint32_t  firstInstance = 0);
+
     static void CommandBuffer::allocate(
         VkCommandPool& cmdPool, 
         std::vector<VkCommandBuffer>& cmdBufs);
+
+    VkCommandBuffer* get() { return m_pCmdBuf; }
 };
 }
