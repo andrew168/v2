@@ -333,6 +333,7 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     <ClCompile Include="auxVk\imBarrier.cpp" />
     <ClCompile Include="auxVk\pipeline.cpp" />
     <ClCompile Include="auxVk\pipelineLayout.cpp" />
+    <ClCompile Include="auxVk\queue.cpp" />
     <ClCompile Include="auxVk\renderPass.cpp" />
     <ClCompile Include="auxVk\semaphore.cpp" />
     <ClCompile Include="auxVk\subpassDescription.cpp" />
@@ -379,6 +380,7 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     <ClInclude Include="auxVk\imBarrier.h" />
     <ClInclude Include="auxVk\pipeline.h" />
     <ClInclude Include="auxVk\pipelineLayout.h" />
+    <ClInclude Include="auxVk\queue.h" />
     <ClInclude Include="auxVk\renderPass.h" />
     <ClInclude Include="auxVk\semaphore.h" />
     <ClInclude Include="auxVk\subpassDescription.h" />

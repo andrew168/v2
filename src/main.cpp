@@ -1003,17 +1003,12 @@ public:
 		memcpy(currentUB.params.mapped, &shaderValuesParams, sizeof(shaderValuesParams));
 		memcpy(currentUB.skybox.mapped, &shaderValuesSkybox, sizeof(shaderValuesSkybox));
 
-		const VkPipelineStageFlags waitDstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-		VkSubmitInfo submitInfo{};
-		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-		submitInfo.pWaitDstStageMask = &waitDstStageMask;
-		submitInfo.pWaitSemaphores = &presentCompleteSemaphores[frameIndex];
-		submitInfo.waitSemaphoreCount = 1;
-		submitInfo.pSignalSemaphores = &renderCompleteSemaphores[frameIndex];
-		submitInfo.signalSemaphoreCount = 1;
-		submitInfo.pCommandBuffers = &commandBuffers[currentBuffer];
-		submitInfo.commandBufferCount = 1;
-		VK_CHECK_RESULT(vkQueueSubmit(queue, 1, &submitInfo, waitFences[frameIndex]));
+		aux::Queue auxQueue(queue);
+		auxQueue.submit(std::vector<VkCommandBuffer>({ commandBuffers[currentBuffer] }),
+			VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+			std::vector<VkSemaphore>({ presentCompleteSemaphores[frameIndex] }),
+			std::vector<VkSemaphore>({ renderCompleteSemaphores[frameIndex] }),
+			waitFences[frameIndex]);
 
 		VkResult present = swapChain.queuePresent(queue, currentBuffer, renderCompleteSemaphores[frameIndex]);
 		if (!((present == VK_SUCCESS) || (present == VK_SUBOPTIMAL_KHR))) {
