@@ -2,15 +2,17 @@
 #include "..\auxVk\auxVk.h"
 #include "brdflut.h"
 
-namespace pbr
+namespace v2
 {
 using namespace aux;
+
+aux::Image* Pbr::m_pBrdfLutImage = nullptr; // 依赖vks,不能delete，
 
 /*
 	Generate a BRDF integration map storing roughness/NdotV as a look-up-table
 */
 
-aux::Image& generateBRDFLUT()
+aux::Image& Pbr::generateBRDFLUT()
 {
 	auto tStart = std::chrono::high_resolution_clock::now();
 	auto queue = Device::getQueue();
@@ -18,12 +20,12 @@ aux::Image& generateBRDFLUT()
 	const int32_t dim = 512;
 
 	aux::ImageCI lutBrdfCI(format, dim, dim);
-	auto p = new aux::Image(lutBrdfCI);
-	aux::Image &lutBrdfImage = *p;
-	aux::RenderPass auxRenderPass(lutBrdfImage);
+	m_pBrdfLutImage = new aux::Image(lutBrdfCI);
+	aux::Image &brdfLutImage = *m_pBrdfLutImage;
+	aux::RenderPass auxRenderPass(brdfLutImage);
 
 	VkRenderPass renderpass = *(auxRenderPass.get());
-	aux::Framebuffer auxFramebuffer(lutBrdfImage, auxRenderPass);
+	aux::Framebuffer auxFramebuffer(brdfLutImage, auxRenderPass);
 	aux::PipelineLayoutCI auxPlCi{};
 	aux::PipelineLayout auxPipelineLayout(auxPlCi);
 	VkPipelineLayout pipelinelayout = auxPipelineLayout.get();
@@ -52,6 +54,6 @@ aux::Image& generateBRDFLUT()
 	auto tDiff = std::chrono::duration<double, std::milli>(tEnd - tStart).count();
 	std::cout << "Generating BRDF LUT took " << tDiff << " ms" << std::endl;
 
-	return lutBrdfImage;
+	return brdfLutImage;
 }
 }

@@ -1,7 +1,15 @@
-#pragma once
+﻿#pragma once
 #include "..\vk.h"
-
-namespace pbr
+namespace v2
 {
-	aux::Image& generateBRDFLUT();
+class aux::Image;
+
+class Pbr
+{
+	static aux::Image* m_pBrdfLutImage; // 依赖vks,不能delete，
+
+public:
+	static aux::Image& generateBRDFLUT();
+};
 }
+

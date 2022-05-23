@@ -3,6 +3,7 @@
 #include "pbr/brdflut.h"
 
 using namespace aux;
+using namespace v2;
 
 /*
 	PBR example main class
@@ -909,7 +910,7 @@ public:
 		}
 		aux::CommandBuffer::allocate(cmdPool, commandBuffers);		
 		loadAssets();
-		pbr::generateBRDFLUT().toVKS(textures.lutBrdf);
+		Pbr::generateBRDFLUT().toVKS(textures.lutBrdf);
 		generateCubemaps();
 		prepareUniformBuffers();
 		setupDescriptors();
