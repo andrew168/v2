@@ -4,7 +4,6 @@
 
 namespace pbr
 {
-vks::Texture2D brdfLutTexture;
 using namespace aux;
 
 /*
@@ -21,11 +20,6 @@ aux::Image& generateBRDFLUT()
 	aux::ImageCI lutBrdfCI(format, dim, dim);
 	auto p = new aux::Image(lutBrdfCI);
 	aux::Image &lutBrdfImage = *p;
-	brdfLutTexture.image = lutBrdfImage.getImage();
-	brdfLutTexture.deviceMemory = lutBrdfImage.getDeviceMemory();
-	brdfLutTexture.view = lutBrdfImage.getView();
-	brdfLutTexture.sampler = lutBrdfImage.getSampler();
-
 	aux::RenderPass auxRenderPass(lutBrdfImage);
 
 	VkRenderPass renderpass = *(auxRenderPass.get());
@@ -54,20 +48,6 @@ aux::Image& generateBRDFLUT()
 	auxCmdBuf.flush(queue);
 
 	vkQueueWaitIdle(queue);
-
-	brdfLutTexture.descriptor.imageView = brdfLutTexture.view;
-	brdfLutTexture.descriptor.sampler = brdfLutTexture.sampler;
-	brdfLutTexture.descriptor.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-	brdfLutTexture.device = Device::getVksDevice();
-
-
-	brdfLutTexture.view = lutBrdfImage.getView();
-
-	brdfLutTexture.sampler = lutBrdfImage.getSampler();
-
-	brdfLutTexture.image = lutBrdfImage.getImage();
-	brdfLutTexture.deviceMemory = lutBrdfImage.getDeviceMemory();
-
 	auto tEnd = std::chrono::high_resolution_clock::now();
 	auto tDiff = std::chrono::duration<double, std::milli>(tEnd - tStart).count();
 	std::cout << "Generating BRDF LUT took " << tDiff << " ms" << std::endl;
