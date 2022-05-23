@@ -103,4 +103,16 @@ void Image::copyOneMip2Cube(
         1,
         &copyRegion);
 }
+/////////////////////// extr for vks /////////////////////
+void Image::toVKS(vks::Texture2D& vks)
+{
+    vks.image = getImage();
+    vks.deviceMemory = getDeviceMemory();
+    vks.view = getView();
+    vks.sampler = getSampler();
+    vks.descriptor.imageView = getView();
+    vks.descriptor.sampler = vks.sampler;
+    vks.descriptor.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+    vks.device = Device::getVksDevice();
+}
 }

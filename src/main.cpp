@@ -1,5 +1,6 @@
 ﻿#include "v2\v2.h"
 #include "auxVk\auxVk.h"
+#include "pbr/brdflut.h"
 
 using namespace aux;
 
@@ -611,62 +612,6 @@ public:
 	}
 
 	/*
-		Generate a BRDF integration map storing roughness/NdotV as a look-up-table
-	*/
-	void generateBRDFLUT()
-	{
-		auto tStart = std::chrono::high_resolution_clock::now();
-
-		const VkFormat format = VK_FORMAT_R16G16_SFLOAT;
-		const int32_t dim = 512;
-
-		aux::ImageCI lutBrdfCI(format, dim, dim);
-		aux::Image lutBrdfImage(lutBrdfCI);
-		textures.lutBrdf.image = lutBrdfImage.getImage();
-		textures.lutBrdf.deviceMemory = lutBrdfImage.getDeviceMemory();
-		textures.lutBrdf.view = lutBrdfImage.getView();
-		textures.lutBrdf.sampler = lutBrdfImage.getSampler();
-
-		aux::RenderPass auxRenderPass(lutBrdfImage);
-
-		VkRenderPass renderpass = *(auxRenderPass.get());
-		aux::Framebuffer auxFramebuffer(lutBrdfImage, auxRenderPass);
-		aux::PipelineLayoutCI auxPlCi{};
-		aux::PipelineLayout auxPipelineLayout(auxPlCi);
-		VkPipelineLayout pipelinelayout = auxPipelineLayout.get();
-
-		aux::PipelineCI auxPipelineCI{};
-		std::vector<aux::ShaderDescription> shaders = {
-			{"genbrdflut.vert.spv", VK_SHADER_STAGE_VERTEX_BIT},
-			{"genbrdflut.frag.spv", VK_SHADER_STAGE_FRAGMENT_BIT}
-		};
-		auxPipelineCI.shaders = shaders;
-		aux::Pipeline auxPipeline(auxPipelineLayout, *auxRenderPass.get(), auxPipelineCI);
-
-		// Render
-		aux::CommandBuffer auxCmdBuf;
-		VkCommandBuffer cmdBuf = *(auxCmdBuf.get());
-		auxRenderPass.begin(&cmdBuf, &auxFramebuffer);
-		auxCmdBuf.setViewport(dim, dim);
-		auxCmdBuf.setScissor(dim, dim);
-		auxPipeline.bindToGraphic(cmdBuf);
-		auxCmdBuf.draw(3, 1, 0, 0);
-		auxRenderPass.end();
-		auxCmdBuf.flush(queue);
-
-		vkQueueWaitIdle(queue);
-
-		textures.lutBrdf.descriptor.imageView = textures.lutBrdf.view;
-		textures.lutBrdf.descriptor.sampler = textures.lutBrdf.sampler;
-		textures.lutBrdf.descriptor.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-		textures.lutBrdf.device = vulkanDevice;
-
-		auto tEnd = std::chrono::high_resolution_clock::now();
-		auto tDiff = std::chrono::duration<double, std::milli>(tEnd - tStart).count();
-		std::cout << "Generating BRDF LUT took " << tDiff << " ms" << std::endl;
-	}
-
-	/*
 		Offline generation for the cube maps used for PBR lighting
 		- Irradiance cube map
 		- Pre-filterd environment cubemap
@@ -964,7 +909,7 @@ public:
 		}
 		aux::CommandBuffer::allocate(cmdPool, commandBuffers);		
 		loadAssets();
-		generateBRDFLUT();
+		pbr::generateBRDFLUT().toVKS(textures.lutBrdf);
 		generateCubemaps();
 		prepareUniformBuffers();
 		setupDescriptors();
