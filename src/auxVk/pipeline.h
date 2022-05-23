@@ -56,7 +56,7 @@ class Pipeline
     aux::PipelineLayout& m_pipelineLayout;
     VkRenderPass& m_renderPass;
     std::vector<aux::ShaderDescription> m_shaderList;
-    PipelineCI& m_auxPipelineCI;
+    PipelineCI& m_auxCI;
 public:
     explicit Pipeline(aux::PipelineLayout& pipelineLayout, VkRenderPass& renderPass, PipelineCI &pipelineCI);
     ~Pipeline();

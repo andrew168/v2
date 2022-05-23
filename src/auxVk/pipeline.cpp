@@ -8,33 +8,32 @@ VkPipelineCache* Pipeline::m_pPipelineCache;
 Pipeline::Pipeline(aux::PipelineLayout& pipelineLayout, VkRenderPass& renderPass, PipelineCI& auxci) :
 	m_pipelineLayout(pipelineLayout),
 	m_renderPass(renderPass),
-	m_auxPipelineCI (auxci)
+	m_auxCI (auxci)
 {
-	auto auxCI = m_auxPipelineCI;
 	const VkDevice& device = Device::getR();
 
 	// Pipeline
 	VkPipelineInputAssemblyStateCreateInfo inputAssemblyStateCI{};
 	inputAssemblyStateCI.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
-	inputAssemblyStateCI.topology = m_auxPipelineCI.primitiveTopology;
+	inputAssemblyStateCI.topology = m_auxCI.primitiveTopology;
 
 	VkPipelineRasterizationStateCreateInfo rasterizationStateCI{};
 	rasterizationStateCI.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
 	rasterizationStateCI.polygonMode = VK_POLYGON_MODE_FILL;
-	rasterizationStateCI.cullMode = m_auxPipelineCI.cullMode;
+	rasterizationStateCI.cullMode = m_auxCI.cullMode;
 	rasterizationStateCI.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
 	rasterizationStateCI.lineWidth = 1.0f;
 
 	VkPipelineColorBlendAttachmentState blendAttachmentState{};
 	blendAttachmentState.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
-	blendAttachmentState.blendEnable = auxCI.blendEnable;
+	blendAttachmentState.blendEnable = m_auxCI.blendEnable;
 	if (blendAttachmentState.blendEnable) {
-		blendAttachmentState.srcColorBlendFactor = auxCI.srcColorBlendFactor;
-		blendAttachmentState.dstColorBlendFactor = auxCI.dstColorBlendFactor;
-		blendAttachmentState.colorBlendOp = auxCI.colorBlendOp;
-		blendAttachmentState.srcAlphaBlendFactor = auxCI.srcAlphaBlendFactor;
-		blendAttachmentState.dstAlphaBlendFactor = auxCI.dstAlphaBlendFactor;
-		blendAttachmentState.alphaBlendOp = auxCI.alphaBlendOp;
+		blendAttachmentState.srcColorBlendFactor = m_auxCI.srcColorBlendFactor;
+		blendAttachmentState.dstColorBlendFactor = m_auxCI.dstColorBlendFactor;
+		blendAttachmentState.colorBlendOp = m_auxCI.colorBlendOp;
+		blendAttachmentState.srcAlphaBlendFactor = m_auxCI.srcAlphaBlendFactor;
+		blendAttachmentState.dstAlphaBlendFactor = m_auxCI.dstAlphaBlendFactor;
+		blendAttachmentState.alphaBlendOp = m_auxCI.alphaBlendOp;
 	}
 
 	VkPipelineColorBlendStateCreateInfo colorBlendStateCI{};
@@ -44,8 +43,8 @@ Pipeline::Pipeline(aux::PipelineLayout& pipelineLayout, VkRenderPass& renderPass
 
 	VkPipelineDepthStencilStateCreateInfo depthStencilStateCI{};
 	depthStencilStateCI.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
-	depthStencilStateCI.depthTestEnable = auxCI.depthTestEnable;
-	depthStencilStateCI.depthWriteEnable = auxCI.depthWriteEnable;
+	depthStencilStateCI.depthTestEnable = m_auxCI.depthTestEnable;
+	depthStencilStateCI.depthWriteEnable = m_auxCI.depthWriteEnable;
 	depthStencilStateCI.depthCompareOp = VK_COMPARE_OP_LESS_OR_EQUAL;
 	depthStencilStateCI.front = depthStencilStateCI.back;
 	depthStencilStateCI.back.compareOp = VK_COMPARE_OP_ALWAYS;
@@ -57,7 +56,7 @@ Pipeline::Pipeline(aux::PipelineLayout& pipelineLayout, VkRenderPass& renderPass
 
 	VkPipelineMultisampleStateCreateInfo multisampleStateCI{};
 	multisampleStateCI.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
-	multisampleStateCI.rasterizationSamples = m_auxPipelineCI.rasterizationSamples;
+	multisampleStateCI.rasterizationSamples = m_auxCI.rasterizationSamples;
 
 	std::vector<VkDynamicState> dynamicStateEnables = {
 		VK_DYNAMIC_STATE_VIEWPORT, 
@@ -81,7 +80,7 @@ Pipeline::Pipeline(aux::PipelineLayout& pipelineLayout, VkRenderPass& renderPass
 
 	std::vector<VkPipelineShaderStageCreateInfo> shaderStages;
 
-	for (auto item : m_auxPipelineCI.shaders) {
+	for (auto item : m_auxCI.shaders) {
 		shaderStages.push_back(loadShader(device, item.m_fileName, item.m_stage));
 	}
 
