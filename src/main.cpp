@@ -623,11 +623,7 @@ public:
 
 		for (uint32_t target = 0; target < PREFILTEREDENV + 1; target++)
 		{
-
-			vks::TextureCubeMap cubemap;
-
 			auto tStart = std::chrono::high_resolution_clock::now();
-
 			VkFormat format;
 			int32_t dim;
 
@@ -649,10 +645,6 @@ public:
 			cubeCI.flags = VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT;
 			cubeCI.isCubemap = true;
 			aux::Image auxCube(cubeCI);
-			cubemap.image = auxCube.getImage();
-			cubemap.deviceMemory = auxCube.getDeviceMemory();
-			cubemap.view = auxCube.getView();
-			cubemap.sampler = auxCube.getSampler();
 
 			aux::AttachmentDescription auxAttDesc(auxCube);
 			auxAttDesc.finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
@@ -796,18 +788,12 @@ public:
 				aux::IMBarrier::transfer2ShaderRead(auxCube, cmdBuf);
 				auxCmdBuf.flush(queue, false);
 			}
-
-			cubemap.descriptor.imageView = cubemap.view;
-			cubemap.descriptor.sampler = cubemap.sampler;
-			cubemap.descriptor.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-			cubemap.device = vulkanDevice;
-
 			switch (target) {
 			case IRRADIANCE:
-				textures.irradianceCube = cubemap;
+				auxCube.toVKS(textures.irradianceCube);
 				break;
 			case PREFILTEREDENV:
-				textures.prefilteredCube = cubemap;
+				auxCube.toVKS(textures.prefilteredCube);
 				shaderValuesParams.prefilteredCubeMipLevels = static_cast<float>(numMips);
 				break;
 			};

@@ -104,7 +104,7 @@ void Image::copyOneMip2Cube(
         &copyRegion);
 }
 /////////////////////// extr for vks /////////////////////
-void Image::toVKS(vks::Texture2D& vks)
+void Image::toVKS(vks::Texture& vks)
 {
     vks.image = getImage();
     vks.deviceMemory = getDeviceMemory();

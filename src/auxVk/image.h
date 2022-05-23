@@ -61,7 +61,7 @@ public:
     VkSampler getSampler() { return m_sampler; }
     uint32_t getWidth() { return m_width; }
     uint32_t getHeight() { return m_height; }
-    void toVKS(vks::Texture2D& vks);
+    void toVKS(vks::Texture& vks);
 private:
     void allocMemory(ImageCI& auxCi);
     void createImageView(ImageCI& auxCi);
