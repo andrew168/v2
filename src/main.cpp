@@ -644,15 +644,15 @@ public:
 		aux::Pipeline auxPipeline(auxPipelineLayout, *auxRenderPass.get(), auxPipelineCI);
 
 		// Render
-		VkCommandBuffer cmdBuf = vulkanDevice->createCommandBuffer(VK_COMMAND_BUFFER_LEVEL_PRIMARY, true);
+		aux::CommandBuffer auxCmdBuf;
+		VkCommandBuffer cmdBuf = *(auxCmdBuf.get());
 		auxRenderPass.begin(&cmdBuf, &auxFramebuffer);
-		aux::CommandBuffer auxCmdBuf(cmdBuf);
 		auxCmdBuf.setViewport(dim, dim);
 		auxCmdBuf.setScissor(dim, dim);
 		auxPipeline.bindToGraphic(cmdBuf);
 		auxCmdBuf.draw(3, 1, 0, 0);
 		auxRenderPass.end();
-		vulkanDevice->flushCommandBuffer(cmdBuf, queue);
+		auxCmdBuf.flush(queue);
 
 		vkQueueWaitIdle(queue);
 
@@ -798,20 +798,19 @@ public:
 				glm::rotate(glm::mat4(1.0f), glm::radians(180.0f), glm::vec3(0.0f, 0.0f, 1.0f)),
 			};
 
-			VkCommandBuffer cmdBuf = vulkanDevice->createCommandBuffer(VK_COMMAND_BUFFER_LEVEL_PRIMARY, false);
-			
+			aux::CommandBuffer auxCmdBuf;
+			VkCommandBuffer cmdBuf = *(auxCmdBuf.get());
 			aux::IMBarrier::convertLayoutToTransfer(auxCube, cmdBuf, queue);
 
 			// Cube的6个face，每个MipLevel, 逐个渲染
 			for (uint32_t m = 0; m < numMips; m++) {
 				for (uint32_t f = 0; f < 6; f++) {
 
-					vulkanDevice->beginCommandBuffer(cmdBuf);
+					auxCmdBuf.begin();
 
 					// Render scene from cube face's point of view
 					auxRenderPass.begin(&cmdBuf, &auxFramebufferOffscreen, { 0.0f, 0.0f, 0.2f, 0.0f });
 					// Pass parameters for current pass using a push constant block
-					aux::CommandBuffer auxCmdBuf(cmdBuf);
 
 					switch (target) {
 					case IRRADIANCE:
@@ -842,14 +841,14 @@ public:
 					region.width = vpDim;
 					aux::Image::copyOneMip2Cube(cmdBuf, auxImageOffscreen, region, auxCube, f, m);
 					aux::IMBarrier::transfer2ColorAttachment(auxImageOffscreen, cmdBuf);
-					vulkanDevice->flushCommandBuffer(cmdBuf, queue, false);
+					auxCmdBuf.flush(queue, false);
 				}
 			}
 
 			{
-				vulkanDevice->beginCommandBuffer(cmdBuf);
+				auxCmdBuf.begin();
 				aux::IMBarrier::transfer2ShaderRead(auxCube, cmdBuf);
-				vulkanDevice->flushCommandBuffer(cmdBuf, queue, false);
+				auxCmdBuf.flush(queue, false);
 			}
 
 			cubemap.descriptor.imageView = cubemap.view;

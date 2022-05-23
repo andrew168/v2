@@ -7,11 +7,16 @@ namespace aux
 class CommandBuffer
 {
     VkCommandBuffer* m_pCmdBuf;
+    bool m_isVK = false;
 
 public:
+    CommandBuffer();
     CommandBuffer(VkCommandBuffer& cmdBuf);
-    void begin(const VkCommandBufferBeginInfo* pBeginInfo);
+    ~CommandBuffer();
+    
+    void begin(const VkCommandBufferBeginInfo* pBeginInfo = nullptr);
     void end();
+    void flush(VkQueue& queue, bool free = true);
     void setViewport(uint32_t width, uint32_t height);
     void setScissor(uint32_t width, uint32_t height);
     void pushConstantsToFS(VkPipelineLayout layout,

@@ -2,19 +2,36 @@
 
 namespace aux
 {
+CommandBuffer::CommandBuffer()
+{
+	m_pCmdBuf = new VkCommandBuffer();
+	*m_pCmdBuf = Device::getVksDevice()->createCommandBuffer(VK_COMMAND_BUFFER_LEVEL_PRIMARY, true);
+}
+
 CommandBuffer::CommandBuffer(VkCommandBuffer& cmdBuf) :
-	m_pCmdBuf(&cmdBuf)
+	m_pCmdBuf(&cmdBuf),
+	m_isVK(true)
 {
 }
 
 void CommandBuffer::begin(const VkCommandBufferBeginInfo* pBeginInfo)
 {
-	VK_CHECK_RESULT(vkBeginCommandBuffer(*m_pCmdBuf, pBeginInfo));
+	if (!pBeginInfo) {
+		Device::getVksDevice()->beginCommandBuffer(*m_pCmdBuf);
+	}
+	else {
+		VK_CHECK_RESULT(vkBeginCommandBuffer(*m_pCmdBuf, pBeginInfo));
+	}
 }
 
 void CommandBuffer::end()
 {
 	VK_CHECK_RESULT(vkEndCommandBuffer(*m_pCmdBuf));
+}
+
+void CommandBuffer::flush(VkQueue &queue, bool free)
+{
+	Device::getVksDevice()->flushCommandBuffer(*m_pCmdBuf, queue, free);
 }
 
 void CommandBuffer::setViewport(uint32_t width,
@@ -100,6 +117,16 @@ void CommandBuffer::bindIndexBuffer(
 	VkIndexType     indexType) 
 {
 	vkCmdBindIndexBuffer(*m_pCmdBuf, buffer, offset, indexType);
+}
+
+CommandBuffer::~CommandBuffer()
+{
+	if (m_isVK) {
+		return;
+	}
+
+	delete m_pCmdBuf;
+	m_pCmdBuf = nullptr;
 }
 
 }
