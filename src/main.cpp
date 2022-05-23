@@ -332,7 +332,7 @@ public:
 			textures.prefilteredCube.destroy();
 		}
 		textures.environmentCube.loadFromFile(filename, VK_FORMAT_R16G16B16A16_SFLOAT, vulkanDevice, queue);
-		generateCubemaps();
+		// generateCubemaps();
 	}
 
 	void loadAssets()
@@ -717,7 +717,9 @@ public:
 			// Create offscreen framebuffer
 			aux::ImageCI offscreenFBCI(format, dim, dim);
 			offscreenFBCI.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-			offscreenFBCI.usage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
+			offscreenFBCI.usage = 
+				VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | 
+				VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
 			offscreenFBCI.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 			aux::Image auxImageOffscreen(offscreenFBCI);
 			aux::Framebuffer auxFramebufferOffscreen(auxImageOffscreen, auxRenderPass);
@@ -737,7 +739,9 @@ public:
 
 			// Pipeline layout
 			VkPushConstantRange pushConstantRange{};
-			pushConstantRange.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
+			pushConstantRange.stageFlags =
+				VK_SHADER_STAGE_VERTEX_BIT | 
+				VK_SHADER_STAGE_FRAGMENT_BIT;
 
 			switch (target) {
 			case IRRADIANCE:
@@ -798,6 +802,7 @@ public:
 			
 			aux::IMBarrier::convertLayoutToTransfer(auxCube, cmdBuf, queue);
 
+			// Cube的6个face，每个MipLevel, 逐个渲染
 			for (uint32_t m = 0; m < numMips; m++) {
 				for (uint32_t f = 0; f < 6; f++) {
 
