@@ -934,9 +934,7 @@ public:
 	void prepare()
 	{
 		VulkanExampleBase::prepare();
-
-		aux::Device::setVksDevice(vulkanDevice);
-		aux::Device::set(&device);
+		aux::Device::set(&device, &queue, vulkanDevice);
 		aux::Pipeline::setCache(&pipelineCache);
 
 		camera.type = Camera::CameraType::lookat;

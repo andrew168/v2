@@ -7,6 +7,7 @@ namespace aux
 
 class Device {
     static VkDevice* m_pDevice;
+    static VkQueue* m_pQueue;
     static vks::VulkanDevice* m_vksDevice;
 public:
     static VkDevice* get() {
@@ -25,6 +26,14 @@ public:
         return *m_pDevice;
     }
 
+    static const VkQueue& getQueue() {
+        if (m_pQueue == nullptr) {
+            Assert(0, "setup first");
+        }
+
+        return *m_pQueue;
+    }
+
     static vks::VulkanDevice* getVksDevice() {
         if (m_vksDevice == nullptr) {
             Assert(0, "setup first");
@@ -32,14 +41,11 @@ public:
         return m_vksDevice;
     }
 
-    static void set(VkDevice* device)
+    static void set(VkDevice* device, VkQueue* queue, vks::VulkanDevice* vksDevice)
     {
         m_pDevice = device;
-    }
-
-    static void setVksDevice(vks::VulkanDevice* device)
-    {
-        m_vksDevice = device;
+        m_vksDevice = vksDevice;
+        m_pQueue = queue;
     }
 };
 }
