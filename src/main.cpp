@@ -620,17 +620,17 @@ public:
 		const VkFormat format = VK_FORMAT_R16G16_SFLOAT;
 		const int32_t dim = 512;
 
-		aux::ImageCI auxImageCI(format, dim, dim);
-		aux::Image auxImage(auxImageCI);
-		textures.lutBrdf.image = auxImage.getImage();
-		textures.lutBrdf.deviceMemory = auxImage.getDeviceMemory();
-		textures.lutBrdf.view = auxImage.getView();
-		textures.lutBrdf.sampler = auxImage.getSampler();
+		aux::ImageCI lutBrdfCI(format, dim, dim);
+		aux::Image lutBrdfImage(lutBrdfCI);
+		textures.lutBrdf.image = lutBrdfImage.getImage();
+		textures.lutBrdf.deviceMemory = lutBrdfImage.getDeviceMemory();
+		textures.lutBrdf.view = lutBrdfImage.getView();
+		textures.lutBrdf.sampler = lutBrdfImage.getSampler();
 
-		aux::RenderPass auxRenderPass(auxImage);
+		aux::RenderPass auxRenderPass(lutBrdfImage);
 
 		VkRenderPass renderpass = *(auxRenderPass.get());
-		aux::Framebuffer auxFramebuffer(auxImage, auxRenderPass);
+		aux::Framebuffer auxFramebuffer(lutBrdfImage, auxRenderPass);
 		aux::PipelineLayoutCI auxPlCi{};
 		aux::PipelineLayout auxPipelineLayout(auxPlCi);
 		VkPipelineLayout pipelinelayout = auxPipelineLayout.get();
@@ -698,11 +698,11 @@ public:
 
 			// Create target cubemap
 			const uint32_t numMips = static_cast<uint32_t>(floor(log2(dim))) + 1;
-			aux::ImageCI auxImageCI(format, dim, dim, numMips, 6);
-			auxImageCI.usage = VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT;
-			auxImageCI.flags = VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT;
-			auxImageCI.isCubemap = true;
-			aux::Image auxCube(auxImageCI);
+			aux::ImageCI cubeCI(format, dim, dim, numMips, 6);
+			cubeCI.usage = VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT;
+			cubeCI.flags = VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT;
+			cubeCI.isCubemap = true;
+			aux::Image auxCube(cubeCI);
 			cubemap.image = auxCube.getImage();
 			cubemap.deviceMemory = auxCube.getDeviceMemory();
 			cubemap.view = auxCube.getView();
@@ -715,14 +715,11 @@ public:
 			aux::RenderPass auxRenderPass(auxCube);
 
 			// Create offscreen framebuffer
-			aux::ImageCI imageCI(format, dim, dim);
-			imageCI.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-			imageCI.usage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
-			imageCI.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
-			aux::Image auxImageOffscreen(imageCI);
-
-			// no sampler, auxImage.getSampler();
-
+			aux::ImageCI offscreenFBCI(format, dim, dim);
+			offscreenFBCI.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+			offscreenFBCI.usage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
+			offscreenFBCI.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+			aux::Image auxImageOffscreen(offscreenFBCI);
 			aux::Framebuffer auxFramebufferOffscreen(auxImageOffscreen, auxRenderPass);
 			aux::IMBarrier::toColorAttachment(auxImageOffscreen, queue);
 		
@@ -751,14 +748,13 @@ public:
 				break;
 			};
 
-
 			// Descriptors
-			VkDescriptorSetLayoutBinding setLayoutBinding = { 0, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1, VK_SHADER_STAGE_FRAGMENT_BIT, nullptr };
+			VkDescriptorSetLayoutBinding setLayoutBinding = 
+			{ 0, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1, VK_SHADER_STAGE_FRAGMENT_BIT, nullptr };
 
 			aux::PipelineLayoutCI auxPipelineLayoutCI{};
 			auxPipelineLayoutCI.pDslBindings = &setLayoutBinding;
 			auxPipelineLayoutCI.pImageInfo = &textures.environmentCube.descriptor;
-			// auxPipelineLayoutCI.pSetLayouts = &descriptorsetlayout;
 			auxPipelineLayoutCI.pPushConstantRanges = &pushConstantRange;
 			
 			aux::PipelineLayout auxPipelineLayout(auxPipelineLayoutCI);
