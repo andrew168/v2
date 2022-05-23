@@ -160,9 +160,7 @@ public:
 			vkDestroySemaphore(device, semaphore, nullptr);
 		}
 
-		textures.environmentCube.destroy();
-		textures.irradianceCube.destroy();
-		textures.prefilteredCube.destroy();
+		destroyCubemaps();
 		textures.lutBrdf.destroy();
 		textures.empty.destroy();
 
@@ -325,13 +323,17 @@ public:
 		camera.setRotation({ 0.0f, 0.0f, 0.0f });
 	}
 
+	void destroyCubemaps() {
+		textures.environmentCube.destroy();
+		textures.irradianceCube.destroy();
+		textures.prefilteredCube.destroy();
+	}
+
 	void loadEnvironment(std::string filename)
 	{
 		std::cout << "Loading environment from " << filename << std::endl;
 		if (textures.environmentCube.image) {
-			textures.environmentCube.destroy();
-			textures.irradianceCube.destroy();
-			textures.prefilteredCube.destroy();
+			destroyCubemaps();
 		}
 		textures.environmentCube.loadFromFile(filename, VK_FORMAT_R16G16B16A16_SFLOAT, vulkanDevice, queue);
 		// generateCubemaps();
