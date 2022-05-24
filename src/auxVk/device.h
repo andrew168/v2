@@ -26,7 +26,7 @@ public:
         return *m_pDevice;
     }
 
-    static const VkQueue& getQueue() {
+    static VkQueue& getQueue() {
         if (m_pQueue == nullptr) {
             Assert(0, "setup first");
         }
