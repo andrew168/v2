@@ -1,5 +1,6 @@
 ﻿#pragma once
 #include "..\vk.h"
+#include "..\gltf\gltf.h"
 namespace v2
 {
 class aux::Image;
@@ -10,6 +11,7 @@ class Pbr
 
 public:
 	static aux::Image& generateBRDFLUT();
+	static void generateCubemaps(std::vector<aux::Image>& cubemaps, gltf::Models models, vks::Texture& texture);
 };
 }
 
