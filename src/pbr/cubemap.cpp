@@ -7,16 +7,15 @@ namespace v2
 using namespace aux;
 
 /*
-		Offline generation for the cube maps used for PBR lighting
-		- Irradiance cube map
-		- Pre-filterd environment cubemap
-	*/
+* 用offscreen渲染生成PBR Lighting的2个cubemap：
+	- 亮度，辐照度(Irradiance) cube map
+	- 预过滤的环境图： (Pre-filterd environment) cubemap, 
+先生成每一个面、每一个mip level，再合成到cubemap中。
+*/
 void Pbr::generateCubemaps(std::vector<Image>& cubemaps, gltf::Models models, vks::Texture &texture)
 {
 	VkQueue& queue = Device::getQueue();
-
 	enum Target { IRRADIANCE = 0, PREFILTEREDENV = 1 };
-
 	for (uint32_t target = 0; target < PREFILTEREDENV + 1; target++)
 	{
 		auto tStart = std::chrono::high_resolution_clock::now();
@@ -41,10 +40,6 @@ void Pbr::generateCubemaps(std::vector<Image>& cubemaps, gltf::Models models, vk
 		cubeCI.flags = VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT;
 		cubeCI.isCubemap = true;
 		aux::Image auxCube(cubeCI);
-
-		aux::AttachmentDescription auxAttDesc(auxCube);
-		auxAttDesc.finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-
 		aux::SubpassDescription auxSubpassDescription(auxCube);
 		aux::RenderPass auxRenderPass(auxCube);
 
@@ -179,11 +174,9 @@ void Pbr::generateCubemaps(std::vector<Image>& cubemaps, gltf::Models models, vk
 			}
 		}
 
-		{
-			auxCmdBuf.begin();
-			aux::IMBarrier::transfer2ShaderRead(auxCube, cmdBuf);
-			auxCmdBuf.flush(queue, false);
-		}
+		auxCmdBuf.begin();
+		aux::IMBarrier::transfer2ShaderRead(auxCube, cmdBuf);
+		auxCmdBuf.flush(queue, false);
 		cubemaps.push_back(auxCube);
 		auto tEnd = std::chrono::high_resolution_clock::now();
 		auto tDiff = std::chrono::duration<double, std::milli>(tEnd - tStart).count();
