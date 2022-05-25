@@ -723,7 +723,6 @@ public:
 	}
 
 	void updateOverlay();
-
 	virtual void render()
 	{
 		if (!prepared) {
@@ -770,7 +769,11 @@ public:
 
 		frameIndex += 1;
 		frameIndex %= renderAhead;
-
+		update();
+	}
+	
+	void update()
+	{
 		if (!paused) {
 			if (rotateModel) {
 				modelrot.y += frameTimer * 35.0f;
@@ -794,6 +797,7 @@ public:
 			updateUniformBuffers();
 		}
 	}
+
 };
 
 VulkanExample* vulkanExample;
