@@ -52,10 +52,6 @@ public:
 	aux::DescriptorSetLayout* pAuxDSLayoutScene;
 	aux::DescriptorSetLayout* pAuxDSLayoutMaterial;
 	aux::DescriptorSetLayout* pAuxDSLayoutNode;
-	struct DescriptorSets {
-		VkDescriptorSet scene;
-		VkDescriptorSet skybox;
-	};
 	std::vector<DescriptorSets> descriptorSets;
 
 	std::vector<VkCommandBuffer> commandBuffers;
@@ -91,26 +87,8 @@ public:
 	glm::vec3 modelrot = glm::vec3(0.0f);
 	glm::vec3 modelPos = glm::vec3(0.0f);
 
-	enum PBRWorkflows { PBR_WORKFLOW_METALLIC_ROUGHNESS = 0, PBR_WORKFLOW_SPECULAR_GLOSINESS = 1 };
-
-	struct PushConstBlockMaterial {
-		glm::vec4 baseColorFactor;
-		glm::vec4 emissiveFactor;
-		glm::vec4 diffuseFactor;
-		glm::vec4 specularFactor;
-		float workflow;
-		int colorTextureSet;
-		int PhysicalDescriptorTextureSet;
-		int normalTextureSet;
-		int occlusionTextureSet;
-		int emissiveTextureSet;
-		float metallicFactor;
-		float roughnessFactor;
-		float alphaMask;
-		float alphaMaskCutoff;
-	} pushConstBlockMaterial;
-
-	std::map<std::string, std::string> environments;
+	PushConstBlockMaterial pushConstBlockMaterial;
+    std::map<std::string, std::string> environments;
 	std::string selectedEnvironment = "papermill";
 
 #if !defined(_WIN32)
@@ -162,73 +140,6 @@ public:
 		textures.empty.destroy();
 
 		delete ui;
-	}
-
-	void renderNode(vkglTF::Node* node, uint32_t cbIndex, vkglTF::Material::AlphaMode alphaMode) {
-		if (node->mesh) {
-			// Render mesh primitives
-			for (vkglTF::Primitive* primitive : node->mesh->primitives) {
-				if (primitive->material.alphaMode == alphaMode) {
-
-					const std::vector<VkDescriptorSet> descriptorsets = {
-						descriptorSets[cbIndex].scene,
-						primitive->material.descriptorSet,
-						node->mesh->uniformBuffer.descriptorSet,
-					};
-					aux::DescriptorSet::bindToGraphics(descriptorsets,
-						commandBuffers[cbIndex], 
-						pipelineLayout);
-
-					// Pass material parameters as push constants
-					PushConstBlockMaterial pushConstBlockMaterial{};
-					pushConstBlockMaterial.emissiveFactor = primitive->material.emissiveFactor;
-					// To save push constant space, availabilty and texture coordiante set are combined
-					// -1 = texture not used for this material, >= 0 texture used and index of texture coordinate set
-					pushConstBlockMaterial.colorTextureSet = primitive->material.baseColorTexture != nullptr ? primitive->material.texCoordSets.baseColor : -1;
-					pushConstBlockMaterial.normalTextureSet = primitive->material.normalTexture != nullptr ? primitive->material.texCoordSets.normal : -1;
-					pushConstBlockMaterial.occlusionTextureSet = primitive->material.occlusionTexture != nullptr ? primitive->material.texCoordSets.occlusion : -1;
-					pushConstBlockMaterial.emissiveTextureSet = primitive->material.emissiveTexture != nullptr ? primitive->material.texCoordSets.emissive : -1;
-					pushConstBlockMaterial.alphaMask = static_cast<float>(primitive->material.alphaMode == vkglTF::Material::ALPHAMODE_MASK);
-					pushConstBlockMaterial.alphaMaskCutoff = primitive->material.alphaCutoff;
-
-					// TODO: glTF specs states that metallic roughness should be preferred, even if specular glosiness is present
-
-					if (primitive->material.pbrWorkflows.metallicRoughness) {
-						// Metallic roughness workflow
-						pushConstBlockMaterial.workflow = static_cast<float>(PBR_WORKFLOW_METALLIC_ROUGHNESS);
-						pushConstBlockMaterial.baseColorFactor = primitive->material.baseColorFactor;
-						pushConstBlockMaterial.metallicFactor = primitive->material.metallicFactor;
-						pushConstBlockMaterial.roughnessFactor = primitive->material.roughnessFactor;
-						pushConstBlockMaterial.PhysicalDescriptorTextureSet = primitive->material.metallicRoughnessTexture != nullptr ? primitive->material.texCoordSets.metallicRoughness : -1;
-						pushConstBlockMaterial.colorTextureSet = primitive->material.baseColorTexture != nullptr ? primitive->material.texCoordSets.baseColor : -1;
-					}
-
-					if (primitive->material.pbrWorkflows.specularGlossiness) {
-						// Specular glossiness workflow
-						pushConstBlockMaterial.workflow = static_cast<float>(PBR_WORKFLOW_SPECULAR_GLOSINESS);
-						pushConstBlockMaterial.PhysicalDescriptorTextureSet = primitive->material.extension.specularGlossinessTexture != nullptr ? primitive->material.texCoordSets.specularGlossiness : -1;
-						pushConstBlockMaterial.colorTextureSet = primitive->material.extension.diffuseTexture != nullptr ? primitive->material.texCoordSets.baseColor : -1;
-						pushConstBlockMaterial.diffuseFactor = primitive->material.extension.diffuseFactor;
-						pushConstBlockMaterial.specularFactor = glm::vec4(primitive->material.extension.specularFactor, 1.0f);
-					}
-					aux::CommandBuffer auxCmdBuf(commandBuffers[cbIndex]);
-					auxCmdBuf.pushConstantsToFS(pipelineLayout, 0, 
-						sizeof(PushConstBlockMaterial), 
-						&pushConstBlockMaterial);
-
-					if (primitive->hasIndices) {
-						auxCmdBuf.drawIndexed(primitive->indexCount, 1, primitive->firstIndex);
-					}
-					else {
-						auxCmdBuf.draw(primitive->vertexCount);
-					}
-				}
-			}
-
-		};
-		for (auto child : node->children) {
-			renderNode(child, cbIndex, alphaMode);
-		}
 	}
 
 	void recordCommandBuffers()
@@ -288,17 +199,18 @@ public:
 				auxCmdBuf.bindIndexBuffer(model.indices.buffer);
 			}
 
+			gltf::Render render(descriptorSets[i].scene, commandBuffers[i], pipelineLayout);
 			// 先普通材质，alpha mask, 最后透明体
-			for (auto node : model.nodes) {
-				renderNode(node, (uint32_t)i, vkglTF::Material::ALPHAMODE_OPAQUE);
+			for (auto node : model.nodes) {				
+				render.drawNode(node, vkglTF::Material::ALPHAMODE_OPAQUE);
 			}
 			for (auto node : model.nodes) {
-				renderNode(node, (uint32_t)i, vkglTF::Material::ALPHAMODE_MASK);
+				render.drawNode(node, vkglTF::Material::ALPHAMODE_MASK);
 			}
 			// TODO: Correct depth sorting
 			pAuxPipelineBlend->bindToGraphic(currentCB); // 透明体才需要blend
 			for (auto node : model.nodes) {
-				renderNode(node, (uint32_t)i, vkglTF::Material::ALPHAMODE_BLEND);
+				render.drawNode(node, vkglTF::Material::ALPHAMODE_BLEND);
 			}
 
 			// User interface
@@ -716,9 +628,7 @@ public:
 
 		ui = new UI(vulkanDevice, renderPass, queue, pipelineCache, settings.sampleCount);
 		updateOverlay();
-
 		recordCommandBuffers();
-
 		prepared = true;
 	}
 
@@ -797,7 +707,6 @@ public:
 			updateUniformBuffers();
 		}
 	}
-
 };
 
 VulkanExample* vulkanExample;
