@@ -6,33 +6,60 @@ namespace v2
 {
 using namespace aux;
 
+struct PushBlockPrefilterEnv {
+	glm::mat4 mvp;
+	float roughness;
+	uint32_t numSamples = 32u;
+};
+
+struct PushBlockIrradiance {
+	glm::mat4 mvp;
+	float deltaPhi = (2.0f * float(M_PI)) / 180.0f;
+	float deltaTheta = (0.5f * float(M_PI)) / 64.0f;
+};
 /*
 * 用offscreen渲染生成PBR Lighting的2个cubemap：
 	- 亮度，辐照度(Irradiance) cube map
 	- 预过滤的环境图： (Pre-filterd environment) cubemap, 
 先生成每一个面、每一个mip level，再合成到cubemap中。
 */
-void Pbr::generateCubemaps(std::vector<Image>& cubemaps, gltf::Models models, vks::Texture &texture)
+void Pbr::generateCubemaps(std::vector<Image>& cubemaps, gltf::Models models, vks::Texture& texture)
+{
+	VkFormat format;
+	int32_t dim;
+
+	format = VK_FORMAT_R32G32B32A32_SFLOAT;
+	dim = 64;
+	std::vector<aux::ShaderDescription> shaders = {
+	{"filtercube.vert.spv", VK_SHADER_STAGE_VERTEX_BIT},
+	{ "irradiancecube.frag.spv", VK_SHADER_STAGE_FRAGMENT_BIT }
+	};
+	cubemaps.push_back(*generateCubemap(models, texture, format, dim, shaders, sizeof(PushBlockIrradiance), &shaders));
+
+	format = VK_FORMAT_R16G16B16A16_SFLOAT;
+	dim = 512;
+
+	std::vector<aux::ShaderDescription> shadersEnv = {
+			{"filtercube.vert.spv", VK_SHADER_STAGE_VERTEX_BIT},
+			{ "prefilterenvmap.frag.spv", VK_SHADER_STAGE_FRAGMENT_BIT }
+	};
+
+	cubemaps.push_back(*generateCubemap(models, texture, 
+		format, dim, shadersEnv, sizeof(PushBlockPrefilterEnv), nullptr));
+}
+
+aux::Image* Pbr::generateCubemap(gltf::Models models, vks::Texture& texture,
+	VkFormat format, int32_t dim,
+	std::vector<aux::ShaderDescription> shaders,
+	uint32_t constsSize, const void* constsData)
 {
 	VkQueue& queue = Device::getQueue();
+
+	PushBlockPrefilterEnv  pushBlockPrefilterEnv;
 	enum Target { IRRADIANCE = 0, PREFILTEREDENV = 1 };
 	for (uint32_t target = 0; target < PREFILTEREDENV + 1; target++)
 	{
 		auto tStart = std::chrono::high_resolution_clock::now();
-		VkFormat format;
-		int32_t dim;
-
-		switch (target) {
-		case IRRADIANCE:
-			format = VK_FORMAT_R32G32B32A32_SFLOAT;
-			dim = 64;
-			break;
-		case PREFILTEREDENV:
-			format = VK_FORMAT_R16G16B16A16_SFLOAT;
-			dim = 512;
-			break;
-		};
-
 		// Create target cubemap
 		const uint32_t numMips = static_cast<uint32_t>(floor(log2(dim))) + 1;
 		aux::ImageCI cubeCI(format, dim, dim, numMips, 6);
@@ -53,33 +80,13 @@ void Pbr::generateCubemaps(std::vector<Image>& cubemaps, gltf::Models models, vk
 		aux::Image auxImageOffscreen(offscreenFBCI);
 		aux::Framebuffer auxFramebufferOffscreen(auxImageOffscreen, auxRenderPass);
 		aux::IMBarrier::toColorAttachment(auxImageOffscreen, queue);
-
-		struct PushBlockIrradiance {
-			glm::mat4 mvp;
-			float deltaPhi = (2.0f * float(M_PI)) / 180.0f;
-			float deltaTheta = (0.5f * float(M_PI)) / 64.0f;
-		} pushBlockIrradiance;
-
-		struct PushBlockPrefilterEnv {
-			glm::mat4 mvp;
-			float roughness;
-			uint32_t numSamples = 32u;
-		} pushBlockPrefilterEnv;
-
 		// Pipeline layout
 		VkPushConstantRange pushConstantRange{};
 		pushConstantRange.stageFlags =
 			VK_SHADER_STAGE_VERTEX_BIT |
 			VK_SHADER_STAGE_FRAGMENT_BIT;
 
-		switch (target) {
-		case IRRADIANCE:
-			pushConstantRange.size = sizeof(PushBlockIrradiance);
-			break;
-		case PREFILTEREDENV:
-			pushConstantRange.size = sizeof(PushBlockPrefilterEnv);
-			break;
-		};
+		pushConstantRange.size = constsSize;
 
 		// Descriptors
 		VkDescriptorSetLayoutBinding setLayoutBinding =
@@ -93,19 +100,7 @@ void Pbr::generateCubemaps(std::vector<Image>& cubemaps, gltf::Models models, vk
 		aux::PipelineLayout auxPipelineLayout(auxPipelineLayoutCI);
 		VkPipelineLayout pipelinelayout = auxPipelineLayout.get();
 
-		aux::PipelineCI auxPipelineCI{};
-		std::vector<aux::ShaderDescription> shaders = {
-			{"filtercube.vert.spv", VK_SHADER_STAGE_VERTEX_BIT},
-		};
-
-		switch (target) {
-		case IRRADIANCE:
-			shaders.push_back({ "irradiancecube.frag.spv", VK_SHADER_STAGE_FRAGMENT_BIT });
-			break;
-		case PREFILTEREDENV:
-			shaders.push_back({ "prefilterenvmap.frag.spv", VK_SHADER_STAGE_FRAGMENT_BIT });
-			break;
-		};
+		aux::PipelineCI auxPipelineCI{};		
 		auxPipelineCI.shaders = shaders;
 		// Vertex input state
 		std::vector<VkVertexInputBindingDescription> vertexInputBindings = {
@@ -141,18 +136,16 @@ void Pbr::generateCubemaps(std::vector<Image>& cubemaps, gltf::Models models, vk
 				auxRenderPass.begin(&cmdBuf, &auxFramebufferOffscreen, { 0.0f, 0.0f, 0.2f, 0.0f });
 				// Pass parameters for current pass using a push constant block
 
-				switch (target) {
-				case IRRADIANCE:
-					pushBlockIrradiance.mvp = glm::perspective((float)(M_PI / 2.0), 1.0f, 0.1f, 512.0f) * matrices[f];
-					auxCmdBuf.pushConstantsToVsFs(pipelinelayout, 0, sizeof(PushBlockIrradiance), &pushBlockIrradiance);
-					break;
-				case PREFILTEREDENV:
+				if (constsData == nullptr) {
 					pushBlockPrefilterEnv.mvp = glm::perspective((float)(M_PI / 2.0), 1.0f, 0.1f, 512.0f) * matrices[f];
 					pushBlockPrefilterEnv.roughness = (float)m / (float)(numMips - 1);
-					auxCmdBuf.pushConstantsToVsFs(pipelinelayout, 0, sizeof(PushBlockPrefilterEnv), &pushBlockPrefilterEnv);
-					break;
-				};
-
+					auxCmdBuf.pushConstantsToVsFs(pipelinelayout, 0, constsSize, &pushBlockPrefilterEnv);
+				}
+				else {
+					PushBlockIrradiance  pushBlockIrradiance;
+					pushBlockIrradiance.mvp = glm::perspective((float)(M_PI / 2.0), 1.0f, 0.1f, 512.0f) * matrices[f];
+					auxCmdBuf.pushConstantsToVsFs(pipelinelayout, 0, constsSize, &pushBlockIrradiance);
+				}
 				uint32_t vpDim = static_cast<uint32_t>(dim * std::pow(0.5f, m));
 				auxCmdBuf.setViewport(vpDim, vpDim);
 				auxCmdBuf.setScissor(dim, dim);
@@ -177,10 +170,10 @@ void Pbr::generateCubemaps(std::vector<Image>& cubemaps, gltf::Models models, vk
 		auxCmdBuf.begin();
 		aux::IMBarrier::transfer2ShaderRead(auxCube, cmdBuf);
 		auxCmdBuf.flush(queue, false);
-		cubemaps.push_back(auxCube);
 		auto tEnd = std::chrono::high_resolution_clock::now();
 		auto tDiff = std::chrono::duration<double, std::milli>(tEnd - tStart).count();
 		std::cout << "Generating cube map with " << numMips << " mip levels took " << tDiff << " ms" << std::endl;
+		return &auxCube;
 	}
 }
 }
