@@ -41,16 +41,19 @@ class Render {
 	VkDescriptorSet& m_sceneDescriptorSet;
 	VkCommandBuffer& m_cmdBuf;
 	VkPipelineLayout& m_pipelineLayout;
-	aux::Pipeline& m_auxPipelineBlend;
+	aux::Pipeline & m_pipeline;		
+	aux::Pipeline* m_pAuxPipelineBlend;
 public:
 	Render(VkDescriptorSet& sceneDescriptorSet,
 		VkCommandBuffer& cmdBuf,
 		VkPipelineLayout& pipelineLayout,
-		aux::Pipeline& pipeline);
+		aux::Pipeline& pipeline,
+		aux::Pipeline* pPipelineBlend = nullptr);
 
 	void drawNode(vkglTF::Node* node, 
 		vkglTF::Material::AlphaMode alphaMode);
 
+	void drawT(vkglTF::Model& model);
 	void draw(vkglTF::Model& model);
 };
 }

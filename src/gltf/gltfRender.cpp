@@ -6,16 +6,28 @@ namespace gltf
 Render::Render(VkDescriptorSet& sceneDescriptorSet, 
 	VkCommandBuffer& cmdBuf, 
 	VkPipelineLayout& pipelineLayout,
-	aux::Pipeline& pipeline):
+	aux::Pipeline& pipeline,
+	aux::Pipeline* pPipelineBlend) :
 	m_sceneDescriptorSet(sceneDescriptorSet),
 	m_cmdBuf(cmdBuf),
 	m_pipelineLayout(pipelineLayout),
-	m_auxPipelineBlend(pipeline)
+	m_pipeline(pipeline),
+	m_pAuxPipelineBlend(pPipelineBlend)
 {
 }
 
 void Render::draw(vkglTF::Model& model)
 {
+	aux::DescriptorSet dsSkybox(m_sceneDescriptorSet);
+	dsSkybox.bindToGraphics(m_cmdBuf, m_pipelineLayout);
+	m_pipeline.bindToGraphic(m_cmdBuf);
+	model.draw(m_cmdBuf);
+}
+
+void Render::drawT(vkglTF::Model& model)
+{
+	m_pipeline.bindToGraphic(m_cmdBuf);
+
 	VkDeviceSize offsets[1] = { 0 };
 	aux::CommandBuffer auxCmdBuf(m_cmdBuf);
 	auxCmdBuf.bindVertexBuffers(0, 1, &model.vertices.buffer, offsets);
@@ -31,9 +43,11 @@ void Render::draw(vkglTF::Model& model)
 		drawNode(node, vkglTF::Material::ALPHAMODE_MASK);
 	}
 	// TODO: Correct depth sorting
-	m_auxPipelineBlend.bindToGraphic(m_cmdBuf); // 透明体才需要blend
-	for (auto node : model.nodes) {
-		drawNode(node, vkglTF::Material::ALPHAMODE_BLEND);
+	if (m_pAuxPipelineBlend) {
+		m_pAuxPipelineBlend->bindToGraphic(m_cmdBuf); // 透明体才需要blend
+		for (auto node : model.nodes) {
+			drawNode(node, vkglTF::Material::ALPHAMODE_BLEND);
+		}
 	}
 }
 

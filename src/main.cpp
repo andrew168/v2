@@ -182,16 +182,15 @@ public:
 
 			if (displayBackground) {
 				//skybox绘制： 先绑定 ds和pipeline，再绘制
-				aux::DescriptorSet dsSkybox(descriptorSets[i].skybox);
-				dsSkybox.bindToGraphics(currentCB, pipelineLayout);
-				pAuxPipelineSkybox->bindToGraphic(currentCB);
-				models.skybox.draw(currentCB);
+				gltf::Render render(descriptorSets[i].skybox, currentCB,
+					pipelineLayout, *pAuxPipelineSkybox);
+				render.draw(models.skybox);
 			}
 
-			pAuxPipelinePbr->bindToGraphic(currentCB);
 			gltf::Render render(descriptorSets[i].scene, currentCB,
-				pipelineLayout, *pAuxPipelineBlend);
-			render.draw(models.scene);
+				pipelineLayout, *pAuxPipelinePbr, pAuxPipelineBlend);
+			render.drawT(models.scene);
+
 			// User interface
 			ui->draw(currentCB);
 
