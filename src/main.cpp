@@ -180,8 +180,6 @@ public:
 			auxCmdBuf.setViewport(width, height);
 			auxCmdBuf.setScissor(width, height);
 
-			VkDeviceSize offsets[1] = { 0 };
-
 			if (displayBackground) {
 				//skybox绘制： 先绑定 ds和pipeline，再绘制
 				aux::DescriptorSet dsSkybox(descriptorSets[i].skybox);
@@ -191,28 +189,9 @@ public:
 			}
 
 			pAuxPipelinePbr->bindToGraphic(currentCB);
-
-			vkglTF::Model& model = models.scene;
-
-			auxCmdBuf.bindVertexBuffers(0, 1, &model.vertices.buffer, offsets);
-			if (model.indices.buffer != VK_NULL_HANDLE) {
-				auxCmdBuf.bindIndexBuffer(model.indices.buffer);
-			}
-
-			gltf::Render render(descriptorSets[i].scene, commandBuffers[i], pipelineLayout);
-			// 先普通材质，alpha mask, 最后透明体
-			for (auto node : model.nodes) {				
-				render.drawNode(node, vkglTF::Material::ALPHAMODE_OPAQUE);
-			}
-			for (auto node : model.nodes) {
-				render.drawNode(node, vkglTF::Material::ALPHAMODE_MASK);
-			}
-			// TODO: Correct depth sorting
-			pAuxPipelineBlend->bindToGraphic(currentCB); // 透明体才需要blend
-			for (auto node : model.nodes) {
-				render.drawNode(node, vkglTF::Material::ALPHAMODE_BLEND);
-			}
-
+			gltf::Render render(descriptorSets[i].scene, currentCB,
+				pipelineLayout, *pAuxPipelineBlend);
+			render.draw(models.scene);
 			// User interface
 			ui->draw(currentCB);
 

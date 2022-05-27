@@ -1,15 +1,40 @@
-#include "gltf.h"
+﻿#include "gltf.h"
 #include "../auxVk/auxVk.h"
 
 namespace gltf
 {
 Render::Render(VkDescriptorSet& sceneDescriptorSet, 
 	VkCommandBuffer& cmdBuf, 
-	VkPipelineLayout& pipelineLayout):
+	VkPipelineLayout& pipelineLayout,
+	aux::Pipeline& pipeline):
 	m_sceneDescriptorSet(sceneDescriptorSet),
 	m_cmdBuf(cmdBuf),
-	m_pipelineLayout(pipelineLayout)
+	m_pipelineLayout(pipelineLayout),
+	m_auxPipelineBlend(pipeline)
 {
+}
+
+void Render::draw(vkglTF::Model& model)
+{
+	VkDeviceSize offsets[1] = { 0 };
+	aux::CommandBuffer auxCmdBuf(m_cmdBuf);
+	auxCmdBuf.bindVertexBuffers(0, 1, &model.vertices.buffer, offsets);
+	if (model.indices.buffer != VK_NULL_HANDLE) {
+		auxCmdBuf.bindIndexBuffer(model.indices.buffer);
+	}
+
+	// 先普通材质，alpha mask, 最后透明体
+	for (auto node : model.nodes) {
+		drawNode(node, vkglTF::Material::ALPHAMODE_OPAQUE);
+	}
+	for (auto node : model.nodes) {
+		drawNode(node, vkglTF::Material::ALPHAMODE_MASK);
+	}
+	// TODO: Correct depth sorting
+	m_auxPipelineBlend.bindToGraphic(m_cmdBuf); // 透明体才需要blend
+	for (auto node : model.nodes) {
+		drawNode(node, vkglTF::Material::ALPHAMODE_BLEND);
+	}
 }
 
 void Render::drawNode(vkglTF::Node* node, 

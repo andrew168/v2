@@ -1,5 +1,7 @@
 ﻿#pragma once
 #include "..\vk.h"
+#include "..\auxVk\auxVk.h"
+
 namespace gltf
 {
 
@@ -39,12 +41,16 @@ class Render {
 	VkDescriptorSet& m_sceneDescriptorSet;
 	VkCommandBuffer& m_cmdBuf;
 	VkPipelineLayout& m_pipelineLayout;
+	aux::Pipeline& m_auxPipelineBlend;
 public:
 	Render(VkDescriptorSet& sceneDescriptorSet,
 		VkCommandBuffer& cmdBuf,
-		VkPipelineLayout& pipelineLayout);
+		VkPipelineLayout& pipelineLayout,
+		aux::Pipeline& pipeline);
 
 	void drawNode(vkglTF::Node* node, 
 		vkglTF::Material::AlphaMode alphaMode);
+
+	void draw(vkglTF::Model& model);
 };
 }
