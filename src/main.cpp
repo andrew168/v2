@@ -543,7 +543,7 @@ public:
 		shaderValuesSkybox.model = glm::mat4(glm::mat3(camera.matrices.view));
 	}
 
-	void updateParams()
+	void updateLights()
 	{
 		shaderValuesParams.lightDir = glm::vec4(
 			sin(glm::radians(lightSource.rotation.x)) * cos(glm::radians(lightSource.rotation.y)),
@@ -675,7 +675,7 @@ public:
 			{
 				sceneModel.update(animationIndex, frameTimer);
 			}
-			updateParams();
+			updateLights();
 			if (rotateModel) {
 				updateUniformBuffers();
 			}

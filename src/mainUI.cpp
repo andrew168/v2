@@ -183,7 +183,7 @@ void VulkanExample::updateOverlay()
 	}
 
 	if (updateShaderParams) {
-		updateParams();
+		updateLights();
 	}
 
 #if defined(VK_USE_PLATFORM_ANDROID_KHR)
