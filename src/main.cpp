@@ -489,10 +489,10 @@ public:
 		for (auto& uniformBuffer : paramUniformBuffers) {
 			uniformBuffer.create(vulkanDevice, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, sizeof(shaderValuesParams));
 		}
-		updateUniformBuffers();
+		updateShaderValues();
 	}
 
-	void updateUniformBuffers()
+	void updateShaderValues()
 	{
 		sceneModel.updateShaderValues(camera);
 		sceneModel.centerAndScale();
@@ -512,7 +512,7 @@ public:
 	{
 		recordCommandBuffers();
 		vkDeviceWaitIdle(device);
-		updateUniformBuffers();
+		updateShaderValues();
 		updateOverlay();
 	}
 
@@ -590,7 +590,7 @@ public:
 		}
 
 		// Update UBOs
-		updateUniformBuffers();
+		updateShaderValues();
 		sceneModel.applyShaderValues(currentBuffer);
 		memcpy(paramUniformBuffers[currentBuffer].mapped, &shaderValuesParams, sizeof(shaderValuesParams));
 		skyboxModel.applyShaderValues(currentBuffer);
@@ -633,11 +633,11 @@ public:
 			}
 			updateLights();
 			if (rotateModel) {
-				updateUniformBuffers();
+				updateShaderValues();
 			}
 		}
 		if (camera.updated) {
-			updateUniformBuffers();
+			updateShaderValues();
 		}
 	}
 };
