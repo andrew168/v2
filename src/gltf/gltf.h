@@ -11,7 +11,13 @@ enum PBRWorkflows {
 };
 
 class Model: public vkglTF::Model {
-
+	float m_animationTimer = 0.0f;
+public:
+	Model();
+	vkglTF::Model* toVkglTF() {
+		return static_cast<vkglTF::Model*> (this);
+	}
+	void update(int32_t animationIndex, float frameTimer);
 };
 
 struct PushConstBlockMaterial {

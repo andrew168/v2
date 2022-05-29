@@ -60,11 +60,8 @@ public:
 
 	const uint32_t renderAhead = 2;
 	uint32_t frameIndex = 0;
-
 	int32_t animationIndex = 0;
-	float animationTimer = 0.0f;
 	bool animate = true;
-
 	bool displayBackground = true;
 
 	struct LightSource {
@@ -204,8 +201,6 @@ public:
 	{
 		std::cout << "Loading scene from " << filename << std::endl;
 		sceneModel.destroy(device);
-		animationIndex = 0;
-		animationTimer = 0.0f;
 		sceneModel.loadFromFile(filename, vulkanDevice, queue);
 		camera.setPosition({ 0.0f, 0.0f, 1.0f });
 		camera.setRotation({ 0.0f, 0.0f, 0.0f });
@@ -676,12 +671,9 @@ public:
 					modelrot.y -= 360.0f;
 				}
 			}
-			if ((animate) && (sceneModel.animations.size() > 0)) {
-				animationTimer += frameTimer;
-				if (animationTimer > sceneModel.animations[animationIndex].end) {
-					animationTimer -= sceneModel.animations[animationIndex].end;
-				}
-				sceneModel.updateAnimation(animationIndex, animationTimer);
+			if (animate)
+			{
+				sceneModel.update(animationIndex, frameTimer);
 			}
 			updateParams();
 			if (rotateModel) {
