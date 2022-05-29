@@ -46,7 +46,8 @@ public:
 	aux::DescriptorSetLayout* pAuxDSLayoutScene;
 	aux::DescriptorSetLayout* pAuxDSLayoutMaterial;
 	aux::DescriptorSetLayout* pAuxDSLayoutNode;
-	std::vector<DescriptorSets> descriptorSets;
+	std::vector<VkDescriptorSet> sceneDS;
+	std::vector<VkDescriptorSet> skyboxDS;
 
 	std::vector<VkCommandBuffer> commandBuffers;
 	std::vector<Buffer> sceneUniformBuffers;
@@ -181,12 +182,12 @@ public:
 
 			if (displayBackground) {
 				//skybox绘制： 先绑定 ds和pipeline，再绘制
-				gltf::Render render(descriptorSets[i].skybox, currentCB,
+				gltf::Render render(skyboxDS[i], currentCB,
 					pipelineLayout, *pAuxPipelineSkybox);
 				render.draw(models.skybox);
 			}
 
-			gltf::Render render(descriptorSets[i].scene, currentCB,
+			gltf::Render render(sceneDS[i], currentCB,
 				pipelineLayout, *pAuxPipelinePbr, pAuxPipelineBlend);
 			render.drawT(models.scene);
 
@@ -332,16 +333,16 @@ public:
 			};
 			pAuxDSLayoutScene = new aux::DescriptorSetLayout(setLayoutBindings);
 
-			for (auto i = 0; i < descriptorSets.size(); i++) {
-				aux::DescriptorSet::allocate(descriptorSets[i].scene,
+			for (auto i = 0; i < sceneDS.size(); i++) {
+				aux::DescriptorSet::allocate(sceneDS[i],
 					descriptorPool, pAuxDSLayoutScene->get());
 				
 				std::vector<VkWriteDescriptorSet> writeDescriptorSets(5);
-				aux::Describe::buffer(writeDescriptorSets[0], descriptorSets[i].scene, 0, &sceneUniformBuffers[i].descriptor);
-				aux::Describe::buffer(writeDescriptorSets[1], descriptorSets[i].scene, 1, &paramUniformBuffers[i].descriptor);
-				aux::Describe::image(writeDescriptorSets[2], descriptorSets[i].scene, 2, &textures.irradianceCube.descriptor);
-				aux::Describe::image(writeDescriptorSets[3], descriptorSets[i].scene, 3, &textures.prefilteredCube.descriptor);
-				aux::Describe::image(writeDescriptorSets[4], descriptorSets[i].scene, 4, &textures.lutBrdf.descriptor);
+				aux::Describe::buffer(writeDescriptorSets[0], sceneDS[i], 0, &sceneUniformBuffers[i].descriptor);
+				aux::Describe::buffer(writeDescriptorSets[1], sceneDS[i], 1, &paramUniformBuffers[i].descriptor);
+				aux::Describe::image(writeDescriptorSets[2], sceneDS[i], 2, &textures.irradianceCube.descriptor);
+				aux::Describe::image(writeDescriptorSets[3], sceneDS[i], 3, &textures.prefilteredCube.descriptor);
+				aux::Describe::image(writeDescriptorSets[4], sceneDS[i], 4, &textures.lutBrdf.descriptor);
 
 				aux::DescriptorSet::updateW(writeDescriptorSets);
 			}
@@ -416,13 +417,13 @@ public:
 
 		// Skybox (fixed set)
 		for (auto i = 0; i < skyboxUniformBuffers.size(); i++) {
-			aux::DescriptorSet::allocate(descriptorSets[i].skybox, 
+			aux::DescriptorSet::allocate(skyboxDS[i], 
 				descriptorPool, pAuxDSLayoutScene->get());
 
 			std::vector<VkWriteDescriptorSet> writeDescriptorSets(3);
-			aux::Describe::buffer(writeDescriptorSets[0], descriptorSets[i].skybox, 0, &skyboxUniformBuffers[i].descriptor);
-			aux::Describe::buffer(writeDescriptorSets[1], descriptorSets[i].skybox, 1, &paramUniformBuffers[i].descriptor);
-			aux::Describe::image(writeDescriptorSets[2], descriptorSets[i].skybox, 2, &textures.prefilteredCube.descriptor);			
+			aux::Describe::buffer(writeDescriptorSets[0], skyboxDS[i], 0, &skyboxUniformBuffers[i].descriptor);
+			aux::Describe::buffer(writeDescriptorSets[1], skyboxDS[i], 1, &paramUniformBuffers[i].descriptor);
+			aux::Describe::image(writeDescriptorSets[2], skyboxDS[i], 2, &textures.prefilteredCube.descriptor);			
 			DescriptorSet::updateW(writeDescriptorSets);
 		}
 	}
@@ -584,7 +585,8 @@ public:
 		sceneUniformBuffers.resize(swapChain.imageCount);
 		skyboxUniformBuffers.resize(swapChain.imageCount);
 		paramUniformBuffers.resize(swapChain.imageCount);
-		descriptorSets.resize(swapChain.imageCount);
+		sceneDS.resize(swapChain.imageCount);
+		skyboxDS.resize(swapChain.imageCount);
 		// Command buffer execution fences
 		for (auto& waitFence : waitFences) {
 			aux::Fence::create(waitFence, true);

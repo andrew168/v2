@@ -15,11 +15,6 @@ struct Models {
 	vkglTF::Model skybox;
 };
 
-struct DescriptorSets {
-	VkDescriptorSet scene;
-	VkDescriptorSet skybox;
-};
-
 struct PushConstBlockMaterial {
 	glm::vec4 baseColorFactor;
 	glm::vec4 emissiveFactor;
