@@ -22,13 +22,6 @@ public:
 		vks::TextureCubeMap prefilteredCube;
 	} textures;
 
-	struct UBOMatrices {
-		glm::mat4 projection;
-		glm::mat4 model;
-		glm::mat4 view;
-		glm::vec3 camPos;
-	} shaderValuesScene, shaderValuesSkybox;
-
 	struct shaderValuesParams {
 		glm::vec4 lightDir;
 		float exposure = 4.5f;
@@ -51,8 +44,6 @@ public:
 	std::vector<VkDescriptorSet> skyboxDS;
 
 	std::vector<VkCommandBuffer> commandBuffers;
-	std::vector<Buffer> sceneUniformBuffers;
-	std::vector<Buffer> skyboxUniformBuffers;
 	std::vector<Buffer> paramUniformBuffers;
 	std::vector<VkFence> waitFences;
 	std::vector<VkSemaphore> renderCompleteSemaphores;
@@ -111,15 +102,6 @@ public:
 		delete pAuxDSLayoutMaterial;
 		delete pAuxDSLayoutNode;
 
-		sceneModel.destroy(device);
-		skyboxModel.destroy(device);
-
-		for (auto buffer : sceneUniformBuffers) {
-			buffer.destroy();
-		}
-		for (auto buffer : skyboxUniformBuffers) {
-			buffer.destroy();
-		}
 		for (auto buffer : paramUniformBuffers) {
 			buffer.destroy();
 		}
@@ -334,7 +316,7 @@ public:
 					descriptorPool, pAuxDSLayoutScene->get());
 				
 				std::vector<VkWriteDescriptorSet> writeDescriptorSets(5);
-				aux::Describe::buffer(writeDescriptorSets[0], sceneDS[i], 0, &sceneUniformBuffers[i].descriptor);
+				aux::Describe::buffer(writeDescriptorSets[0], sceneDS[i], 0, &(sceneModel.getUB()[i].descriptor));
 				aux::Describe::buffer(writeDescriptorSets[1], sceneDS[i], 1, &paramUniformBuffers[i].descriptor);
 				aux::Describe::image(writeDescriptorSets[2], sceneDS[i], 2, &textures.irradianceCube.descriptor);
 				aux::Describe::image(writeDescriptorSets[3], sceneDS[i], 3, &textures.prefilteredCube.descriptor);
@@ -412,12 +394,12 @@ public:
 		}
 
 		// Skybox (fixed set)
-		for (auto i = 0; i < skyboxUniformBuffers.size(); i++) {
+		for (auto i = 0; i < skyboxModel.getUB().size(); i++) {
 			aux::DescriptorSet::allocate(skyboxDS[i], 
 				descriptorPool, pAuxDSLayoutScene->get());
 
 			std::vector<VkWriteDescriptorSet> writeDescriptorSets(3);
-			aux::Describe::buffer(writeDescriptorSets[0], skyboxDS[i], 0, &skyboxUniformBuffers[i].descriptor);
+			aux::Describe::buffer(writeDescriptorSets[0], skyboxDS[i], 0, &(skyboxModel.getUB()[i].descriptor));
 			aux::Describe::buffer(writeDescriptorSets[1], skyboxDS[i], 1, &paramUniformBuffers[i].descriptor);
 			aux::Describe::image(writeDescriptorSets[2], skyboxDS[i], 2, &textures.prefilteredCube.descriptor);			
 			DescriptorSet::updateW(writeDescriptorSets);
@@ -502,12 +484,8 @@ public:
 	*/
 	void prepareUniformBuffers()
 	{
-		for (auto& uniformBuffer : sceneUniformBuffers) {
-			uniformBuffer.create(vulkanDevice, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, sizeof(shaderValuesScene));
-		}
-		for (auto& uniformBuffer : skyboxUniformBuffers) {
-			uniformBuffer.create(vulkanDevice, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, sizeof(shaderValuesSkybox));
-		}
+		sceneModel.prepareUniformBuffers();
+		skyboxModel.prepareUniformBuffers();
 		for (auto& uniformBuffer : paramUniformBuffers) {
 			uniformBuffer.create(vulkanDevice, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, sizeof(shaderValuesParams));
 		}
@@ -516,31 +494,9 @@ public:
 
 	void updateUniformBuffers()
 	{
-		// Scene
-		shaderValuesScene.projection = camera.matrices.perspective;
-		shaderValuesScene.view = camera.matrices.view;
-
-		// Center and scale model
-		float scale = (1.0f / std::max(sceneModel.aabb[0][0], std::max(sceneModel.aabb[1][1], sceneModel.aabb[2][2]))) * 0.5f;
-		glm::vec3 translate = -glm::vec3(sceneModel.aabb[3][0], sceneModel.aabb[3][1], sceneModel.aabb[3][2]);
-		translate += -0.5f * glm::vec3(sceneModel.aabb[0][0], sceneModel.aabb[1][1], sceneModel.aabb[2][2]);
-
-		shaderValuesScene.model = glm::mat4(1.0f);
-		shaderValuesScene.model[0][0] = scale;
-		shaderValuesScene.model[1][1] = scale;
-		shaderValuesScene.model[2][2] = scale;
-		shaderValuesScene.model = glm::translate(shaderValuesScene.model, translate);
-
-		shaderValuesScene.camPos = glm::vec3(
-			-camera.position.z * sin(glm::radians(camera.rotation.y)) * cos(glm::radians(camera.rotation.x)),
-			-camera.position.z * sin(glm::radians(camera.rotation.x)),
-			camera.position.z * cos(glm::radians(camera.rotation.y)) * cos(glm::radians(camera.rotation.x))
-		);
-
-		// Skybox
-		shaderValuesSkybox.projection = camera.matrices.perspective;
-		shaderValuesSkybox.view = camera.matrices.view;
-		shaderValuesSkybox.model = glm::mat4(glm::mat3(camera.matrices.view));
+		sceneModel.updateShaderValues(camera);
+		sceneModel.centerAndScale();
+		skyboxModel.updateShaderValues(camera);
 	}
 
 	void updateLights()
@@ -578,8 +534,8 @@ public:
 		presentCompleteSemaphores.resize(renderAhead);
 		renderCompleteSemaphores.resize(renderAhead);
 		commandBuffers.resize(swapChain.imageCount);
-		sceneUniformBuffers.resize(swapChain.imageCount);
-		skyboxUniformBuffers.resize(swapChain.imageCount);
+		sceneModel.getUB().resize(swapChain.imageCount);
+		skyboxModel.getUB().resize(swapChain.imageCount);
 		paramUniformBuffers.resize(swapChain.imageCount);
 		sceneDS.resize(swapChain.imageCount);
 		skyboxDS.resize(swapChain.imageCount);
@@ -635,10 +591,10 @@ public:
 
 		// Update UBOs
 		updateUniformBuffers();
-		memcpy(sceneUniformBuffers[currentBuffer].mapped, &shaderValuesScene, sizeof(shaderValuesScene));
+		sceneModel.applyShaderValues(currentBuffer);
 		memcpy(paramUniformBuffers[currentBuffer].mapped, &shaderValuesParams, sizeof(shaderValuesParams));
-		memcpy(skyboxUniformBuffers[currentBuffer].mapped, &shaderValuesSkybox, sizeof(shaderValuesSkybox));
-
+		skyboxModel.applyShaderValues(currentBuffer);
+		
 		aux::Queue auxQueue(queue);
 		auxQueue.submit(std::vector<VkCommandBuffer>({ commandBuffers[currentBuffer] }),
 			VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,

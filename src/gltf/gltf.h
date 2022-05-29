@@ -10,14 +10,29 @@ enum PBRWorkflows {
 	PBR_WORKFLOW_SPECULAR_GLOSINESS = 1
 };
 
+struct UBOMatrices {
+	glm::mat4 projection;
+	glm::mat4 model;
+	glm::mat4 view;
+	glm::vec3 camPos;
+};
+
 class Model: public vkglTF::Model {
 	float m_animationTimer = 0.0f;
+	std::vector<Buffer> uniformBuffers;
+	UBOMatrices shaderValues;
 public:
 	Model();
+	~Model();
 	vkglTF::Model* toVkglTF() {
 		return static_cast<vkglTF::Model*> (this);
 	}
 	void update(int32_t animationIndex, float frameTimer);
+	void updateShaderValues(Camera& camera);
+	void Model::centerAndScale();
+	void applyShaderValues(uint32_t currentBuffer);
+	void prepareUniformBuffers();
+	std::vector<Buffer>& getUB() { return uniformBuffers; }
 };
 
 struct PushConstBlockMaterial {
