@@ -23,7 +23,7 @@ struct PushBlockIrradiance {
 	- 预过滤的环境图： (Pre-filterd environment) cubemap, 
 先生成每一个面、每一个mip level，再合成到cubemap中。
 */
-void Pbr::generateCubemaps(std::vector<Image>& cubemaps, gltf::Model skyboxModel, vks::Texture& texture)
+void Pbr::generateCubemaps(std::vector<Image>& cubemaps, gltf::Model& skyboxModel, vks::Texture& texture)
 {
 	VkFormat format;
 	int32_t dim;
@@ -53,7 +53,7 @@ void Pbr::generateCubemaps(std::vector<Image>& cubemaps, gltf::Model skyboxModel
 * 用offscreen渲染生成每一个面、每一个mip level，
 * 再copy到cubemap中。
 */
-aux::Image* Pbr::generateCubemap(gltf::Model skyboxModel, vks::Texture& texture,
+aux::Image* Pbr::generateCubemap(gltf::Model& skyboxModel, vks::Texture& texture,
 	VkFormat format, int32_t dim,
 	std::vector<aux::ShaderDescription> shaders,
 	uint32_t constsSize, const void* constsData)

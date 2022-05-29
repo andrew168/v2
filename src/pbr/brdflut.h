@@ -12,8 +12,8 @@ class Pbr
 
 public:
 	static aux::Image& generateBRDFLUT();
-	static void generateCubemaps(std::vector<aux::Image>& cubemaps, gltf::Model skyboxMmodel, vks::Texture& texture);
-	static aux::Image* Pbr::generateCubemap(gltf::Model skyboxModel, vks::Texture& texture, VkFormat format, int32_t dim,
+	static void generateCubemaps(std::vector<aux::Image>& cubemaps, gltf::Model& skyboxMmodel, vks::Texture& texture);
+	static aux::Image* Pbr::generateCubemap(gltf::Model& skyboxModel, vks::Texture& texture, VkFormat format, int32_t dim,
 		std::vector<aux::ShaderDescription> shaders,
 		uint32_t constsSize, const void* constsData);
 };
