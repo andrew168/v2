@@ -10,9 +10,8 @@ enum PBRWorkflows {
 	PBR_WORKFLOW_SPECULAR_GLOSINESS = 1
 };
 
-struct Models {
-	vkglTF::Model scene;
-	vkglTF::Model skybox;
+class Model: public vkglTF::Model {
+
 };
 
 struct PushConstBlockMaterial {

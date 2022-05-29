@@ -12,7 +12,8 @@ using namespace gltf;
 class VulkanExample : public VulkanExampleBase
 {
 public:
-	gltf::Models models;
+	gltf::Model sceneModel;
+	gltf::Model skyboxModel;
 	struct Textures {
 		vks::TextureCubeMap environmentCube;
 		vks::Texture2D empty;
@@ -113,8 +114,8 @@ public:
 		delete pAuxDSLayoutMaterial;
 		delete pAuxDSLayoutNode;
 
-		models.scene.destroy(device);
-		models.skybox.destroy(device);
+		sceneModel.destroy(device);
+		skyboxModel.destroy(device);
 
 		for (auto buffer : sceneUniformBuffers) {
 			buffer.destroy();
@@ -184,12 +185,12 @@ public:
 				//skybox绘制： 先绑定 ds和pipeline，再绘制
 				gltf::Render render(skyboxDS[i], currentCB,
 					pipelineLayout, *pAuxPipelineSkybox);
-				render.draw(models.skybox);
+				render.draw(skyboxModel);
 			}
 
 			gltf::Render render(sceneDS[i], currentCB,
 				pipelineLayout, *pAuxPipelinePbr, pAuxPipelineBlend);
-			render.drawT(models.scene);
+			render.drawT(sceneModel);
 
 			// User interface
 			ui->draw(currentCB);
@@ -202,10 +203,10 @@ public:
 	void loadScene(std::string filename)
 	{
 		std::cout << "Loading scene from " << filename << std::endl;
-		models.scene.destroy(device);
+		sceneModel.destroy(device);
 		animationIndex = 0;
 		animationTimer = 0.0f;
-		models.scene.loadFromFile(filename, vulkanDevice, queue);
+		sceneModel.loadFromFile(filename, vulkanDevice, queue);
 		camera.setPosition({ 0.0f, 0.0f, 1.0f });
 		camera.setRotation({ 0.0f, 0.0f, 0.0f });
 	}
@@ -268,7 +269,7 @@ public:
 		}
 
 		loadScene(sceneFile.c_str());
-		models.skybox.loadFromFile(assetpath + "models/Box/glTF-Embedded/Box.gltf", vulkanDevice, queue);
+		skyboxModel.loadFromFile(assetpath + "models/Box/glTF-Embedded/Box.gltf", vulkanDevice, queue);
 
 		loadEnvironment(envMapFile.c_str());
 	}
@@ -298,7 +299,7 @@ public:
 		imageSamplerCount += 3;
 
 		// 每一个GLTF模型都有自己的材质列表和mesh列表
-		std::vector<vkglTF::Model*> modellist = { &models.skybox, &models.scene };
+		std::vector<vkglTF::Model*> modellist = { &skyboxModel, &sceneModel };
 		for (auto& model : modellist) {
 			for (auto& material : model->materials) {
 				imageSamplerCount += 5;  // 每种PBR材质有5个texture作为sampler
@@ -360,7 +361,7 @@ public:
 			pAuxDSLayoutMaterial = new aux::DescriptorSetLayout(setLayoutBindings);
 
 			// Per-Material descriptor sets
-			for (auto& material : models.scene.materials) {
+			for (auto& material : sceneModel.materials) {
 				aux::DescriptorSet::allocate(material.descriptorSet, 
 					descriptorPool, pAuxDSLayoutMaterial->get());				
 				std::vector<VkDescriptorImageInfo> imageDescriptors = {
@@ -408,7 +409,7 @@ public:
 				pAuxDSLayoutNode = new aux::DescriptorSetLayout(setLayoutBindings);
 
 				// Per-Node descriptor set
-				for (auto& node : models.scene.nodes) {
+				for (auto& node : sceneModel.nodes) {
 					setupNodeDescriptorSet(node);
 				}
 			}
@@ -525,9 +526,9 @@ public:
 		shaderValuesScene.view = camera.matrices.view;
 
 		// Center and scale model
-		float scale = (1.0f / std::max(models.scene.aabb[0][0], std::max(models.scene.aabb[1][1], models.scene.aabb[2][2]))) * 0.5f;
-		glm::vec3 translate = -glm::vec3(models.scene.aabb[3][0], models.scene.aabb[3][1], models.scene.aabb[3][2]);
-		translate += -0.5f * glm::vec3(models.scene.aabb[0][0], models.scene.aabb[1][1], models.scene.aabb[2][2]);
+		float scale = (1.0f / std::max(sceneModel.aabb[0][0], std::max(sceneModel.aabb[1][1], sceneModel.aabb[2][2]))) * 0.5f;
+		glm::vec3 translate = -glm::vec3(sceneModel.aabb[3][0], sceneModel.aabb[3][1], sceneModel.aabb[3][2]);
+		translate += -0.5f * glm::vec3(sceneModel.aabb[0][0], sceneModel.aabb[1][1], sceneModel.aabb[2][2]);
 
 		shaderValuesScene.model = glm::mat4(1.0f);
 		shaderValuesScene.model[0][0] = scale;
@@ -602,7 +603,7 @@ public:
 		loadAssets();
 		Pbr::generateBRDFLUT().toVKS(textures.lutBrdf);
 		std::vector<aux::Image> auxCubemaps{};
-		v2::Pbr::generateCubemaps(auxCubemaps, models, textures.environmentCube);
+		v2::Pbr::generateCubemaps(auxCubemaps, skyboxModel, textures.environmentCube);
 		auxCubemaps[0].toVKS(textures.irradianceCube);
 		auxCubemaps[1].toVKS(textures.prefilteredCube);
 		shaderValuesParams.prefilteredCubeMipLevels = 
@@ -675,12 +676,12 @@ public:
 					modelrot.y -= 360.0f;
 				}
 			}
-			if ((animate) && (models.scene.animations.size() > 0)) {
+			if ((animate) && (sceneModel.animations.size() > 0)) {
 				animationTimer += frameTimer;
-				if (animationTimer > models.scene.animations[animationIndex].end) {
-					animationTimer -= models.scene.animations[animationIndex].end;
+				if (animationTimer > sceneModel.animations[animationIndex].end) {
+					animationTimer -= sceneModel.animations[animationIndex].end;
 				}
-				models.scene.updateAnimation(animationIndex, animationTimer);
+				sceneModel.updateAnimation(animationIndex, animationTimer);
 			}
 			updateParams();
 			if (rotateModel) {

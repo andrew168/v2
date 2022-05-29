@@ -26,7 +26,7 @@ void VulkanExample::updateOverlay()
 	ImGui::NewFrame();
 
 	ImGui::SetNextWindowPos(ImVec2(10, 10));
-	ImGui::SetNextWindowSize(ImVec2(200 * scale, (models.scene.animations.size() > 0 ? 440 : 360) * scale), ImGuiSetCond_Always);
+	ImGui::SetNextWindowSize(ImVec2(200 * scale, (sceneModel.animations.size() > 0 ? 440 : 360) * scale), ImGuiSetCond_Always);
 	ImGui::Begin("Vulkan glTF 2.0 PBR", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove);
 	ImGui::PushItemWidth(100.0f * scale);
 
@@ -117,11 +117,11 @@ void VulkanExample::updateOverlay()
 		}
 	}
 
-	if (models.scene.animations.size() > 0) {
+	if (sceneModel.animations.size() > 0) {
 		if (ui->header("Animations")) {
 			ui->checkbox("Animate", &animate);
 			std::vector<std::string> animationNames;
-			for (auto animation : models.scene.animations) {
+			for (auto animation : sceneModel.animations) {
 				animationNames.push_back(animation.name);
 			}
 			ui->combo("Animation", &animationIndex, animationNames);
