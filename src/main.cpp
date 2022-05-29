@@ -21,12 +21,6 @@ public:
 		vks::TextureCubeMap prefilteredCube;
 	} textures;
 
-	struct UniformBufferSet {
-		Buffer scene;
-		Buffer skybox;
-		Buffer params;
-	};
-
 	struct UBOMatrices {
 		glm::mat4 projection;
 		glm::mat4 model;
@@ -55,8 +49,9 @@ public:
 	std::vector<DescriptorSets> descriptorSets;
 
 	std::vector<VkCommandBuffer> commandBuffers;
-	std::vector<UniformBufferSet> uniformBuffers;
-
+	std::vector<Buffer> sceneUniformBuffers;
+	std::vector<Buffer> skyboxUniformBuffers;
+	std::vector<Buffer> paramUniformBuffers;
 	std::vector<VkFence> waitFences;
 	std::vector<VkSemaphore> renderCompleteSemaphores;
 	std::vector<VkSemaphore> presentCompleteSemaphores;
@@ -120,10 +115,14 @@ public:
 		models.scene.destroy(device);
 		models.skybox.destroy(device);
 
-		for (auto buffer : uniformBuffers) {
-			buffer.params.destroy();
-			buffer.scene.destroy();
-			buffer.skybox.destroy();
+		for (auto buffer : sceneUniformBuffers) {
+			buffer.destroy();
+		}
+		for (auto buffer : skyboxUniformBuffers) {
+			buffer.destroy();
+		}
+		for (auto buffer : paramUniformBuffers) {
+			buffer.destroy();
 		}
 		for (auto fence : waitFences) {
 			vkDestroyFence(device, fence, nullptr);
@@ -338,8 +337,8 @@ public:
 					descriptorPool, pAuxDSLayoutScene->get());
 				
 				std::vector<VkWriteDescriptorSet> writeDescriptorSets(5);
-				aux::Describe::buffer(writeDescriptorSets[0], descriptorSets[i].scene, 0, &uniformBuffers[i].scene.descriptor);
-				aux::Describe::buffer(writeDescriptorSets[1], descriptorSets[i].scene, 1, &uniformBuffers[i].params.descriptor);
+				aux::Describe::buffer(writeDescriptorSets[0], descriptorSets[i].scene, 0, &sceneUniformBuffers[i].descriptor);
+				aux::Describe::buffer(writeDescriptorSets[1], descriptorSets[i].scene, 1, &paramUniformBuffers[i].descriptor);
 				aux::Describe::image(writeDescriptorSets[2], descriptorSets[i].scene, 2, &textures.irradianceCube.descriptor);
 				aux::Describe::image(writeDescriptorSets[3], descriptorSets[i].scene, 3, &textures.prefilteredCube.descriptor);
 				aux::Describe::image(writeDescriptorSets[4], descriptorSets[i].scene, 4, &textures.lutBrdf.descriptor);
@@ -416,13 +415,13 @@ public:
 		}
 
 		// Skybox (fixed set)
-		for (auto i = 0; i < uniformBuffers.size(); i++) {
+		for (auto i = 0; i < skyboxUniformBuffers.size(); i++) {
 			aux::DescriptorSet::allocate(descriptorSets[i].skybox, 
 				descriptorPool, pAuxDSLayoutScene->get());
 
 			std::vector<VkWriteDescriptorSet> writeDescriptorSets(3);
-			aux::Describe::buffer(writeDescriptorSets[0], descriptorSets[i].skybox, 0, &uniformBuffers[i].skybox.descriptor);
-			aux::Describe::buffer(writeDescriptorSets[1], descriptorSets[i].skybox, 1, &uniformBuffers[i].params.descriptor);
+			aux::Describe::buffer(writeDescriptorSets[0], descriptorSets[i].skybox, 0, &skyboxUniformBuffers[i].descriptor);
+			aux::Describe::buffer(writeDescriptorSets[1], descriptorSets[i].skybox, 1, &paramUniformBuffers[i].descriptor);
 			aux::Describe::image(writeDescriptorSets[2], descriptorSets[i].skybox, 2, &textures.prefilteredCube.descriptor);			
 			DescriptorSet::updateW(writeDescriptorSets);
 		}
@@ -506,10 +505,14 @@ public:
 	*/
 	void prepareUniformBuffers()
 	{
-		for (auto& uniformBuffer : uniformBuffers) {
-			uniformBuffer.scene.create(vulkanDevice, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, sizeof(shaderValuesScene));
-			uniformBuffer.skybox.create(vulkanDevice, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, sizeof(shaderValuesSkybox));
-			uniformBuffer.params.create(vulkanDevice, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, sizeof(shaderValuesParams));
+		for (auto& uniformBuffer : sceneUniformBuffers) {
+			uniformBuffer.create(vulkanDevice, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, sizeof(shaderValuesScene));
+		}
+		for (auto& uniformBuffer : skyboxUniformBuffers) {
+			uniformBuffer.create(vulkanDevice, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, sizeof(shaderValuesSkybox));
+		}
+		for (auto& uniformBuffer : paramUniformBuffers) {
+			uniformBuffer.create(vulkanDevice, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, sizeof(shaderValuesParams));
 		}
 		updateUniformBuffers();
 	}
@@ -578,7 +581,9 @@ public:
 		presentCompleteSemaphores.resize(renderAhead);
 		renderCompleteSemaphores.resize(renderAhead);
 		commandBuffers.resize(swapChain.imageCount);
-		uniformBuffers.resize(swapChain.imageCount);
+		sceneUniformBuffers.resize(swapChain.imageCount);
+		skyboxUniformBuffers.resize(swapChain.imageCount);
+		paramUniformBuffers.resize(swapChain.imageCount);
 		descriptorSets.resize(swapChain.imageCount);
 		// Command buffer execution fences
 		for (auto& waitFence : waitFences) {
@@ -632,10 +637,9 @@ public:
 
 		// Update UBOs
 		updateUniformBuffers();
-		UniformBufferSet currentUB = uniformBuffers[currentBuffer];
-		memcpy(currentUB.scene.mapped, &shaderValuesScene, sizeof(shaderValuesScene));
-		memcpy(currentUB.params.mapped, &shaderValuesParams, sizeof(shaderValuesParams));
-		memcpy(currentUB.skybox.mapped, &shaderValuesSkybox, sizeof(shaderValuesSkybox));
+		memcpy(sceneUniformBuffers[currentBuffer].mapped, &shaderValuesScene, sizeof(shaderValuesScene));
+		memcpy(paramUniformBuffers[currentBuffer].mapped, &shaderValuesParams, sizeof(shaderValuesParams));
+		memcpy(skyboxUniformBuffers[currentBuffer].mapped, &shaderValuesSkybox, sizeof(shaderValuesSkybox));
 
 		aux::Queue auxQueue(queue);
 		auxQueue.submit(std::vector<VkCommandBuffer>({ commandBuffers[currentBuffer] }),
