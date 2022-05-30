@@ -419,7 +419,9 @@ public:
 
 		// Pipeline layout
 		const std::vector<VkDescriptorSetLayout> setLayouts = {
-			*(pAuxDSLayoutScene->get()), *(pAuxDSLayoutMaterial->get()), *(pAuxDSLayoutNode->get())
+			*(pAuxDSLayoutScene->get()), 
+			*(pAuxDSLayoutMaterial->get()), 
+			*(pAuxDSLayoutNode->get())
 		};
 
 		VkPushConstantRange pushConstantRange{};
