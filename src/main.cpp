@@ -1,7 +1,7 @@
 ﻿#include "v2\v2.h"
 #include "auxVk\auxVk.h"
-#include "pbr/brdflut.h"
 #include "gltf/gltf.h"
+#include "pbr/pbr.h"
 
 using namespace aux;
 using namespace v2;
@@ -12,19 +12,12 @@ using namespace gltf;
 class VulkanExample : public VulkanExampleBase
 {
 public:
+	Pbr pbrRender;
 	gltf::Model sceneModel;
 	gltf::Model skyboxModel;
 	gltf::Render sceneRender;
 	gltf::Render skyboxRender;
-
-	struct Textures {
-		vks::TextureCubeMap environmentCube;
-		vks::Texture2D empty;
-		vks::Texture2D lutBrdf;
-		vks::TextureCubeMap irradianceCube;
-		vks::TextureCubeMap prefilteredCube;
-	} textures;
-
+	Textures textures;
 	struct shaderValuesParams {
 		glm::vec4 lightDir;
 		float exposure = 4.5f;
@@ -40,9 +33,7 @@ public:
 	aux::Pipeline* pAuxPipelineBlend;
 	aux::Pipeline* pAuxPipelinePbr;
 	aux::Pipeline* pAuxPipelineSkybox;
-	aux::DescriptorSetLayout* pAuxDSLayoutScene;
 	aux::DescriptorSetLayout* pAuxDSLayoutNode;
-	std::vector<VkDescriptorSet> sceneDS;
 	std::vector<VkDescriptorSet> skyboxDS;
 
 	std::vector<VkCommandBuffer> commandBuffers;
@@ -100,7 +91,6 @@ public:
 		delete pAuxPipelinePbr;
 		delete pAuxPipelineSkybox;
 		delete pAuxPipelineLayout;
-		delete pAuxDSLayoutScene;
 		delete pAuxDSLayoutNode;
 
 		for (auto buffer : paramUniformBuffers) {
@@ -160,7 +150,7 @@ public:
 				skyboxRender.draw(skyboxModel);
 			}
 
-			sceneRender.config(sceneDS[i], currentCB,
+			sceneRender.config(pbrRender.getDS()[i], currentCB,
 				pipelineLayout, *pAuxPipelinePbr, pAuxPipelineBlend);
 			sceneRender.drawT(sceneModel);
 
@@ -293,32 +283,7 @@ public:
 			Descriptor sets
 		*/
 
-		// Scene (matrices and environment maps)
-		{
-			std::vector<VkDescriptorSetLayoutBinding> setLayoutBindings = {
-				{ 0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, nullptr },
-				{ 1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1, VK_SHADER_STAGE_FRAGMENT_BIT, nullptr },
-				{ 2, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1, VK_SHADER_STAGE_FRAGMENT_BIT, nullptr },
-				{ 3, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1, VK_SHADER_STAGE_FRAGMENT_BIT, nullptr },
-				{ 4, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1, VK_SHADER_STAGE_FRAGMENT_BIT, nullptr },
-			};
-			pAuxDSLayoutScene = new aux::DescriptorSetLayout(setLayoutBindings);
-
-			for (auto i = 0; i < sceneDS.size(); i++) {
-				aux::DescriptorSet::allocate(sceneDS[i],
-					descriptorPool, pAuxDSLayoutScene->get());
-
-				std::vector<VkWriteDescriptorSet> writeDescriptorSets(5);
-				aux::Describe::buffer(writeDescriptorSets[0], sceneDS[i], 0, &(sceneModel.getUB()[i].descriptor));
-				aux::Describe::buffer(writeDescriptorSets[1], sceneDS[i], 1, &paramUniformBuffers[i].descriptor);
-				aux::Describe::image(writeDescriptorSets[2], sceneDS[i], 2, &textures.irradianceCube.descriptor);
-				aux::Describe::image(writeDescriptorSets[3], sceneDS[i], 3, &textures.prefilteredCube.descriptor);
-				aux::Describe::image(writeDescriptorSets[4], sceneDS[i], 4, &textures.lutBrdf.descriptor);
-
-				aux::DescriptorSet::updateW(writeDescriptorSets);
-			}
-		}
-
+		pbrRender.setupDSL(descriptorPool);
 		sceneModel.setupMaterialDSL(descriptorPool, textures.empty.descriptor);
 		// Model node (matrices)
 		{
@@ -336,7 +301,7 @@ public:
 		// Skybox (fixed set)
 		for (auto i = 0; i < skyboxModel.getUB().size(); i++) {
 			aux::DescriptorSet::allocate(skyboxDS[i],
-				descriptorPool, pAuxDSLayoutScene->get());
+				descriptorPool, pbrRender.getDSL());
 
 			std::vector<VkWriteDescriptorSet> writeDescriptorSets(3);
 			aux::Describe::buffer(writeDescriptorSets[0], skyboxDS[i], 0, &(skyboxModel.getUB()[i].descriptor));
@@ -359,7 +324,7 @@ public:
 
 		// Pipeline layout
 		const std::vector<VkDescriptorSetLayout> setLayouts = {
-			*(pAuxDSLayoutScene->get()),
+			*(pbrRender.getDSL()),
 			*(sceneModel.getMaterialDSL()),
 			*(pAuxDSLayoutNode->get())
 		};
@@ -479,7 +444,10 @@ public:
 		sceneModel.getUB().resize(swapChain.imageCount);
 		skyboxModel.getUB().resize(swapChain.imageCount);
 		paramUniformBuffers.resize(swapChain.imageCount);
-		sceneDS.resize(swapChain.imageCount);
+		pbrRender.init(swapChain.imageCount);
+		pbrRender.config(sceneModel, skyboxModel, 
+			paramUniformBuffers, textures);
+
 		skyboxDS.resize(swapChain.imageCount);
 		// Command buffer execution fences
 		for (auto& waitFence : waitFences) {

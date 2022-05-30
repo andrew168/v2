@@ -1,6 +1,6 @@
 ﻿#include "..\vk.h"
 #include "..\auxVk\auxVk.h"
-#include "brdflut.h"
+#include "pbr.h"
 
 namespace v2
 {

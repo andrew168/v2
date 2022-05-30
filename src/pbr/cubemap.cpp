@@ -1,7 +1,7 @@
 ﻿#include "..\vk.h"
 #include "..\auxVk\auxVk.h"
 #include "..\gltf\gltf.h"
-#include "brdflut.h"
+#include "pbr.h"
 namespace v2
 {
 using namespace aux;
