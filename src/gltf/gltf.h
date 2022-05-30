@@ -58,13 +58,15 @@ struct PushConstBlockMaterial {
 };
 
 class Render {
-	VkDescriptorSet& m_sceneDescriptorSet;
-	VkCommandBuffer& m_cmdBuf;
-	VkPipelineLayout& m_pipelineLayout;
-	aux::Pipeline & m_pipeline;		
+	VkDescriptorSet* m_rSceneDescriptorSet;
+	VkCommandBuffer* m_rCmdBuf;
+	VkPipelineLayout* m_rPipelineLayout;
+	aux::Pipeline* m_rPipeline;		
 	aux::Pipeline* m_pAuxPipelineBlend;
 public:
-	Render(VkDescriptorSet& sceneDescriptorSet,
+	Render();
+	~Render();
+	void config(VkDescriptorSet& sceneDescriptorSet,
 		VkCommandBuffer& cmdBuf,
 		VkPipelineLayout& pipelineLayout,
 		aux::Pipeline& pipeline,

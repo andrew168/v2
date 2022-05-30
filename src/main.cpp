@@ -14,6 +14,9 @@ class VulkanExample : public VulkanExampleBase
 public:
 	gltf::Model sceneModel;
 	gltf::Model skyboxModel;
+	gltf::Render sceneRender;
+	gltf::Render skyboxRender;
+
 	struct Textures {
 		vks::TextureCubeMap environmentCube;
 		vks::Texture2D empty;
@@ -152,14 +155,14 @@ public:
 
 			if (displayBackground) {
 				//skybox绘制： 先绑定 ds和pipeline，再绘制
-				gltf::Render render(skyboxDS[i], currentCB,
+				skyboxRender.config(skyboxDS[i], currentCB,
 					pipelineLayout, *pAuxPipelineSkybox);
-				render.draw(skyboxModel);
+				skyboxRender.draw(skyboxModel);
 			}
 
-			gltf::Render render(sceneDS[i], currentCB,
+			sceneRender.config(sceneDS[i], currentCB,
 				pipelineLayout, *pAuxPipelinePbr, pAuxPipelineBlend);
-			render.drawT(sceneModel);
+			sceneRender.drawT(sceneModel);
 
 			// User interface
 			ui->draw(currentCB);

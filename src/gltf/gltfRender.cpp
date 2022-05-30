@@ -3,33 +3,41 @@
 
 namespace gltf
 {
-Render::Render(VkDescriptorSet& sceneDescriptorSet, 
+Render::Render()
+{
+}
+
+Render::~Render()
+{
+}
+
+void Render::config(VkDescriptorSet& sceneDescriptorSet, 
 	VkCommandBuffer& cmdBuf, 
 	VkPipelineLayout& pipelineLayout,
 	aux::Pipeline& pipeline,
-	aux::Pipeline* pPipelineBlend) :
-	m_sceneDescriptorSet(sceneDescriptorSet),
-	m_cmdBuf(cmdBuf),
-	m_pipelineLayout(pipelineLayout),
-	m_pipeline(pipeline),
-	m_pAuxPipelineBlend(pPipelineBlend)
+	aux::Pipeline* pPipelineBlend)
 {
+	m_rSceneDescriptorSet = &sceneDescriptorSet;
+	m_rCmdBuf = &cmdBuf;
+	m_rPipelineLayout = &pipelineLayout;
+	m_rPipeline = &pipeline;
+	m_pAuxPipelineBlend = pPipelineBlend;
 }
 
 void Render::draw(vkglTF::Model& model)
 {
-	aux::DescriptorSet dsSkybox(m_sceneDescriptorSet);
-	dsSkybox.bindToGraphics(m_cmdBuf, m_pipelineLayout);
-	m_pipeline.bindToGraphic(m_cmdBuf);
-	model.draw(m_cmdBuf);
+	aux::DescriptorSet dsSkybox(*m_rSceneDescriptorSet);
+	dsSkybox.bindToGraphics(*m_rCmdBuf, *m_rPipelineLayout);
+	m_rPipeline->bindToGraphic(*m_rCmdBuf);
+	model.draw(*m_rCmdBuf);
 }
 
 void Render::drawT(vkglTF::Model& model)
 {
-	m_pipeline.bindToGraphic(m_cmdBuf);
+	m_rPipeline->bindToGraphic(*m_rCmdBuf);
 
 	VkDeviceSize offsets[1] = { 0 };
-	aux::CommandBuffer auxCmdBuf(m_cmdBuf);
+	aux::CommandBuffer auxCmdBuf(*m_rCmdBuf);
 	auxCmdBuf.bindVertexBuffers(0, 1, &model.vertices.buffer, offsets);
 	if (model.indices.buffer != VK_NULL_HANDLE) {
 		auxCmdBuf.bindIndexBuffer(model.indices.buffer);
@@ -44,7 +52,7 @@ void Render::drawT(vkglTF::Model& model)
 	}
 	// TODO: Correct depth sorting
 	if (m_pAuxPipelineBlend) {
-		m_pAuxPipelineBlend->bindToGraphic(m_cmdBuf); // 透明体才需要blend
+		m_pAuxPipelineBlend->bindToGraphic(*m_rCmdBuf); // 透明体才需要blend
 		for (auto node : model.nodes) {
 			drawNode(node, vkglTF::Material::ALPHAMODE_BLEND);
 		}
@@ -60,13 +68,13 @@ void Render::drawNode(vkglTF::Node* node,
 			if (primitive->material.alphaMode == alphaMode) {
 
 				const std::vector<VkDescriptorSet> dSets = {
-					m_sceneDescriptorSet,
+					*m_rSceneDescriptorSet,
 					primitive->material.descriptorSet,
 					node->mesh->uniformBuffer.descriptorSet,
 				};
 				aux::DescriptorSet::bindToGraphics(dSets,
-					m_cmdBuf,
-					m_pipelineLayout);
+					*m_rCmdBuf,
+					*m_rPipelineLayout);
 
 				// Pass material parameters as push constants
 				PushConstBlockMaterial pushConstBlockMaterial{};
@@ -100,8 +108,8 @@ void Render::drawNode(vkglTF::Node* node,
 					pushConstBlockMaterial.diffuseFactor = primitive->material.extension.diffuseFactor;
 					pushConstBlockMaterial.specularFactor = glm::vec4(primitive->material.extension.specularFactor, 1.0f);
 				}
-				aux::CommandBuffer auxCmdBuf(m_cmdBuf);
-				auxCmdBuf.pushConstantsToFS(m_pipelineLayout, 0,
+				aux::CommandBuffer auxCmdBuf(*m_rCmdBuf);
+				auxCmdBuf.pushConstantsToFS(*m_rPipelineLayout, 0,
 					sizeof(PushConstBlockMaterial),
 					&pushConstBlockMaterial);
 
