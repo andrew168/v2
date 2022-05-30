@@ -16,6 +16,9 @@ Model::~Model()
 	for (auto buffer : uniformBuffers) {
 		buffer.destroy();
 	}
+
+	delete m_pMaterialDSL;
+	m_pMaterialDSL = nullptr;
 }
 
 void Model::update(int32_t animationIndex, float frameTimer)
@@ -71,4 +74,58 @@ void Model::applyShaderValues(uint32_t currentBuffer)
 	memcpy(uniformBuffers[currentBuffer].mapped, &shaderValues, sizeof(shaderValues));
 }
 
+void Model::setupMaterialDSL(VkDescriptorPool& descriptorPool,
+	VkDescriptorImageInfo& defaultTextureDesc)
+{
+	// Material (samplers)	
+	std::vector<VkDescriptorSetLayoutBinding> dslBindings = {
+		{ 0, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1, VK_SHADER_STAGE_FRAGMENT_BIT, nullptr },
+		{ 1, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1, VK_SHADER_STAGE_FRAGMENT_BIT, nullptr },
+		{ 2, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1, VK_SHADER_STAGE_FRAGMENT_BIT, nullptr },
+		{ 3, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1, VK_SHADER_STAGE_FRAGMENT_BIT, nullptr },
+		{ 4, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1, VK_SHADER_STAGE_FRAGMENT_BIT, nullptr },
+	};
+	m_pMaterialDSL = new aux::DescriptorSetLayout(dslBindings);
+
+	// Per-Material descriptor sets
+	for (auto& material : materials) {
+		aux::DescriptorSet::allocate(material.descriptorSet,
+			descriptorPool, m_pMaterialDSL->get());
+		std::vector<VkDescriptorImageInfo> imageDescriptors = {
+			defaultTextureDesc,
+			defaultTextureDesc,
+			material.normalTexture ? material.normalTexture->descriptor : defaultTextureDesc,
+			material.occlusionTexture ? material.occlusionTexture->descriptor : defaultTextureDesc,
+			material.emissiveTexture ? material.emissiveTexture->descriptor : defaultTextureDesc
+		};
+
+		// TODO: glTF specs states that metallic roughness should be preferred, even if specular glosiness is present
+
+		if (material.pbrWorkflows.metallicRoughness) {
+			if (material.baseColorTexture) {
+				imageDescriptors[0] = material.baseColorTexture->descriptor;
+			}
+			if (material.metallicRoughnessTexture) {
+				imageDescriptors[1] = material.metallicRoughnessTexture->descriptor;
+			}
+		}
+
+		if (material.pbrWorkflows.specularGlossiness) {
+			if (material.extension.diffuseTexture) {
+				imageDescriptors[0] = material.extension.diffuseTexture->descriptor;
+			}
+			if (material.extension.specularGlossinessTexture) {
+				imageDescriptors[1] = material.extension.specularGlossinessTexture->descriptor;
+			}
+		}
+
+		std::vector<VkWriteDescriptorSet> writeDescriptorSets(5);
+		for (size_t i = 0; i < imageDescriptors.size(); i++) {
+			aux::Describe::image(writeDescriptorSets[i], material.descriptorSet,
+				static_cast<uint32_t>(i), &imageDescriptors[i]);
+		}
+
+		DescriptorSet::updateW(writeDescriptorSets);
+	}
+}
 }

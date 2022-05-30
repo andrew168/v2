@@ -38,7 +38,6 @@ public:
 	aux::Pipeline* pAuxPipelinePbr;
 	aux::Pipeline* pAuxPipelineSkybox;
 	aux::DescriptorSetLayout* pAuxDSLayoutScene;
-	aux::DescriptorSetLayout* pAuxDSLayoutMaterial;
 	aux::DescriptorSetLayout* pAuxDSLayoutNode;
 	std::vector<VkDescriptorSet> sceneDS;
 	std::vector<VkDescriptorSet> skyboxDS;
@@ -99,7 +98,6 @@ public:
 		delete pAuxPipelineSkybox;
 		delete pAuxPipelineLayout;
 		delete pAuxDSLayoutScene;
-		delete pAuxDSLayoutMaterial;
 		delete pAuxDSLayoutNode;
 
 		for (auto buffer : paramUniformBuffers) {
@@ -306,7 +304,7 @@ public:
 			for (auto i = 0; i < sceneDS.size(); i++) {
 				aux::DescriptorSet::allocate(sceneDS[i],
 					descriptorPool, pAuxDSLayoutScene->get());
-				
+
 				std::vector<VkWriteDescriptorSet> writeDescriptorSets(5);
 				aux::Describe::buffer(writeDescriptorSets[0], sceneDS[i], 0, &(sceneModel.getUB()[i].descriptor));
 				aux::Describe::buffer(writeDescriptorSets[1], sceneDS[i], 1, &paramUniformBuffers[i].descriptor);
@@ -318,82 +316,29 @@ public:
 			}
 		}
 
-		// Material (samplers)
+		sceneModel.setupMaterialDSL(descriptorPool, textures.empty.descriptor);
+		// Model node (matrices)
 		{
 			std::vector<VkDescriptorSetLayoutBinding> setLayoutBindings = {
-				{ 0, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1, VK_SHADER_STAGE_FRAGMENT_BIT, nullptr },
-				{ 1, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1, VK_SHADER_STAGE_FRAGMENT_BIT, nullptr },
-				{ 2, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1, VK_SHADER_STAGE_FRAGMENT_BIT, nullptr },
-				{ 3, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1, VK_SHADER_STAGE_FRAGMENT_BIT, nullptr },
-				{ 4, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1, VK_SHADER_STAGE_FRAGMENT_BIT, nullptr },
+				{ 0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1, VK_SHADER_STAGE_VERTEX_BIT, nullptr },
 			};
-			pAuxDSLayoutMaterial = new aux::DescriptorSetLayout(setLayoutBindings);
+			pAuxDSLayoutNode = new aux::DescriptorSetLayout(setLayoutBindings);
 
-			// Per-Material descriptor sets
-			for (auto& material : sceneModel.materials) {
-				aux::DescriptorSet::allocate(material.descriptorSet, 
-					descriptorPool, pAuxDSLayoutMaterial->get());				
-				std::vector<VkDescriptorImageInfo> imageDescriptors = {
-					textures.empty.descriptor,
-					textures.empty.descriptor,
-					material.normalTexture ? material.normalTexture->descriptor : textures.empty.descriptor,
-					material.occlusionTexture ? material.occlusionTexture->descriptor : textures.empty.descriptor,
-					material.emissiveTexture ? material.emissiveTexture->descriptor : textures.empty.descriptor
-				};
-
-				// TODO: glTF specs states that metallic roughness should be preferred, even if specular glosiness is present
-
-				if (material.pbrWorkflows.metallicRoughness) {
-					if (material.baseColorTexture) {
-						imageDescriptors[0] = material.baseColorTexture->descriptor;
-					}
-					if (material.metallicRoughnessTexture) {
-						imageDescriptors[1] = material.metallicRoughnessTexture->descriptor;
-					}
-				}
-
-				if (material.pbrWorkflows.specularGlossiness) {
-					if (material.extension.diffuseTexture) {
-						imageDescriptors[0] = material.extension.diffuseTexture->descriptor;
-					}
-					if (material.extension.specularGlossinessTexture) {
-						imageDescriptors[1] = material.extension.specularGlossinessTexture->descriptor;
-					}
-				}
-
-				std::vector<VkWriteDescriptorSet> writeDescriptorSets(5);
-				for (size_t i = 0; i < imageDescriptors.size(); i++) {
-					aux::Describe::image(writeDescriptorSets[i], material.descriptorSet, 
-						static_cast<uint32_t>(i), &imageDescriptors[i]);
-				}
-
-				DescriptorSet::updateW(writeDescriptorSets);
+			// Per-Node descriptor set
+			for (auto& node : sceneModel.nodes) {
+				setupNodeDescriptorSet(node);
 			}
-
-			// Model node (matrices)
-			{
-				std::vector<VkDescriptorSetLayoutBinding> setLayoutBindings = {
-					{ 0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1, VK_SHADER_STAGE_VERTEX_BIT, nullptr },
-				};
-				pAuxDSLayoutNode = new aux::DescriptorSetLayout(setLayoutBindings);
-
-				// Per-Node descriptor set
-				for (auto& node : sceneModel.nodes) {
-					setupNodeDescriptorSet(node);
-				}
-			}
-
 		}
 
 		// Skybox (fixed set)
 		for (auto i = 0; i < skyboxModel.getUB().size(); i++) {
-			aux::DescriptorSet::allocate(skyboxDS[i], 
+			aux::DescriptorSet::allocate(skyboxDS[i],
 				descriptorPool, pAuxDSLayoutScene->get());
 
 			std::vector<VkWriteDescriptorSet> writeDescriptorSets(3);
 			aux::Describe::buffer(writeDescriptorSets[0], skyboxDS[i], 0, &(skyboxModel.getUB()[i].descriptor));
 			aux::Describe::buffer(writeDescriptorSets[1], skyboxDS[i], 1, &paramUniformBuffers[i].descriptor);
-			aux::Describe::image(writeDescriptorSets[2], skyboxDS[i], 2, &textures.prefilteredCube.descriptor);			
+			aux::Describe::image(writeDescriptorSets[2], skyboxDS[i], 2, &textures.prefilteredCube.descriptor);
 			DescriptorSet::updateW(writeDescriptorSets);
 		}
 	}
@@ -411,8 +356,8 @@ public:
 
 		// Pipeline layout
 		const std::vector<VkDescriptorSetLayout> setLayouts = {
-			*(pAuxDSLayoutScene->get()), 
-			*(pAuxDSLayoutMaterial->get()), 
+			*(pAuxDSLayoutScene->get()),
+			*(sceneModel.getMaterialDSL()),
 			*(pAuxDSLayoutNode->get())
 		};
 
