@@ -19,6 +19,11 @@ public:
     explicit RenderPass(aux::Image& image);
     explicit RenderPass(VkRenderPass& renderpass);
     ~RenderPass();
+    void fillBI(VkRenderPassBeginInfo& ci,
+        uint32_t width,
+        uint32_t height,
+        uint32_t clearValueCount,
+        const VkClearValue* pClearValues);
     void begin(VkCommandBuffer* pCmdBuf, aux::Framebuffer* auxFramebuffer, VkClearColorValue color = { 0.0f, 0.0f, 0.0f, 1.0f });
     void begin(VkCommandBuffer& cmdBuf, VkRenderPassBeginInfo& beginInfo);
     void end();

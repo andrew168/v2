@@ -139,17 +139,9 @@ public:
 		}
 
 		// 1个RenderPass， 1个BeginInfo，被多个CmdBuf使用
-		VkRenderPassBeginInfo renderPassBeginInfo{};
-		renderPassBeginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-		renderPassBeginInfo.renderPass = renderPass;
-		renderPassBeginInfo.renderArea.offset.x = 0;
-		renderPassBeginInfo.renderArea.offset.y = 0;
-		renderPassBeginInfo.renderArea.extent.width = width;
-		renderPassBeginInfo.renderArea.extent.height = height;
-		renderPassBeginInfo.clearValueCount = settings.multiSampling ? 3 : 2;
-		renderPassBeginInfo.pClearValues = clearValues;
-
 		aux::RenderPass auxRenderPass(renderPass);
+		VkRenderPassBeginInfo renderPassBeginInfo{};
+		auxRenderPass.fillBI(renderPassBeginInfo, width, height, settings.multiSampling ? 3 : 2, clearValues);
 		for (size_t i = 0; i < commandBuffers.size(); ++i) {
 			renderPassBeginInfo.framebuffer = frameBuffers[i];
 
