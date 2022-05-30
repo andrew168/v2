@@ -86,7 +86,7 @@ public:
 
 	VulkanExample() : VulkanExampleBase()
 	{
-		title = "Vulkan glTF 2.0 PBR - (C) Sascha Willems (www.saschawillems.de)";
+		title = "V2--Vulkan library from beginner to professinonal";
 #if defined(TINYGLTF_ENABLE_DRACO)
 		std::cout << "Draco mesh compression is enabled" << std::endl;
 #endif
