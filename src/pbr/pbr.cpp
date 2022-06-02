@@ -94,7 +94,7 @@ void Pbr::preparePipeline(PbrConfig &settings)
 	};
 
 	VkPushConstantRange pushConstantRange{};
-	pushConstantRange.size = sizeof(gltf::PushConstBlockMaterial);
+	pushConstantRange.size = sizeof(PushConstBlockMaterial);
 	pushConstantRange.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
 
 	aux::PipelineLayoutCI auxPipelineLayoutCI{ &pushConstantRange };

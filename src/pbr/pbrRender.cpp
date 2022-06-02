@@ -1,7 +1,9 @@
-﻿#include "gltf.h"
+﻿#include "../gltf/gltf.h"
 #include "../auxVk/auxVk.h"
+#include "pbr.h"
+#include "pbrRender.h"
 
-namespace gltf
+namespace v2
 {
 Render::Render()
 {

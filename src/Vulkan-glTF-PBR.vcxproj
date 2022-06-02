@@ -340,11 +340,11 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     <ClCompile Include="auxVk\subpassDescription.cpp" />
     <ClCompile Include="auxVk\util.cpp" />
     <ClCompile Include="E:\projectsVK\glTF-PBR\src\main.cpp" />
-    <ClCompile Include="gltf\gltfRender.cpp" />
     <ClCompile Include="gltf\model.cpp" />
     <ClCompile Include="pbr\brdflut.cpp" />
     <ClCompile Include="pbr\cubemap.cpp" />
     <ClCompile Include="pbr\pbr.cpp" />
+    <ClCompile Include="pbr\pbrRender.cpp" />
     <ClCompile Include="v2\v2.cpp" />
     <None Include="E:\projectsVK\glTF-PBR\data\shaders\filtercube.vert" />
     <None Include="E:\projectsVK\glTF-PBR\data\shaders\genbrdflut.frag" />
@@ -393,8 +393,8 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     <ClInclude Include="auxVk\subpassDescription.h" />
     <ClInclude Include="auxVk\util.h" />
     <ClInclude Include="gltf\gltf.h" />
-    <ClInclude Include="gltf\gltfRender.h" />
     <ClInclude Include="pbr\pbr.h" />
+    <ClInclude Include="pbr\pbrRender.h" />
     <ClInclude Include="v2\v2.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

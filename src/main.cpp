@@ -1,7 +1,7 @@
-﻿#include "v2\v2.h"
-#include "auxVk\auxVk.h"
+﻿#include "auxVk/auxVk.h"
 #include "gltf/gltf.h"
 #include "pbr/pbr.h"
+#include "v2/v2.h"
 
 using namespace aux;
 using namespace v2;
@@ -15,8 +15,8 @@ public:
 	Pbr pbrRender;
 	gltf::Model sceneModel;
 	gltf::Model skyboxModel;
-	gltf::Render sceneRender;
-	gltf::Render skyboxRender;
+	v2::Render sceneRender;
+	v2::Render skyboxRender;
 	Textures textures;
 	// VkPipelineLayout pipelineLayout;
 

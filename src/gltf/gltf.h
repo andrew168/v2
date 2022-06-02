@@ -4,12 +4,6 @@
 
 namespace gltf
 {
-
-enum PBRWorkflows {
-	PBR_WORKFLOW_METALLIC_ROUGHNESS = 0,
-	PBR_WORKFLOW_SPECULAR_GLOSINESS = 1
-};
-
 struct UBOMatrices {
 	glm::mat4 projection;
 	glm::mat4 model;
@@ -38,44 +32,5 @@ public:
 	void prepareUniformBuffers();
 	std::vector<Buffer>& getUB() { return uniformBuffers; }
 	VkDescriptorSetLayout* getMaterialDSL() { return m_pMaterialDSL->get(); }
-};
-
-struct PushConstBlockMaterial {
-	glm::vec4 baseColorFactor;
-	glm::vec4 emissiveFactor;
-	glm::vec4 diffuseFactor;
-	glm::vec4 specularFactor;
-	float workflow;
-	int colorTextureSet;
-	int PhysicalDescriptorTextureSet;
-	int normalTextureSet;
-	int occlusionTextureSet;
-	int emissiveTextureSet;
-	float metallicFactor;
-	float roughnessFactor;
-	float alphaMask;
-	float alphaMaskCutoff;
-};
-
-class Render {
-	VkDescriptorSet* m_rSceneDescriptorSet;
-	VkCommandBuffer* m_rCmdBuf;
-	VkPipelineLayout* m_rPipelineLayout;
-	aux::Pipeline* m_rPipeline;		
-	aux::Pipeline* m_pAuxPipelineBlend;
-public:
-	Render();
-	~Render();
-	void config(VkDescriptorSet& sceneDescriptorSet,
-		VkCommandBuffer& cmdBuf,
-		VkPipelineLayout& pipelineLayout,
-		aux::Pipeline& pipeline,
-		aux::Pipeline* pPipelineBlend = nullptr);
-
-	void drawNode(vkglTF::Node* node, 
-		vkglTF::Material::AlphaMode alphaMode);
-
-	void drawT(vkglTF::Model& model);
-	void draw(vkglTF::Model& model);
 };
 }

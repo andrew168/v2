@@ -6,6 +6,28 @@ namespace v2
 class aux::Image;
 class gltf::Model;
 
+enum PBRWorkflows {
+	PBR_WORKFLOW_METALLIC_ROUGHNESS = 0,
+	PBR_WORKFLOW_SPECULAR_GLOSINESS = 1
+};
+
+struct PushConstBlockMaterial {
+	glm::vec4 baseColorFactor;
+	glm::vec4 emissiveFactor;
+	glm::vec4 diffuseFactor;
+	glm::vec4 specularFactor;
+	float workflow;
+	int colorTextureSet;
+	int PhysicalDescriptorTextureSet;
+	int normalTextureSet;
+	int occlusionTextureSet;
+	int emissiveTextureSet;
+	float metallicFactor;
+	float roughnessFactor;
+	float alphaMask;
+	float alphaMaskCutoff;
+};
+
 struct Textures {
 	vks::TextureCubeMap environmentCube;
 	vks::Texture2D empty;
