@@ -65,7 +65,6 @@ public:
 	glm::vec3 modelrot = glm::vec3(0.0f);
 	glm::vec3 modelPos = glm::vec3(0.0f);
 
-	PushConstBlockMaterial pushConstBlockMaterial;
     std::map<std::string, std::string> environments;
 	std::string selectedEnvironment = "papermill";
 
