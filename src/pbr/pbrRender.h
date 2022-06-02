@@ -14,14 +14,14 @@ public:
 	~Render();
 	void config(VkDescriptorSet& sceneDescriptorSet,
 		VkCommandBuffer& cmdBuf,
-		VkPipelineLayout& pipelineLayout,
+		Pbr& pbr,
 		aux::Pipeline& pipeline,
 		aux::Pipeline* pPipelineBlend = nullptr);
 
 	void drawNode(vkglTF::Node* node,
 		vkglTF::Material::AlphaMode alphaMode);
 
-	void drawT(vkglTF::Model& model);
+	void drawT(vkglTF::Model& model); //T: Transparent supported, 
 	void draw(vkglTF::Model& model);
 };
 }

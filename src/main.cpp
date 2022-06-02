@@ -119,12 +119,12 @@ public:
 			if (displayBackground) {
 				//skybox绘制： 先绑定 ds和pipeline，再绘制
 				skyboxRender.config(pbrRender.skyboxDS[i], currentCB,
-					*(pbrRender.getPipelineLayout()), *pbrRender.pAuxPipelineSkybox);
+					pbrRender, *pbrRender.pAuxPipelineSkybox);
 				skyboxRender.draw(skyboxModel);
 			}
 
 			sceneRender.config(pbrRender.getDS()[i], currentCB,
-				*(pbrRender.getPipelineLayout()), *pbrRender.pAuxPipelinePbr, pbrRender.pAuxPipelineBlend);
+				pbrRender, *pbrRender.pAuxPipelinePbr, pbrRender.pAuxPipelineBlend);
 			sceneRender.drawT(sceneModel);
 
 			// User interface

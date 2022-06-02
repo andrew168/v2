@@ -15,13 +15,13 @@ Render::~Render()
 
 void Render::config(VkDescriptorSet& sceneDescriptorSet, 
 	VkCommandBuffer& cmdBuf, 
-	VkPipelineLayout& pipelineLayout,
+	Pbr& pbr,
 	aux::Pipeline& pipeline,
 	aux::Pipeline* pPipelineBlend)
 {
 	m_rSceneDescriptorSet = &sceneDescriptorSet;
 	m_rCmdBuf = &cmdBuf;
-	m_rPipelineLayout = &pipelineLayout;
+	m_rPipelineLayout = pbr.getPipelineLayout();
 	m_rPipeline = &pipeline;
 	m_pAuxPipelineBlend = pPipelineBlend;
 }
