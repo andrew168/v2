@@ -6,6 +6,7 @@ namespace gltf
 using namespace aux;
 Model::Model():
 	vkglTF::Model(),
+	m_pMaterialDSL(nullptr),
 	m_animationTimer(0.0f)
 {
 }
@@ -17,8 +18,11 @@ Model::~Model()
 		buffer.destroy();
 	}
 
-	delete m_pMaterialDSL;
-	m_pMaterialDSL = nullptr;
+	if (m_pMaterialDSL != nullptr)
+	{
+		delete m_pMaterialDSL;
+		m_pMaterialDSL = nullptr;
+	}
 }
 
 void Model::update(int32_t animationIndex, float frameTimer)
