@@ -35,6 +35,7 @@ public:
     explicit  PipelineLayout(PipelineLayoutCI &ci);
     ~PipelineLayout();
     VkPipelineLayout get() { return m_pipelineLayout; }
+    VkPipelineLayout* getP() { return &m_pipelineLayout; }
     VkDescriptorSetLayout* getDSLayout() { return &m_descriptorSetLayout; }
     DescriptorSet* getDSet() { return m_pDescriptorSet; }
 
