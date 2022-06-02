@@ -12,7 +12,7 @@ using namespace gltf;
 class VulkanExample : public VulkanExampleBase
 {
 public:
-	Pbr pbrRender;
+	SkyboxRender pbrRender;
 	gltf::Model sceneModel;
 	gltf::Model skyboxModel;
 	v2::Render sceneRender;
@@ -118,9 +118,8 @@ public:
 
 			if (displayBackground) {
 				//skybox绘制： 先绑定 ds和pipeline，再绘制
-				skyboxRender.config(pbrRender.skyboxDS[i], currentCB,
-					pbrRender, *pbrRender.pAuxPipelineSkybox);
-				skyboxRender.draw(skyboxModel);
+				pbrRender.configPbr(static_cast<uint32_t>(i), currentCB);
+				pbrRender.draw(skyboxModel);
 			}
 
 			sceneRender.config(pbrRender.getDS()[i], currentCB,

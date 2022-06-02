@@ -61,6 +61,7 @@ class Texture2D : public vks::Texture2D
 
 class Pbr
 {
+public:
 	uint32_t m_swapChainImageCount;
 	aux::DescriptorSetLayout* m_pDSL;
 
@@ -72,7 +73,6 @@ class Pbr
 
 public:
 	std::vector<VkDescriptorSet> sceneDS;
-	std::vector<VkDescriptorSet> skyboxDS;
 	aux::DescriptorSetLayout* pAuxDSLayoutNode;
 	aux::Pipeline* pAuxPipelineBlend;
 	aux::Pipeline* pAuxPipelinePbr;
@@ -92,7 +92,6 @@ public:
 	void prepareUniformBuffers();
 	void preparePipeline(PbrConfig& settings);
 	VkPipelineLayout* getPipelineLayout() { return pAuxPipelineLayout->getP(); }
-	void setupDescriptors(VkDescriptorPool &descriptorPool);
 	void setupNodeDescriptorSet(vkglTF::Node* node, VkDescriptorPool& descriptorPool);
 	void applyShaderValues(uint32_t currentBuffer);
 	void updateShaderValues();
