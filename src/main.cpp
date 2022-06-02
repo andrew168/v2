@@ -18,26 +18,9 @@ public:
 	gltf::Render sceneRender;
 	gltf::Render skyboxRender;
 	Textures textures;
-	struct shaderValuesParams {
-		glm::vec4 lightDir;
-		float exposure = 4.5f;
-		float gamma = 2.2f;
-		float prefilteredCubeMipLevels;
-		float scaleIBLAmbient = 1.0f;
-		float debugViewInputs = 0;
-		float debugViewEquation = 0;
-	} shaderValuesParams;
-
-	VkPipelineLayout pipelineLayout;
-	aux::PipelineLayout *pAuxPipelineLayout;
-	aux::Pipeline* pAuxPipelineBlend;
-	aux::Pipeline* pAuxPipelinePbr;
-	aux::Pipeline* pAuxPipelineSkybox;
-	aux::DescriptorSetLayout* pAuxDSLayoutNode;
-	std::vector<VkDescriptorSet> skyboxDS;
+	// VkPipelineLayout pipelineLayout;
 
 	std::vector<VkCommandBuffer> commandBuffers;
-	std::vector<Buffer> paramUniformBuffers;
 	std::vector<VkFence> waitFences;
 	std::vector<VkSemaphore> renderCompleteSemaphores;
 	std::vector<VkSemaphore> presentCompleteSemaphores;
@@ -85,16 +68,7 @@ public:
 	}
 
 	~VulkanExample()
-	{
-		delete pAuxPipelineBlend;
-		delete pAuxPipelinePbr;
-		delete pAuxPipelineSkybox;
-		delete pAuxPipelineLayout;
-		delete pAuxDSLayoutNode;
-
-		for (auto buffer : paramUniformBuffers) {
-			buffer.destroy();
-		}
+	{		
 		for (auto fence : waitFences) {
 			vkDestroyFence(device, fence, nullptr);
 		}
@@ -144,13 +118,13 @@ public:
 
 			if (displayBackground) {
 				//skybox绘制： 先绑定 ds和pipeline，再绘制
-				skyboxRender.config(skyboxDS[i], currentCB,
-					pipelineLayout, *pAuxPipelineSkybox);
+				skyboxRender.config(pbrRender.skyboxDS[i], currentCB,
+					*(pbrRender.getPipelineLayout()), *pbrRender.pAuxPipelineSkybox);
 				skyboxRender.draw(skyboxModel);
 			}
 
 			sceneRender.config(pbrRender.getDS()[i], currentCB,
-				pipelineLayout, *pAuxPipelinePbr, pAuxPipelineBlend);
+				*(pbrRender.getPipelineLayout()), *pbrRender.pAuxPipelinePbr, pbrRender.pAuxPipelineBlend);
 			sceneRender.drawT(sceneModel);
 
 			// User interface
@@ -233,181 +207,9 @@ public:
 		loadEnvironment(envMapFile.c_str());
 	}
 
-	void setupNodeDescriptorSet(vkglTF::Node* node) {
-		if (node->mesh) {
-			aux::DescriptorSet::allocate(node->mesh->uniformBuffer.descriptorSet,
-			 descriptorPool, pAuxDSLayoutNode->get());			
-			aux::Describe::bufferUpdate(node->mesh->uniformBuffer.descriptorSet,
-				0, &node->mesh->uniformBuffer.descriptor);
-		}
-		for (auto& child : node->children) {
-			setupNodeDescriptorSet(child);
-		}
-	}
-
-	void setupDescriptors()
-	{
-		/*
-			Descriptor Pool
-		*/
-		uint32_t imageSamplerCount = 0;
-		uint32_t materialCount = 0;
-		uint32_t meshCount = 0;
-
-		// Environment samplers (radiance, irradiance, brdf lut)
-		imageSamplerCount += 3;
-
-		// 每一个GLTF模型都有自己的材质列表和mesh列表
-		std::vector<vkglTF::Model*> modellist = { &skyboxModel, &sceneModel };
-		for (auto& model : modellist) {
-			for (auto& material : model->materials) {
-				imageSamplerCount += 5;  // 每种PBR材质有5个texture作为sampler
-				materialCount++;
-			}
-			for (auto node : model->linearNodes) {
-				if (node->mesh) {
-					meshCount++;
-				}
-			}
-		}
-
-		std::vector<VkDescriptorPoolSize> poolSizes = {
-			{ VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, (4 + meshCount) * swapChain.imageCount },
-			{ VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, imageSamplerCount * swapChain.imageCount }
-		};
-		uint32_t maxSets = (2 + materialCount + meshCount) * swapChain.imageCount;
-		aux::DescriptorPool::create(descriptorPool, poolSizes, maxSets);
-
-		/*
-			Descriptor sets
-		*/
-
-		pbrRender.setupDSL(descriptorPool);
-		sceneModel.setupMaterialDSL(descriptorPool, textures.empty.descriptor);
-		// Model node (matrices)
-		{
-			std::vector<VkDescriptorSetLayoutBinding> setLayoutBindings = {
-				{ 0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1, VK_SHADER_STAGE_VERTEX_BIT, nullptr },
-			};
-			pAuxDSLayoutNode = new aux::DescriptorSetLayout(setLayoutBindings);
-
-			// Per-Node descriptor set
-			for (auto& node : sceneModel.nodes) {
-				setupNodeDescriptorSet(node);
-			}
-		}
-
-		// Skybox (fixed set)
-		for (auto i = 0; i < skyboxModel.getUB().size(); i++) {
-			aux::DescriptorSet::allocate(skyboxDS[i],
-				descriptorPool, pbrRender.getDSL());
-
-			std::vector<VkWriteDescriptorSet> writeDescriptorSets(3);
-			aux::Describe::buffer(writeDescriptorSets[0], skyboxDS[i], 0, &(skyboxModel.getUB()[i].descriptor));
-			aux::Describe::buffer(writeDescriptorSets[1], skyboxDS[i], 1, &paramUniformBuffers[i].descriptor);
-			aux::Describe::image(writeDescriptorSets[2], skyboxDS[i], 2, &textures.prefilteredCube.descriptor);
-			DescriptorSet::updateW(writeDescriptorSets);
-		}
-	}
-
-	void preparePipelines()
-	{
-		aux::PipelineCI auxPipelineCI{};
-		auxPipelineCI.cullMode = VK_CULL_MODE_BACK_BIT;
-		if (settings.multiSampling) {
-			auxPipelineCI.rasterizationSamples = settings.sampleCount;
-		}
-		else {
-			Assert(0, "which value?");
-		}
-
-		// Pipeline layout
-		const std::vector<VkDescriptorSetLayout> setLayouts = {
-			*(pbrRender.getDSL()),
-			*(sceneModel.getMaterialDSL()),
-			*(pAuxDSLayoutNode->get())
-		};
-
-		VkPushConstantRange pushConstantRange{};
-		pushConstantRange.size = sizeof(PushConstBlockMaterial);
-		pushConstantRange.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
-
-		aux::PipelineLayoutCI auxPipelineLayoutCI{ &pushConstantRange };
-		auxPipelineLayoutCI.pSetLayouts = &setLayouts;
-
-		pAuxPipelineLayout = new aux::PipelineLayout(auxPipelineLayoutCI);
-		pipelineLayout = pAuxPipelineLayout->get();
-		
-		// Vertex bindings an attributes
-		std::vector<VkVertexInputBindingDescription> vertexInputBindings = { 
-			{0, sizeof(vkglTF::Model::Vertex), VK_VERTEX_INPUT_RATE_VERTEX}
-		};
-
-		std::vector<VkVertexInputAttributeDescription> vertexInputAttributes = {
-			{ 0, 0, VK_FORMAT_R32G32B32_SFLOAT, 0 },
-			{ 1, 0, VK_FORMAT_R32G32B32_SFLOAT, sizeof(float) * 3 },
-			{ 2, 0, VK_FORMAT_R32G32_SFLOAT, sizeof(float) * 6 },
-			{ 3, 0, VK_FORMAT_R32G32_SFLOAT, sizeof(float) * 8 },
-			{ 4, 0, VK_FORMAT_R32G32B32A32_SFLOAT, sizeof(float) * 10 },
-			{ 5, 0, VK_FORMAT_R32G32B32A32_SFLOAT, sizeof(float) * 14 }
-		};
-
-		auxPipelineCI.pVertexInputBindings = &vertexInputBindings;
-		auxPipelineCI.pVertexInputAttributes = &vertexInputAttributes;
-
-		std::vector<aux::ShaderDescription> shadersSkybox = {
-			{"skybox.vert.spv", VK_SHADER_STAGE_VERTEX_BIT},
-			{"skybox.frag.spv", VK_SHADER_STAGE_FRAGMENT_BIT}
-		};
-		auxPipelineCI.shaders = shadersSkybox;
-		pAuxPipelineSkybox = new aux::Pipeline(*pAuxPipelineLayout, renderPass, auxPipelineCI);
-		
-		// PBR pipeline
-		std::vector<aux::ShaderDescription> shadersPbr = {
-			{"pbr.vert.spv", VK_SHADER_STAGE_VERTEX_BIT},
-			{"pbr_khr.frag.spv", VK_SHADER_STAGE_FRAGMENT_BIT}
-		};
-
-		auxPipelineCI.shaders = shadersPbr;
-		auxPipelineCI.depthWriteEnable = VK_TRUE;
-		auxPipelineCI.depthTestEnable = VK_TRUE;	
-		pAuxPipelinePbr = new aux::Pipeline(*pAuxPipelineLayout, renderPass, auxPipelineCI);
-
-		auxPipelineCI.cullMode = VK_CULL_MODE_NONE;
-		auxPipelineCI.blendEnable = VK_TRUE;
-		auxPipelineCI.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
-		auxPipelineCI.srcColorBlendFactor = VK_BLEND_FACTOR_SRC_ALPHA;
-		auxPipelineCI.dstColorBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
-		auxPipelineCI.colorBlendOp = VK_BLEND_OP_ADD;
-		auxPipelineCI.srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
-		auxPipelineCI.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
-		auxPipelineCI.alphaBlendOp = VK_BLEND_OP_ADD;
-		pAuxPipelineBlend = new aux::Pipeline(*pAuxPipelineLayout, renderPass, auxPipelineCI);
-	}
-
-	/*
-		Prepare and initialize uniform buffers containing shader parameters
-	*/
-	void prepareUniformBuffers()
-	{
-		sceneModel.prepareUniformBuffers();
-		skyboxModel.prepareUniformBuffers();
-		for (auto& uniformBuffer : paramUniformBuffers) {
-			uniformBuffer.create(vulkanDevice, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, sizeof(shaderValuesParams));
-		}
-		updateShaderValues();
-	}
-
-	void updateShaderValues()
-	{
-		sceneModel.updateShaderValues(camera);
-		sceneModel.centerAndScale();
-		skyboxModel.updateShaderValues(camera);
-	}
-
 	void updateLights()
 	{
-		shaderValuesParams.lightDir = glm::vec4(
+		pbrRender.shaderValuesParams.lightDir = glm::vec4(
 			sin(glm::radians(lightSource.rotation.x)) * cos(glm::radians(lightSource.rotation.y)),
 			sin(glm::radians(lightSource.rotation.y)),
 			cos(glm::radians(lightSource.rotation.x)) * cos(glm::radians(lightSource.rotation.y)),
@@ -418,7 +220,7 @@ public:
 	{
 		recordCommandBuffers();
 		vkDeviceWaitIdle(device);
-		updateShaderValues();
+		pbrRender.updateShaderValues();
 		updateOverlay();
 	}
 
@@ -442,12 +244,9 @@ public:
 		commandBuffers.resize(swapChain.imageCount);
 		sceneModel.getUB().resize(swapChain.imageCount);
 		skyboxModel.getUB().resize(swapChain.imageCount);
-		paramUniformBuffers.resize(swapChain.imageCount);
-		pbrRender.init(swapChain.imageCount);
-		pbrRender.config(sceneModel, skyboxModel, 
-			paramUniformBuffers, textures);
+		pbrRender.init(swapChain.imageCount, camera, renderPass);
+		pbrRender.config(sceneModel, skyboxModel, textures);
 
-		skyboxDS.resize(swapChain.imageCount);
 		// Command buffer execution fences
 		for (auto& waitFence : waitFences) {
 			aux::Fence::create(waitFence, true);
@@ -466,12 +265,15 @@ public:
 		v2::Pbr::generateCubemaps(auxCubemaps, skyboxModel, textures.environmentCube);
 		auxCubemaps[0].toVKS(textures.irradianceCube);
 		auxCubemaps[1].toVKS(textures.prefilteredCube);
-		shaderValuesParams.prefilteredCubeMipLevels = 
+		pbrRender.shaderValuesParams.prefilteredCubeMipLevels = 
 			static_cast<float>(auxCubemaps[1].getMipLevels());
-		prepareUniformBuffers();
-		setupDescriptors();
-		preparePipelines();
-
+			static_cast<float>(auxCubemaps[1].getMipLevels());
+		pbrRender.prepareUniformBuffers();
+		pbrRender.setupDescriptors(descriptorPool);
+		PbrConfig pbrConfig;
+		pbrConfig.multiSampling = settings.multiSampling;
+		pbrConfig.sampleCount = settings.sampleCount;
+		pbrRender.preparePipeline(pbrConfig);
 		ui = new UI(vulkanDevice, renderPass, queue, pipelineCache, settings.sampleCount);
 		updateOverlay();
 		recordCommandBuffers();
@@ -499,9 +301,9 @@ public:
 		}
 
 		// Update UBOs
-		updateShaderValues();
+		pbrRender.updateShaderValues();
 		sceneModel.applyShaderValues(currentBuffer);
-		memcpy(paramUniformBuffers[currentBuffer].mapped, &shaderValuesParams, sizeof(shaderValuesParams));
+		pbrRender.applyShaderValues(currentBuffer);
 		skyboxModel.applyShaderValues(currentBuffer);
 		
 		aux::Queue auxQueue(queue);
@@ -542,11 +344,11 @@ public:
 			}
 			updateLights();
 			if (rotateModel) {
-				updateShaderValues();
+				pbrRender.updateShaderValues();
 			}
 		}
 		if (camera.updated) {
-			updateShaderValues();
+			pbrRender.updateShaderValues();
 		}
 	}
 };

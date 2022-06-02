@@ -14,6 +14,21 @@ struct Textures {
 	vks::TextureCubeMap prefilteredCube;
 };
 
+struct ShaderValuesParams {
+	glm::vec4 lightDir;
+	float exposure = 4.5f;
+	float gamma = 2.2f;
+	float prefilteredCubeMipLevels;
+	float scaleIBLAmbient = 1.0f;
+	float debugViewInputs = 0;
+	float debugViewEquation = 0;
+};
+
+struct PbrConfig {
+	bool multiSampling = true;
+	VkSampleCountFlagBits sampleCount = VK_SAMPLE_COUNT_4_BIT;
+};
+
 class Cubemap: public vks::TextureCubeMap 
 {
 };
@@ -24,23 +39,41 @@ class Texture2D : public vks::Texture2D
 
 class Pbr
 {
+	uint32_t m_swapChainImageCount;
 	aux::DescriptorSetLayout* m_pDSL;
-	std::vector<VkDescriptorSet> sceneDS;
+
 	static aux::Image* m_pBrdfLutImage; // 依赖vks,不能delete，
 	gltf::Model *m_pSceneModel;
 	gltf::Model *m_pSkyboxModel;
-	std::vector<Buffer>* m_pParamUniformBuffers;
 	Textures* m_pTextures;
+	VkRenderPass* m_rRenderPass; // refer point to outside, do not destroy it
+
+public:
+	std::vector<VkDescriptorSet> sceneDS;
+	std::vector<VkDescriptorSet> skyboxDS;
+	aux::DescriptorSetLayout* pAuxDSLayoutNode;
+	aux::Pipeline* pAuxPipelineBlend;
+	aux::Pipeline* pAuxPipelinePbr;
+	aux::Pipeline* pAuxPipelineSkybox;
+	aux::PipelineLayout* pAuxPipelineLayout;
+	std::vector<Buffer> paramUniformBuffers;
+	ShaderValuesParams shaderValuesParams;
+	Camera *m_pCamera;
 
 public:
 	Pbr();
 	~Pbr();
-	void init(uint32_t swapChainCount);
+	void init(uint32_t swapChainCount, Camera& camera, VkRenderPass& renderPass);
 	void config(gltf::Model& sceneModel,
 		gltf::Model& skyboxModel,
-		std::vector<Buffer>& paramUniformBuffers,
 		Textures& textures);
-
+	void prepareUniformBuffers();
+	void preparePipeline(PbrConfig& settings);
+	VkPipelineLayout* getPipelineLayout() { return pAuxPipelineLayout->getP(); }
+	void setupDescriptors(VkDescriptorPool &descriptorPool);
+	void setupNodeDescriptorSet(vkglTF::Node* node, VkDescriptorPool& descriptorPool);
+	void applyShaderValues(uint32_t currentBuffer);
+	void updateShaderValues();
 	void setupDSL(VkDescriptorPool& descriptorPool);
 	static aux::Image& generateBRDFLUT();
 	static void generateCubemaps(std::vector<aux::Image>& cubemaps, gltf::Model& skyboxMmodel, vks::Texture& texture);

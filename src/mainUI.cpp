@@ -72,7 +72,7 @@ void VulkanExample::updateOverlay()
 			if (!filename.empty()) {
 				vkDeviceWaitIdle(device);
 				loadScene(filename);
-				setupDescriptors();
+				pbrRender.setupDescriptors(descriptorPool);
 				updateCBs = true;
 			}
 		}
@@ -80,7 +80,7 @@ void VulkanExample::updateOverlay()
 		if (ui->combo("Environment", selectedEnvironment, environments)) {
 			vkDeviceWaitIdle(device);
 			loadEnvironment(environments[selectedEnvironment]);
-			setupDescriptors();
+			pbrRender.setupDescriptors(descriptorPool);
 			updateCBs = true;
 		}
 	}
@@ -89,13 +89,13 @@ void VulkanExample::updateOverlay()
 		if (ui->checkbox("Background", &displayBackground)) {
 			updateShaderParams = true;
 		}
-		if (ui->slider("Exposure", &shaderValuesParams.exposure, 0.1f, 10.0f)) {
+		if (ui->slider("Exposure", &pbrRender.shaderValuesParams.exposure, 0.1f, 10.0f)) {
 			updateShaderParams = true;
 		}
-		if (ui->slider("Gamma", &shaderValuesParams.gamma, 0.1f, 4.0f)) {
+		if (ui->slider("Gamma", &pbrRender.shaderValuesParams.gamma, 0.1f, 4.0f)) {
 			updateShaderParams = true;
 		}
-		if (ui->slider("IBL", &shaderValuesParams.scaleIBLAmbient, 0.0f, 1.0f)) {
+		if (ui->slider("IBL", &pbrRender.shaderValuesParams.scaleIBLAmbient, 0.0f, 1.0f)) {
 			updateShaderParams = true;
 		}
 	}
@@ -105,14 +105,14 @@ void VulkanExample::updateOverlay()
 			"none", "Base color", "Normal", "Occlusion", "Emissive", "Metallic", "Roughness"
 		};
 		if (ui->combo("Inputs", &debugViewInputs, debugNamesInputs)) {
-			shaderValuesParams.debugViewInputs = (float)debugViewInputs;
+			pbrRender.shaderValuesParams.debugViewInputs = (float)debugViewInputs;
 			updateShaderParams = true;
 		}
 		const std::vector<std::string> debugNamesEquation = {
 			"none", "Diff (l,n)", "F (l,h)", "G (l,v,h)", "D (h)", "Specular"
 		};
 		if (ui->combo("PBR equation", &debugViewEquation, debugNamesEquation)) {
-			shaderValuesParams.debugViewEquation = (float)debugViewEquation;
+			pbrRender.shaderValuesParams.debugViewEquation = (float)debugViewEquation;
 			updateShaderParams = true;
 		}
 	}
