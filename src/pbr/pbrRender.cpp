@@ -97,7 +97,9 @@ void Render::drawNode(vkglTF::Node* node,
 				if (primitive->material.pbrWorkflows.specularGlossiness) {
 					// Specular glossiness workflow
 					pushConstBlockMaterial.workflow = static_cast<float>(PBR_WORKFLOW_SPECULAR_GLOSINESS);
-					pushConstBlockMaterial.PhysicalDescriptorTextureSet = primitive->material.extension.specularGlossinessTexture != nullptr ? primitive->material.texCoordSets.specularGlossiness : -1;
+					pushConstBlockMaterial.PhysicalDescriptorTextureSet = 
+						primitive->material.extension.specularGlossinessTexture != nullptr ? 
+						primitive->material.texCoordSets.specularGlossiness : -1;
 					pushConstBlockMaterial.colorTextureSet = primitive->material.extension.diffuseTexture != nullptr ? primitive->material.texCoordSets.baseColor : -1;
 					pushConstBlockMaterial.diffuseFactor = primitive->material.extension.diffuseFactor;
 					pushConstBlockMaterial.specularFactor = glm::vec4(primitive->material.extension.specularFactor, 1.0f);
