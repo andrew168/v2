@@ -22,7 +22,6 @@ public:
 		vkglTF::Material::AlphaMode alphaMode);
 
 	void drawT(vkglTF::Model& model); //T: Transparent supported, 
-	void draw(vkglTF::Model& model);
 };
 }
 

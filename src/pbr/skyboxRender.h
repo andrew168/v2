@@ -8,7 +8,7 @@ namespace v2
 class SkyboxRender : public Pbr
 {
 public:
-	VkDescriptorSet* m_rSceneDescriptorSet;
+	VkDescriptorSet* m_rDS;
 	VkCommandBuffer* m_rCmdBuf;
 	VkPipelineLayout* m_rPipelineLayout;
 	aux::Pipeline* m_rPipeline;
@@ -23,10 +23,6 @@ public:
 	void configPbr(uint32_t dsID,
 		VkCommandBuffer& cmdBuf);
 
-	void drawNode(vkglTF::Node* node,
-		vkglTF::Material::AlphaMode alphaMode);
-
-	void drawT(vkglTF::Model& model); //T: Transparent supported, 
 	void draw(vkglTF::Model& model);
 };
 }

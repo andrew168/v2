@@ -26,14 +26,6 @@ void Render::config(VkDescriptorSet& sceneDescriptorSet,
 	m_pAuxPipelineBlend = pPipelineBlend;
 }
 
-void Render::draw(vkglTF::Model& model)
-{
-	aux::DescriptorSet dsSkybox(*m_rSceneDescriptorSet);
-	dsSkybox.bindToGraphics(*m_rCmdBuf, *m_rPipelineLayout);
-	m_rPipeline->bindToGraphic(*m_rCmdBuf);
-	model.draw(*m_rCmdBuf);
-}
-
 void Render::drawT(vkglTF::Model& model)
 {
 	m_rPipeline->bindToGraphic(*m_rCmdBuf);

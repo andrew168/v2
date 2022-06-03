@@ -67,6 +67,8 @@ void DescriptorSet::allocate(VkDescriptorSet& dSet,
 	VK_CHECK_RESULT(vkAllocateDescriptorSets(Device::getR(), &ai, &dSet));
 }
 
+/*updateW: W-for WriteDescriptorSet
+*/
 void DescriptorSet::updateW(std::vector<VkWriteDescriptorSet> sets)
 {
 	vkUpdateDescriptorSets(Device::getR(),

@@ -48,6 +48,8 @@ void Pbr::config(gltf::Model& sceneModel,
 	m_pTextures = &textures;
 }
 
+/*设置DS，保存在Device上的DS Pool中
+*/
 void Pbr::setupDSL(VkDescriptorPool& descriptorPool)
 {
 	// Scene (matrices and environment maps)
@@ -151,6 +153,8 @@ void Pbr::preparePipeline(PbrConfig &settings)
 	pAuxPipelineBlend = new aux::Pipeline(*pAuxPipelineLayout, *m_rRenderPass, auxPipelineCI);
 }
 
+/* 用统一的DSL更新DS，直接保存到vkGLTF对象的node中，
+*/
 void Pbr::setupNodeDescriptorSet(vkglTF::Node* node, VkDescriptorPool& descriptorPool)
 {
 	if (node->mesh) {
