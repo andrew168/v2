@@ -118,8 +118,7 @@ public:
 
 			if (displayBackground) {
 				//skybox绘制： 先绑定 ds和pipeline，再绘制
-				pbrRender.configPbr(static_cast<uint32_t>(i), currentCB);
-				pbrRender.draw(skyboxModel);
+				pbrRender.draw(skyboxModel, static_cast<uint32_t>(i), currentCB);
 			}
 
 			sceneRender.config(pbrRender.getDS()[i], currentCB,

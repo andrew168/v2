@@ -90,20 +90,11 @@ void SkyboxRender::setupDescriptors(VkDescriptorPool& descriptorPool)
 	}
 }
 
-void SkyboxRender::configPbr(uint32_t dsID,
-	VkCommandBuffer& cmdBuf)
+void SkyboxRender::draw(vkglTF::Model& model, uint32_t dsID, VkCommandBuffer& cmdBuf)
 {
-	m_rDS = &skyboxDS[dsID];
-	m_rCmdBuf = &cmdBuf;
-	m_rPipelineLayout = getPipelineLayout();
-	m_rPipeline = pAuxPipelineSkybox;
-}
-
-void SkyboxRender::draw(vkglTF::Model& model)
-{
-	aux::DescriptorSet dsSkybox(*m_rDS);
-	dsSkybox.bindToGraphics(*m_rCmdBuf, *m_rPipelineLayout);
-	m_rPipeline->bindToGraphic(*m_rCmdBuf);
-	model.draw(*m_rCmdBuf);
+	aux::DescriptorSet dsSkybox(skyboxDS[dsID]);
+	dsSkybox.bindToGraphics(cmdBuf, *getPipelineLayout());
+	pAuxPipelineSkybox->bindToGraphic(cmdBuf);
+	model.draw(cmdBuf);
 }
 }
