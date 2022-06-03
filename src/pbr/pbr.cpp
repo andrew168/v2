@@ -36,6 +36,8 @@ void Pbr::init(uint32_t swapChainCount, Camera &camera, VkRenderPass& renderPass
 	m_swapChainImageCount = swapChainCount;
 	paramUniformBuffers.resize(swapChainCount);
 	sceneDS.resize(swapChainCount);
+	m_pSceneModel->getUB().resize(swapChainCount);
+	m_pSkyboxModel->getUB().resize(swapChainCount);
 }
 void Pbr::config(gltf::Model& sceneModel,
 	gltf::Model& skyboxModel,

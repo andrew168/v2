@@ -241,10 +241,8 @@ public:
 		presentCompleteSemaphores.resize(renderAhead);
 		renderCompleteSemaphores.resize(renderAhead);
 		commandBuffers.resize(swapChain.imageCount);
-		sceneModel.getUB().resize(swapChain.imageCount);
-		skyboxModel.getUB().resize(swapChain.imageCount);
-		pbrRender.init(swapChain.imageCount, camera, renderPass);
 		pbrRender.config(sceneModel, skyboxModel, textures);
+		pbrRender.init(swapChain.imageCount, camera, renderPass);
 
 		// Command buffer execution fences
 		for (auto& waitFence : waitFences) {
