@@ -49,10 +49,11 @@ void Pbr::config(gltf::Model& sceneModel,
 }
 
 /*设置DS，保存在Device上的DS Pool中
+* DS: scene的Uniform Buffer，pbr参数的UB， 3个环境Cubemap
 */
-void Pbr::setupDS(VkDescriptorPool& descriptorPool)
+void Pbr::updateSceneBodyDS(VkDescriptorPool& descriptorPool)
 {
-	// Scene (matrices and environment maps)
+	// DSLB: 绑定slot号，UB还是Sampler，几个, 到VS还是FS？
 	std::vector<VkDescriptorSetLayoutBinding> setLayoutBindings = {
 		{ 0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, nullptr },
 		{ 1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1, VK_SHADER_STAGE_FRAGMENT_BIT, nullptr },
@@ -61,19 +62,22 @@ void Pbr::setupDS(VkDescriptorPool& descriptorPool)
 		{ 4, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1, VK_SHADER_STAGE_FRAGMENT_BIT, nullptr },
 	};
 
+	// binding和DSL都是临时的，只为了到pool中allocate出DS,
 	m_pDSL = new aux::DescriptorSetLayout(setLayoutBindings);
+	// 对所有SwapChain用的DS都update，
+	// 用1个DS一次性update描述SceneBody的5个D (1个整体UB + 1个pbr UB + 3个环境Sampler）
+	for (auto i = 0; i < sceneDS.size(); i++) { // sceneDS数量就是swapChain数量，
+		aux::DescriptorSet::allocate(sceneDS[i], descriptorPool, m_pDSL->get());
 
-	for (auto i = 0; i < sceneDS.size(); i++) {
-		aux::DescriptorSet::allocate(sceneDS[i],
-			descriptorPool, m_pDSL->get());
-
+		// VkWriteDescriptorSet本来可以集合多个D，为了简化，这里只存1个D
 		std::vector<VkWriteDescriptorSet> writeDescriptorSets(5);
 		aux::Describe::buffer(writeDescriptorSets[0], sceneDS[i], 0, &(m_pSceneModel->getUB()[i].descriptor));
 		aux::Describe::buffer(writeDescriptorSets[1], sceneDS[i], 1, &(paramUniformBuffers)[i].descriptor);
 		aux::Describe::image(writeDescriptorSets[2], sceneDS[i], 2, &m_pTextures->irradianceCube.descriptor);
 		aux::Describe::image(writeDescriptorSets[3], sceneDS[i], 3, &m_pTextures->prefilteredCube.descriptor);
 		aux::Describe::image(writeDescriptorSets[4], sceneDS[i], 4, &m_pTextures->lutBrdf.descriptor);
-
+		// 如果此DS已经被正在执行的某CmdX绑定，则CmdX立即变成invalid，
+		// 所有需要多个DS供swapchain轮流使用
 		aux::DescriptorSet::updateW(writeDescriptorSets);
 	}
 }
@@ -153,18 +157,20 @@ void Pbr::preparePipeline(PbrConfig &settings)
 	pAuxPipelineBlend = new aux::Pipeline(*pAuxPipelineLayout, *m_rRenderPass, auxPipelineCI);
 }
 
-/* 用统一的DSL更新DS，直接保存到vkGLTF对象的node中，
+/* 更新每一个Mesh's UB的DS，更新到Device上，直接利用vkGLTF对象的node
 */
-void Pbr::setupNodeDescriptorSet(vkglTF::Node* node, VkDescriptorPool& descriptorPool)
+void Pbr::updateMeshUBDS(vkglTF::Node* node, VkDescriptorPool& descriptorPool)
 {
 	if (node->mesh) {
+		// 先allocate，再update
+		// mesh 保存自己的DS
 		aux::DescriptorSet::allocate(node->mesh->uniformBuffer.descriptorSet,
 			descriptorPool, pAuxDSLayoutNode->get());
 		aux::Describe::bufferUpdate(node->mesh->uniformBuffer.descriptorSet,
 			0, &node->mesh->uniformBuffer.descriptor);
 	}
 	for (auto& child : node->children) {
-		setupNodeDescriptorSet(child, descriptorPool);
+		updateMeshUBDS(child, descriptorPool);
 	}
 }
 

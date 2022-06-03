@@ -265,7 +265,7 @@ public:
 			static_cast<float>(auxCubemaps[1].getMipLevels());
 			static_cast<float>(auxCubemaps[1].getMipLevels());
 		pbrRender.prepareUniformBuffers();
-		pbrRender.setupDescriptors(descriptorPool);
+		pbrRender.updateDS(descriptorPool);
 		PbrConfig pbrConfig;
 		pbrConfig.multiSampling = settings.multiSampling;
 		pbrConfig.sampleCount = settings.sampleCount;

@@ -16,9 +16,9 @@ public:
     ~SkyboxRender();
     void init(uint32_t swapChainCount, Camera& camera, VkRenderPass& renderPass);
     void createDPool(VkDescriptorPool& descriptorPool);
-    void setupSkyboxDS(VkDescriptorPool& descriptorPool);
-    void setupNodeDS(VkDescriptorPool& descriptorPool);
-    void setupDescriptors(VkDescriptorPool& descriptorPool);
+    void updateSkyboxBodyDS(VkDescriptorPool& descriptorPool);
+    void updateSceneMeshUBDS(VkDescriptorPool& descriptorPool);
+    void updateDS(VkDescriptorPool& descriptorPool);
 	void draw(vkglTF::Model& model, uint32_t dsID, VkCommandBuffer& cmdBuf);
 };
 }

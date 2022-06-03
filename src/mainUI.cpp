@@ -38,7 +38,7 @@ void VulkanExample::updateOverlay()
 		if (ui->combo("File", selectedScene, scenes)) {
 			vkDeviceWaitIdle(device);
 			loadScene(scenes[selectedScene]);
-			setupDescriptors();
+			updateDS();
 			updateCBs = true;
 		}
 #else
@@ -72,7 +72,7 @@ void VulkanExample::updateOverlay()
 			if (!filename.empty()) {
 				vkDeviceWaitIdle(device);
 				loadScene(filename);
-				pbrRender.setupDescriptors(descriptorPool);
+				pbrRender.updateDS(descriptorPool);
 				updateCBs = true;
 			}
 		}
@@ -80,7 +80,7 @@ void VulkanExample::updateOverlay()
 		if (ui->combo("Environment", selectedEnvironment, environments)) {
 			vkDeviceWaitIdle(device);
 			loadEnvironment(environments[selectedEnvironment]);
-			pbrRender.setupDescriptors(descriptorPool);
+			pbrRender.updateDS(descriptorPool);
 			updateCBs = true;
 		}
 	}

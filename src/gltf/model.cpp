@@ -78,9 +78,11 @@ void Model::applyShaderValues(uint32_t currentBuffer)
 	memcpy(uniformBuffers[currentBuffer].mapped, &shaderValues, sizeof(shaderValues));
 }
 
-void Model::setupMaterialDS(VkDescriptorPool& descriptorPool,
+void Model::updateMaterialDS(VkDescriptorPool& descriptorPool,
 	VkDescriptorImageInfo& defaultTextureDesc)
 {
+	// 5步方法：用DS上传shader参数到device：
+	//  binding到槽，建立layout，allocate DS，汇集到DS，update到device
 	// Material (samplers)	
 	std::vector<VkDescriptorSetLayoutBinding> dslBindings = {
 		{ 0, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1, VK_SHADER_STAGE_FRAGMENT_BIT, nullptr },
@@ -91,13 +93,14 @@ void Model::setupMaterialDS(VkDescriptorPool& descriptorPool,
 	};
 	m_pMaterialDSL = new aux::DescriptorSetLayout(dslBindings);
 
-	// Per-Material descriptor sets
+	// 每种材质1个DS，描述其5个texture，如果法矢图/遮挡图/发光图没有特殊描述就用缺省的
+	// 材质的DS归material自己保存，各个SwapChain公用（因为不改变）
 	for (auto& material : materials) {
 		aux::DescriptorSet::allocate(material.descriptorSet,
 			descriptorPool, m_pMaterialDSL->get());
 		std::vector<VkDescriptorImageInfo> imageDescriptors = {
-			defaultTextureDesc,
-			defaultTextureDesc,
+			defaultTextureDesc,  // 基础颜色图，baseColorTexture;
+			defaultTextureDesc,  // 金属粗糙度图，metallicRoughnessTexture;
 			material.normalTexture ? material.normalTexture->descriptor : defaultTextureDesc,
 			material.occlusionTexture ? material.occlusionTexture->descriptor : defaultTextureDesc,
 			material.emissiveTexture ? material.emissiveTexture->descriptor : defaultTextureDesc
@@ -105,6 +108,7 @@ void Model::setupMaterialDS(VkDescriptorPool& descriptorPool,
 
 		// TODO: glTF specs states that metallic roughness should be preferred, even if specular glosiness is present
 
+		// PBR的两种算法： 金属粗糙度 和 镜面光泽度（ToDo：应该改为金属粗糙度优先）
 		if (material.pbrWorkflows.metallicRoughness) {
 			if (material.baseColorTexture) {
 				imageDescriptors[0] = material.baseColorTexture->descriptor;
