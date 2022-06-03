@@ -95,7 +95,7 @@ public:
 	void setupNodeDescriptorSet(vkglTF::Node* node, VkDescriptorPool& descriptorPool);
 	void applyShaderValues(uint32_t currentBuffer);
 	void updateShaderValues();
-	void setupDSL(VkDescriptorPool& descriptorPool);
+	void setupDS(VkDescriptorPool& descriptorPool);
 	static aux::Image& generateBRDFLUT();
 	static void generateCubemaps(std::vector<aux::Image>& cubemaps, gltf::Model& skyboxMmodel, vks::Texture& texture);
 	static aux::Image* Pbr::generateCubemap(gltf::Model& skyboxModel, vks::Texture& texture, VkFormat format, int32_t dim,

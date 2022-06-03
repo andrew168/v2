@@ -23,7 +23,7 @@ void SkyboxRender::init(uint32_t swapChainCount, Camera& camera, VkRenderPass& r
 	skyboxDS.resize(swapChainCount);
 }
 
-void SkyboxRender::setupDescriptors(VkDescriptorPool& descriptorPool)
+void SkyboxRender::createDPool(VkDescriptorPool& descriptorPool)
 {
 	/*
 		Descriptor Pool
@@ -57,15 +57,20 @@ void SkyboxRender::setupDescriptors(VkDescriptorPool& descriptorPool)
 	};
 	uint32_t maxSets = (2 + materialCount + meshCount) * m_swapChainImageCount;
 	aux::DescriptorPool::create(descriptorPool, poolSizes, maxSets);
+}
 
-	/*
-		Descriptor sets
-	*/
+void SkyboxRender::setupDescriptors(VkDescriptorPool& descriptorPool)
+{
+	createDPool(descriptorPool);
+	setupDS(descriptorPool);
+	m_pSceneModel->setupMaterialDS(descriptorPool, m_pTextures->empty.descriptor);
+	setupNodeDS(descriptorPool);
+	setupSkyboxDS(descriptorPool);
+}
 
-	setupDSL(descriptorPool);
-	m_pSceneModel->setupMaterialDSL(descriptorPool, m_pTextures->empty.descriptor);
+void SkyboxRender::setupNodeDS(VkDescriptorPool& descriptorPool)
+{
 	// Model node (matrices)
-	{
 		std::vector<VkDescriptorSetLayoutBinding> setLayoutBindings = {
 			{ 0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1, VK_SHADER_STAGE_VERTEX_BIT, nullptr },
 		};
@@ -75,9 +80,11 @@ void SkyboxRender::setupDescriptors(VkDescriptorPool& descriptorPool)
 		for (auto& node : m_pSceneModel->nodes) {
 			setupNodeDescriptorSet(node, descriptorPool);
 		}
-	}
 
-	// Skybox (fixed set)
+}
+void SkyboxRender::setupSkyboxDS(VkDescriptorPool& descriptorPool)
+{
+// Skybox (fixed set)
 	for (auto i = 0; i < m_pSkyboxModel->getUB().size(); i++) {
 		aux::DescriptorSet::allocate(skyboxDS[i],
 			descriptorPool, getDSL());

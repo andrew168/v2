@@ -23,7 +23,7 @@ public:
 	vkglTF::Model* toVkglTF() {
 		return static_cast<vkglTF::Model*> (this);
 	}
-	void setupMaterialDSL(VkDescriptorPool &descriptorPool,
+	void setupMaterialDS(VkDescriptorPool &descriptorPool,
 		VkDescriptorImageInfo &defaultTextureDesc);
 	void update(int32_t animationIndex, float frameTimer);
 	void updateShaderValues(Camera& camera);

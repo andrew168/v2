@@ -50,7 +50,7 @@ void Pbr::config(gltf::Model& sceneModel,
 
 /*设置DS，保存在Device上的DS Pool中
 */
-void Pbr::setupDSL(VkDescriptorPool& descriptorPool)
+void Pbr::setupDS(VkDescriptorPool& descriptorPool)
 {
 	// Scene (matrices and environment maps)
 	std::vector<VkDescriptorSetLayoutBinding> setLayoutBindings = {

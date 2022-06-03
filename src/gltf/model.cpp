@@ -78,7 +78,7 @@ void Model::applyShaderValues(uint32_t currentBuffer)
 	memcpy(uniformBuffers[currentBuffer].mapped, &shaderValues, sizeof(shaderValues));
 }
 
-void Model::setupMaterialDSL(VkDescriptorPool& descriptorPool,
+void Model::setupMaterialDS(VkDescriptorPool& descriptorPool,
 	VkDescriptorImageInfo& defaultTextureDesc)
 {
 	// Material (samplers)	
