@@ -1,9 +1,13 @@
-﻿#include "gltf.h"
+﻿#include "model.h"
 #include "../auxVk/auxVk.h"
+#include "../pbr/pbr.h"
 
 namespace gltf
 {
 using namespace aux;
+
+aux::DescriptorSetLayout* Model::m_pDSL = nullptr;
+
 Model::Model():
 	vkglTF::Model(),
 	m_pMaterialDSL(nullptr),
@@ -11,13 +15,21 @@ Model::Model():
 {
 }
 
-void Model::init(uint32_t swapChainCount)
+void Model::init(uint32_t swapChainCount,
+	std::vector<Buffer>& paramUniformBuffers,
+	Textures& textures)
 {
+	m_rParamUniformBuffers = &paramUniformBuffers;
+	m_rTextures = &textures;
 	uniformBuffers.resize(swapChainCount);
+	ds.resize(swapChainCount);
 }
 
 Model::~Model()
 {
+	delete m_pDSL;
+	m_pDSL = nullptr;
+
 	destroy(Device::getR());
 	for (auto buffer : uniformBuffers) {
 		buffer.destroy();
@@ -143,4 +155,47 @@ void Model::updateMaterialDS(VkDescriptorPool& descriptorPool,
 		DescriptorSet::updateW(writeDescriptorSets);
 	}
 }
+
+
+/*设置DS，保存在Device上的DS Pool中
+* DS: scene的Uniform Buffer，pbr参数的UB， 3个环境Cubemap
+*/
+void Model::createDSL(VkDescriptorPool& descriptorPool)
+{
+	// DSLB: 绑定slot号，UB还是Sampler，几个, 到VS还是FS？
+	std::vector<VkDescriptorSetLayoutBinding> setLayoutBindings = {
+		{ 0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, nullptr },
+		{ 1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1, VK_SHADER_STAGE_FRAGMENT_BIT, nullptr },
+		{ 2, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1, VK_SHADER_STAGE_FRAGMENT_BIT, nullptr },
+		{ 3, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1, VK_SHADER_STAGE_FRAGMENT_BIT, nullptr },
+		{ 4, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1, VK_SHADER_STAGE_FRAGMENT_BIT, nullptr },
+	};
+
+	// binding和DSL都是临时的，只为了到pool中allocate出DS,
+	m_pDSL = new aux::DescriptorSetLayout(setLayoutBindings);
+}
+
+void Model::updateDS(VkDescriptorPool & descriptorPool)
+{
+	if (m_pDSL == nullptr) {
+		Model::createDSL(descriptorPool);
+	}
+		// 对所有SwapChain用的DS都update，
+	// 用1个DS一次性update描述SceneBody的5个D (1个整体UB + 1个pbr UB + 3个环境Sampler）
+	for (auto i = 0; i < ds.size(); i++) { // ds数量就是swapChain数量，
+		aux::DescriptorSet::allocate(ds[i], descriptorPool, m_pDSL->get());
+
+		// VkWriteDescriptorSet本来可以集合多个D，为了简化，这里只存1个D
+		std::vector<VkWriteDescriptorSet> writeDescriptorSets(5);
+		aux::Describe::buffer(writeDescriptorSets[0], ds[i], 0, &(uniformBuffers[i].descriptor));
+		aux::Describe::buffer(writeDescriptorSets[1], ds[i], 1, &(*m_rParamUniformBuffers)[i].descriptor);
+		aux::Describe::image(writeDescriptorSets[2], ds[i], 2, &m_rTextures->irradianceCube.descriptor);
+		aux::Describe::image(writeDescriptorSets[3], ds[i], 3, &m_rTextures->prefilteredCube.descriptor);
+		aux::Describe::image(writeDescriptorSets[4], ds[i], 4, &m_rTextures->lutBrdf.descriptor);
+		// 如果此DS已经被正在执行的某CmdX绑定，则CmdX立即变成invalid，
+		// 所有需要多个DS供swapchain轮流使用
+		aux::DescriptorSet::updateW(writeDescriptorSets);
+	}
+}
+
 }

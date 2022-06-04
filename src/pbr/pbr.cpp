@@ -2,22 +2,17 @@
 #include "..\auxVk\auxVk.h"
 #include "..\gltf\gltf.h"
 #include "pbr.h"
-#include "..\gltf\gltf.h"
 
 using namespace aux;
 
 namespace v2
 {
-Pbr::Pbr():
-	m_pDSL(nullptr)
+Pbr::Pbr()
 {
 }
 
 Pbr::~Pbr()
 {
-	delete m_pDSL;
-	m_pDSL = nullptr;
-
 	delete pAuxDSLayoutNode;
 	delete pAuxPipelineBlend;
 	delete pAuxPipelinePbr;
@@ -35,51 +30,16 @@ void Pbr::init(uint32_t swapChainCount, Camera &camera, VkRenderPass& renderPass
 	m_pCamera = &camera;
 	m_swapChainImageCount = swapChainCount;
 	paramUniformBuffers.resize(swapChainCount);
-	sceneDS.resize(swapChainCount);
-	m_pSceneModel->init(swapChainCount);
-	m_pSkyboxModel->init(swapChainCount);
+	m_pSceneModel->init(swapChainCount, paramUniformBuffers, *m_pTextures);
+	m_pSkyboxModel->init(swapChainCount, paramUniformBuffers, *m_pTextures);
 }
 void Pbr::config(gltf::Model& sceneModel,
-	gltf::Model& skyboxModel,
+	gltf::Skybox& skyboxModel,
 	Textures &textures)
 {
 	m_pSceneModel = &sceneModel;
 	m_pSkyboxModel = &skyboxModel;	
 	m_pTextures = &textures;
-}
-
-/*设置DS，保存在Device上的DS Pool中
-* DS: scene的Uniform Buffer，pbr参数的UB， 3个环境Cubemap
-*/
-void Pbr::updateSceneBodyDS(VkDescriptorPool& descriptorPool)
-{
-	// DSLB: 绑定slot号，UB还是Sampler，几个, 到VS还是FS？
-	std::vector<VkDescriptorSetLayoutBinding> setLayoutBindings = {
-		{ 0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, nullptr },
-		{ 1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1, VK_SHADER_STAGE_FRAGMENT_BIT, nullptr },
-		{ 2, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1, VK_SHADER_STAGE_FRAGMENT_BIT, nullptr },
-		{ 3, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1, VK_SHADER_STAGE_FRAGMENT_BIT, nullptr },
-		{ 4, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1, VK_SHADER_STAGE_FRAGMENT_BIT, nullptr },
-	};
-
-	// binding和DSL都是临时的，只为了到pool中allocate出DS,
-	m_pDSL = new aux::DescriptorSetLayout(setLayoutBindings);
-	// 对所有SwapChain用的DS都update，
-	// 用1个DS一次性update描述SceneBody的5个D (1个整体UB + 1个pbr UB + 3个环境Sampler）
-	for (auto i = 0; i < sceneDS.size(); i++) { // sceneDS数量就是swapChain数量，
-		aux::DescriptorSet::allocate(sceneDS[i], descriptorPool, m_pDSL->get());
-
-		// VkWriteDescriptorSet本来可以集合多个D，为了简化，这里只存1个D
-		std::vector<VkWriteDescriptorSet> writeDescriptorSets(5);
-		aux::Describe::buffer(writeDescriptorSets[0], sceneDS[i], 0, &(m_pSceneModel->getUB()[i].descriptor));
-		aux::Describe::buffer(writeDescriptorSets[1], sceneDS[i], 1, &(paramUniformBuffers)[i].descriptor);
-		aux::Describe::image(writeDescriptorSets[2], sceneDS[i], 2, &m_pTextures->irradianceCube.descriptor);
-		aux::Describe::image(writeDescriptorSets[3], sceneDS[i], 3, &m_pTextures->prefilteredCube.descriptor);
-		aux::Describe::image(writeDescriptorSets[4], sceneDS[i], 4, &m_pTextures->lutBrdf.descriptor);
-		// 如果此DS已经被正在执行的某CmdX绑定，则CmdX立即变成invalid，
-		// 所有需要多个DS供swapchain轮流使用
-		aux::DescriptorSet::updateW(writeDescriptorSets);
-	}
 }
 
 void Pbr::preparePipeline(PbrConfig &settings)
@@ -95,7 +55,7 @@ void Pbr::preparePipeline(PbrConfig &settings)
 
 	// Pipeline layout
 	const std::vector<VkDescriptorSetLayout> setLayouts = {
-		*(getDSL()),
+		*(m_pSceneModel->getDSL()),
 		*(m_pSceneModel->getMaterialDSL()),
 		*(pAuxDSLayoutNode->get())
 	};

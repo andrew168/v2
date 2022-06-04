@@ -341,6 +341,7 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     <ClCompile Include="auxVk\util.cpp" />
     <ClCompile Include="E:\projectsVK\glTF-PBR\src\main.cpp" />
     <ClCompile Include="gltf\model.cpp" />
+    <ClCompile Include="gltf\skybox.cpp" />
     <ClCompile Include="pbr\brdflut.cpp" />
     <ClCompile Include="pbr\cubemap.cpp" />
     <ClCompile Include="pbr\pbr.cpp" />
@@ -394,6 +395,8 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     <ClInclude Include="auxVk\subpassDescription.h" />
     <ClInclude Include="auxVk\util.h" />
     <ClInclude Include="gltf\gltf.h" />
+    <ClInclude Include="gltf\model.h" />
+    <ClInclude Include="gltf\skybox.h" />
     <ClInclude Include="pbr\pbr.h" />
     <ClInclude Include="pbr\pbrRender.h" />
     <ClInclude Include="pbr\skyboxRender.h" />

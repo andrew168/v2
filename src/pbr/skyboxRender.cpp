@@ -20,7 +20,6 @@ SkyboxRender::~SkyboxRender()
 void SkyboxRender::init(uint32_t swapChainCount, Camera& camera, VkRenderPass& renderPass)
 {
 	Pbr::init(swapChainCount, camera, renderPass);
-	skyboxDS.resize(swapChainCount);
 }
 
 void SkyboxRender::createDPool(VkDescriptorPool& descriptorPool)
@@ -72,11 +71,11 @@ void SkyboxRender::updateDS(VkDescriptorPool& descriptorPool)
 	//
 	//他们都必须用D(Descriptor)描述，汇集到DS(DescriptorSet)，再上传给Device。
 	createDPool(descriptorPool);
-	updateSceneBodyDS(descriptorPool);  //DS: scene的Uniform Buffer，pbr参数的UB， 3个环境Cubemap
+	m_pSceneModel->updateDS(descriptorPool);  //DS: scene的Uniform Buffer，pbr参数的UB， 3个环境Cubemap
 	// 材质的DS归material自己保存，各个SwapChain公用（因为不改变）
 	m_pSceneModel->updateMaterialDS(descriptorPool, m_pTextures->empty.descriptor);
 	updateSceneMeshUBDS(descriptorPool); // 更新每一个Mesh's UB的DS，mesh记录自己的DS
-	updateSkyboxBodyDS(descriptorPool); //DS: skybox的Uniform Buffer，pbr参数的UB， 1个环境Cubemap: Prefilted
+	m_pSkyboxModel->updateDS(descriptorPool); //DS: skybox的Uniform Buffer，pbr参数的UB， 1个环境Cubemap: Prefilted
 }
 
 // 遍历Model的每一个Node，给每个mesh 分配DS，记录在mesh中，存放mesh的matrix
@@ -96,27 +95,9 @@ void SkyboxRender::updateSceneMeshUBDS(VkDescriptorPool& descriptorPool)
 	}
 }
 
-//DS: skybox的Uniform Buffer，pbr参数的UB， 1个环境Cubemap: Prefilted
-void SkyboxRender::updateSkyboxBodyDS(VkDescriptorPool& descriptorPool)
+void SkyboxRender::draw(gltf::Model& model, uint32_t dsID, VkCommandBuffer& cmdBuf)
 {
-	// Skybox (fixed set)
-	// 用1个DS一次性update描述SkyboxBody的3个D (1个整体UB + 1个pbr UB + 1个环境Sampler）
-	for (auto i = 0; i < m_pSkyboxModel->getUB().size(); i++) {
-		// DSL可公用，借用SceneBody的DSL的前3个，只要一致即可。
-		// 先从Dpool中allocate 1个DS（唯一的），再update
-		aux::DescriptorSet::allocate(skyboxDS[i], descriptorPool, getDSL());
-
-		std::vector<VkWriteDescriptorSet> writeDescriptorSets(3);
-		aux::Describe::buffer(writeDescriptorSets[0], skyboxDS[i], 0, &(m_pSkyboxModel->getUB()[i].descriptor));
-		aux::Describe::buffer(writeDescriptorSets[1], skyboxDS[i], 1, &paramUniformBuffers[i].descriptor);
-		aux::Describe::image(writeDescriptorSets[2], skyboxDS[i], 2, &m_pTextures->prefilteredCube.descriptor);
-		aux::DescriptorSet::updateW(writeDescriptorSets);
-	}
-}
-
-void SkyboxRender::draw(vkglTF::Model& model, uint32_t dsID, VkCommandBuffer& cmdBuf)
-{
-	aux::DescriptorSet dsSkybox(skyboxDS[dsID]);
+	aux::DescriptorSet dsSkybox(model.getDS()[dsID]);
 	dsSkybox.bindToGraphics(cmdBuf, *getPipelineLayout());
 	pAuxPipelineSkybox->bindToGraphic(cmdBuf);
 	model.draw(cmdBuf);

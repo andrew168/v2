@@ -28,14 +28,6 @@ struct PushConstBlockMaterial {
 	float alphaMaskCutoff;
 };
 
-struct Textures {
-	vks::TextureCubeMap environmentCube;
-	vks::Texture2D empty;
-	vks::Texture2D lutBrdf;
-	vks::TextureCubeMap irradianceCube;
-	vks::TextureCubeMap prefilteredCube;
-};
-
 struct ShaderValuesParams {
 	glm::vec4 lightDir;
 	float exposure = 4.5f;
@@ -63,16 +55,14 @@ class Pbr
 {
 public:
 	uint32_t m_swapChainImageCount;
-	aux::DescriptorSetLayout* m_pDSL;
 
 	static aux::Image* m_pBrdfLutImage; // 依赖vks,不能delete，
 	gltf::Model *m_pSceneModel;
-	gltf::Model *m_pSkyboxModel;
-	Textures* m_pTextures;
+	gltf::Skybox *m_pSkyboxModel;
+	Textures* m_pTextures; 
 	VkRenderPass* m_rRenderPass; // refer point to outside, do not destroy it
 
 public:
-	std::vector<VkDescriptorSet> sceneDS;
 	aux::DescriptorSetLayout* pAuxDSLayoutNode;
 	aux::Pipeline* pAuxPipelineBlend;
 	aux::Pipeline* pAuxPipelinePbr;
@@ -87,7 +77,7 @@ public:
 	~Pbr();
 	void init(uint32_t swapChainCount, Camera& camera, VkRenderPass& renderPass);
 	void config(gltf::Model& sceneModel,
-		gltf::Model& skyboxModel,
+		gltf::Skybox& skyboxModel,
 		Textures& textures);
 	void createUB();
 	void preparePipeline(PbrConfig& settings);
@@ -95,14 +85,11 @@ public:
 	void updateMeshUBDS(vkglTF::Node* node, VkDescriptorPool& descriptorPool);
 	void applyShaderValues(uint32_t currentBuffer);
 	void updateShaderValues();
-	void updateSceneBodyDS(VkDescriptorPool& descriptorPool);
 	static aux::Image& generateBRDFLUT();
 	static void generateCubemaps(std::vector<aux::Image>& cubemaps, gltf::Model& skyboxMmodel, vks::Texture& texture);
 	static aux::Image* Pbr::generateCubemap(gltf::Model& skyboxModel, vks::Texture& texture, VkFormat format, int32_t dim,
 		std::vector<aux::ShaderDescription> shaders,
 		uint32_t constsSize, const void* constsData);
-	std::vector<VkDescriptorSet>& getDS() { return sceneDS; }
-	VkDescriptorSetLayout* getDSL() { return m_pDSL->get(); }
 };
 }
 

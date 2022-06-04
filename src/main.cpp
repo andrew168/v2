@@ -14,7 +14,7 @@ class VulkanExample : public VulkanExampleBase
 public:
 	SkyboxRender pbrRender;
 	gltf::Model sceneModel;
-	gltf::Model skyboxModel;
+	gltf::Skybox skyboxModel;
 	v2::Render sceneRender;
 	v2::Render skyboxRender;
 	Textures textures;
@@ -121,7 +121,7 @@ public:
 				pbrRender.draw(skyboxModel, static_cast<uint32_t>(i), currentCB);
 			}
 
-			sceneRender.config(pbrRender.getDS()[i], currentCB,
+			sceneRender.config(sceneModel.getDS()[i], currentCB,
 				pbrRender, *pbrRender.pAuxPipelinePbr, pbrRender.pAuxPipelineBlend);
 			sceneRender.drawT(sceneModel);
 
