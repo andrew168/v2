@@ -1,6 +1,8 @@
 ﻿#pragma once
 #include "..\vk.h"
 #include "..\auxVk\auxVk.h"
+#include "model.h"
+
 class aux::Image;
 
 namespace gltf

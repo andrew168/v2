@@ -1,5 +1,4 @@
-﻿#include "model.h"
-#include "../auxVk/auxVk.h"
+﻿#include "../auxVk/auxVk.h"
 #include "../pbr/pbr.h"
 #include "model.h"
 #include "skybox.h"
