@@ -69,6 +69,24 @@ public:
 		std::vector<Buffer>& pParamUniformBuffers,
 		Textures& pTextures);
 
+	inline uint32_t getMaterialCount() {
+		uint32_t sum = 0;
+		for (auto& material : materials) {
+			sum++;
+		}
+		return sum;
+	}
+	
+	inline uint32_t getMeshCount() {
+		uint32_t sum = 0;
+		for (auto node : linearNodes) {
+			if (node->mesh) {	// 每一个GLTF模型都有自己的mesh列表
+				sum++;
+			}
+		}
+		return sum;
+	}
+
 	vkglTF::Model* toVkglTF() {
 		return static_cast<vkglTF::Model*> (this);
 	}

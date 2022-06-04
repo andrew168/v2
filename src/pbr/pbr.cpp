@@ -128,9 +128,6 @@ void Pbr::createDPool(VkDescriptorPool& descriptorPool)
 	uint32_t materialCount = 0;
 	uint32_t meshCount = 0;
 
-	// Environment samplers (radiance, irradiance, brdf lut)
-	imageSamplerCount += 3;
-
 	// 创建DPool在Device上，容纳Render需要的所有sample和UB的descriptor。
 	// DPool的大小计算：
 	// * Sampler数量：
@@ -140,18 +137,14 @@ void Pbr::createDPool(VkDescriptorPool& descriptorPool)
 	//	+ 每mesh一个UB
 	//	+ 4(每model整体的UB, pbr参数的UB, ??)
 	// * 每一个swapChainImage，需要1份，==》 放大倍数 swapChainImageCount
-	std::vector<vkglTF::Model*> modellist = { m_pSkyboxModel, m_pSceneModel };
+	std::vector<gltf::Model*> modellist = { m_pSkyboxModel, m_pSceneModel };
 	for (auto& model : modellist) {
-		for (auto& material : model->materials) {
-			imageSamplerCount += 5;  // 每种PBR材质有5个texture作为sampler
-			materialCount++;		  //这个种材质的5个sampler放在1个set中描述
-		}
-		for (auto node : model->linearNodes) {
-			if (node->mesh) {	// 每一个GLTF模型都有自己的mesh列表
-				meshCount++;	// 每一个mesh的UB，放在1个set中
-			}
-		}
+		materialCount += model->getMaterialCount();		  //这个种材质的5个sampler放在1个set中描述
+		meshCount += model->getMeshCount();
 	}
+
+	// 3个环境图 samplers (radiance, irradiance, brdf lut)
+	imageSamplerCount = 3 + 5 * materialCount;  // 每种PBR材质有5个texture作为sampler
 
 	std::vector<VkDescriptorPoolSize> poolSizes = {
 		{ VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, (4 + meshCount) * m_swapChainImageCount },
