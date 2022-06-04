@@ -36,8 +36,8 @@ void Pbr::init(uint32_t swapChainCount, Camera &camera, VkRenderPass& renderPass
 	m_swapChainImageCount = swapChainCount;
 	paramUniformBuffers.resize(swapChainCount);
 	sceneDS.resize(swapChainCount);
-	m_pSceneModel->getUB().resize(swapChainCount);
-	m_pSkyboxModel->getUB().resize(swapChainCount);
+	m_pSceneModel->init(swapChainCount);
+	m_pSkyboxModel->init(swapChainCount);
 }
 void Pbr::config(gltf::Model& sceneModel,
 	gltf::Model& skyboxModel,
@@ -177,10 +177,10 @@ void Pbr::updateMeshUBDS(vkglTF::Node* node, VkDescriptorPool& descriptorPool)
 /*
 Prepare and initialize uniform buffers containing shader parameters
 */
-void Pbr::prepareUniformBuffers()
+void Pbr::createUB()
 {
-	m_pSceneModel->prepareUniformBuffers();
-	m_pSkyboxModel->prepareUniformBuffers();
+	m_pSceneModel->createUB();
+	m_pSkyboxModel->createUB();
 	for (auto& uniformBuffer : paramUniformBuffers) {
 		uniformBuffer.create(Device::getVksDevice(), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, sizeof(shaderValuesParams));
 	}

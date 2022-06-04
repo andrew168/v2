@@ -264,7 +264,7 @@ public:
 		pbrRender.shaderValuesParams.prefilteredCubeMipLevels = 
 			static_cast<float>(auxCubemaps[1].getMipLevels());
 			static_cast<float>(auxCubemaps[1].getMipLevels());
-		pbrRender.prepareUniformBuffers();
+		pbrRender.createUB();
 		pbrRender.updateDS(descriptorPool);
 		PbrConfig pbrConfig;
 		pbrConfig.multiSampling = settings.multiSampling;

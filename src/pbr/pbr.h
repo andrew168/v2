@@ -89,7 +89,7 @@ public:
 	void config(gltf::Model& sceneModel,
 		gltf::Model& skyboxModel,
 		Textures& textures);
-	void prepareUniformBuffers();
+	void createUB();
 	void preparePipeline(PbrConfig& settings);
 	VkPipelineLayout* getPipelineLayout() { return pAuxPipelineLayout->getP(); }
 	void updateMeshUBDS(vkglTF::Node* node, VkDescriptorPool& descriptorPool);

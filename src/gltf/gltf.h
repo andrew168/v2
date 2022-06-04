@@ -20,6 +20,7 @@ class Model: public vkglTF::Model {
 public:
 	Model();
 	~Model();
+	void init(uint32_t swapChainCount);
 	vkglTF::Model* toVkglTF() {
 		return static_cast<vkglTF::Model*> (this);
 	}
@@ -29,7 +30,7 @@ public:
 	void updateShaderValues(Camera& camera);
 	void Model::centerAndScale();
 	void applyShaderValues(uint32_t currentBuffer);
-	void prepareUniformBuffers();
+	void createUB();
 	std::vector<Buffer>& getUB() { return uniformBuffers; }
 	VkDescriptorSetLayout* getMaterialDSL() { return m_pMaterialDSL->get(); }
 };

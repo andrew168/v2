@@ -11,6 +11,11 @@ Model::Model():
 {
 }
 
+void Model::init(uint32_t swapChainCount)
+{
+	uniformBuffers.resize(swapChainCount);
+}
+
 Model::~Model()
 {
 	destroy(Device::getR());
@@ -36,7 +41,7 @@ void Model::update(int32_t animationIndex, float frameTimer)
 	}
 }
 
-void Model::prepareUniformBuffers()
+void Model::createUB()
 {
 	for (auto& uniformBuffer : uniformBuffers) {
 		uniformBuffer.create(Device::getVksDevice(), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, sizeof(shaderValues));
@@ -73,6 +78,8 @@ void Model::centerAndScale()
 	shaderValues.model = glm::translate(shaderValues.model, translate);
 }
 
+// shader参数值的更改
+// 先更改shaderValues，再memcpy到UB中，
 void Model::applyShaderValues(uint32_t currentBuffer)
 {
 	memcpy(uniformBuffers[currentBuffer].mapped, &shaderValues, sizeof(shaderValues));
