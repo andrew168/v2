@@ -16,7 +16,6 @@ public:
 	gltf::Model sceneModel;
 	gltf::Skybox skyboxModel;
 	v2::Render sceneRender;
-	v2::Render skyboxRender;
 	Textures textures;
 	// VkPipelineLayout pipelineLayout;
 

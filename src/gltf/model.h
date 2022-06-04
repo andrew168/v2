@@ -50,7 +50,6 @@ public:
 	void Model::centerAndScale();
 	void applyShaderValues(uint32_t currentBuffer);
 	void createUB();
-	std::vector<Buffer>& getUB() { return uniformBuffers; }
 	VkDescriptorSetLayout* getMaterialDSL() { return m_pMaterialDSL->get(); }
 	VkDescriptorSetLayout* getDSL() { return m_pDSL->get(); }
 	std::vector<VkDescriptorSet>& getDS() { return ds; }
