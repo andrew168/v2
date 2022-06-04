@@ -24,6 +24,12 @@ class Model: public vkglTF::Model {
 	UBOMatrices shaderValues;
 	aux::DescriptorSetLayout* m_pMaterialDSL;
 
+	VkDescriptorSet* m_rSceneDescriptorSet;
+	VkCommandBuffer* m_rCmdBuf;
+	VkPipelineLayout* m_rPipelineLayout;
+	aux::Pipeline* m_rPipeline;
+	aux::Pipeline* m_pAuxPipelineBlend;
+
 protected:
 	std::vector<Buffer> uniformBuffers;
 	std::vector<VkDescriptorSet> ds;  //本model所有Shader参数的descriptorSet
@@ -53,6 +59,18 @@ public:
 	VkDescriptorSetLayout* getMaterialDSL() { return m_pMaterialDSL->get(); }
 	VkDescriptorSetLayout* getDSL() { return m_pDSL->get(); }
 	std::vector<VkDescriptorSet>& getDS() { return ds; }
+
+	void config(VkDescriptorSet& sceneDescriptorSet,
+		VkCommandBuffer& cmdBuf,
+		VkPipelineLayout& pipelineLayout,
+		aux::Pipeline& pipeline,
+		aux::Pipeline* pPipelineBlend = nullptr);
+
+	void drawNode(vkglTF::Node* node,
+		vkglTF::Material::AlphaMode alphaMode);
+
+	void drawT(vkglTF::Model& model); //T: Transparent supported, 
+
 
 	static void Model::createDSL(VkDescriptorPool& descriptorPool);
 };

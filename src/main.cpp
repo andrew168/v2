@@ -119,10 +119,9 @@ public:
 				//skybox绘制： 先绑定 ds和pipeline，再绘制
 				pbrRender.draw(skyboxModel, static_cast<uint32_t>(i), currentCB);
 			}
-
-			sceneRender.config(sceneModel.getDS()[i], currentCB,
-				pbrRender, *pbrRender.pAuxPipelinePbr, pbrRender.pAuxPipelineBlend);
-			sceneRender.drawT(sceneModel);
+			sceneModel.config(sceneModel.getDS()[i], currentCB,
+				*pbrRender.getPipelineLayout(), *pbrRender.pAuxPipelinePbr, pbrRender.pAuxPipelineBlend);
+			sceneModel.drawT(sceneModel);
 
 			// User interface
 			ui->draw(currentCB);
