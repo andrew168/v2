@@ -11,6 +11,7 @@ aux::DescriptorSetLayout* Model::m_pDSL = nullptr;
 Model::Model():
 	vkglTF::Model(),
 	m_pMaterialDSL(nullptr),
+	m_pMeshDSL(nullptr),
 	m_animationTimer(0.0f)
 {
 }
@@ -27,10 +28,9 @@ void Model::init(uint32_t swapChainCount,
 
 Model::~Model()
 {
-	delete m_pDSL;
-	m_pDSL = nullptr;
-	delete m_pMeshDSL;
-
+		delete m_pDSL;
+		delete m_pMeshDSL;
+	
 	destroy(Device::getR());
 	for (auto buffer : uniformBuffers) {
 		buffer.destroy();
@@ -233,13 +233,13 @@ void Model::updateNodeUBDS(vkglTF::Node* node, VkDescriptorPool& descriptorPool)
 	}
 }
 
-void Model::attachPbr(VkDescriptorSet& sceneDescriptorSet,
+void Model::attachPbr(uint32_t dsID,
 	VkCommandBuffer& cmdBuf,
 	VkPipelineLayout & pipelineLayout,
 	aux::Pipeline& pipeline,
 	aux::Pipeline* pPipelineBlend)
 {
-	m_rCurrentDS = &sceneDescriptorSet;
+	m_rCurrentDS = &ds[dsID];
 	m_rCmdBuf = &cmdBuf;
 	m_rPipelineLayout = &pipelineLayout;
 	m_rPipeline = &pipeline;
@@ -344,4 +344,15 @@ void Model::drawNode(vkglTF::Node* node,
 	}
 }
 
+std::vector<VkDescriptorSetLayout>& Model::getDSLs()
+{
+	if (m_DSLs.size() == 0) {
+		m_DSLs.reserve(3);
+		m_DSLs.push_back(*(m_pDSL->get()));
+		m_DSLs.push_back(*(m_pMaterialDSL->get()));
+		m_DSLs.push_back(*(m_pMeshDSL->get()));
+	}
+
+	return m_DSLs;
+}
 }

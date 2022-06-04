@@ -52,19 +52,12 @@ void Pbr::preparePipeline(PbrConfig &settings)
 		Assert(0, "which value?");
 	}
 
-	// Pipeline layout
-	const std::vector<VkDescriptorSetLayout> setLayouts = {
-		*(m_pSceneModel->getDSL()),
-		*(m_pSceneModel->getMaterialDSL()),
-		*(m_pSceneModel->getMeshDSL())
-	};
-
 	VkPushConstantRange pushConstantRange{};
 	pushConstantRange.size = sizeof(gltf::PushConstBlockMaterial);
 	pushConstantRange.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
 
 	aux::PipelineLayoutCI auxPipelineLayoutCI{ &pushConstantRange };
-	auxPipelineLayoutCI.pSetLayouts = &setLayouts;
+	auxPipelineLayoutCI.pSetLayouts = &m_pSceneModel->getDSLs();
 
 	pAuxPipelineLayout = new aux::PipelineLayout(auxPipelineLayoutCI);
 	// pipelineLayout = pAuxPipelineLayout->get();

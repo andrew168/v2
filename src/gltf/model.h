@@ -60,6 +60,7 @@ protected:
 	static aux::DescriptorSetLayout* m_pDSL;
 	aux::DescriptorSetLayout* m_pMaterialDSL;
 	aux::DescriptorSetLayout* m_pMeshDSL;
+	std::vector<VkDescriptorSetLayout> m_DSLs;
 
 public:
 	Model();
@@ -81,12 +82,9 @@ public:
 	void centerAndScale();
 	void applyShaderValues(uint32_t currentBuffer);
 	void createUB();
-	VkDescriptorSetLayout* getMaterialDSL() { return m_pMaterialDSL->get(); }
-	VkDescriptorSetLayout* getDSL() { return m_pDSL->get(); }
-	VkDescriptorSetLayout* getMeshDSL() { return m_pMeshDSL->get(); }
-	std::vector<VkDescriptorSet>& getDS() { return ds; }
+	std::vector<VkDescriptorSetLayout>& getDSLs();
 
-	void attachPbr(VkDescriptorSet& sceneDescriptorSet,
+	void attachPbr(uint32_t dsID,
 		VkCommandBuffer& cmdBuf,
 		VkPipelineLayout& pipelineLayout,
 		aux::Pipeline& pipeline,

@@ -116,12 +116,12 @@ public:
 
 			if (displayBackground) {
 				//skybox绘制： 先绑定 ds和pipeline，再绘制
-				skyboxModel.attachPbr(skyboxModel.getDS()[i], currentCB,
+				skyboxModel.attachPbr(static_cast<uint32_t>(i), currentCB,
 					*pbr.getPipelineLayout(), *pbr.pAuxPipelineSkybox, nullptr);
 
 				skyboxModel.draw(skyboxModel);
 			}
-			sceneModel.attachPbr(sceneModel.getDS()[i], currentCB,
+			sceneModel.attachPbr(static_cast<uint32_t>(i), currentCB,
 				*pbr.getPipelineLayout(), *pbr.pAuxPipelinePbr, pbr.pAuxPipelineBlend);
 			sceneModel.drawT(sceneModel);
 
