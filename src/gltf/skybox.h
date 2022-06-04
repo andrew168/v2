@@ -13,5 +13,6 @@ public:
 	Skybox();
 	~Skybox();
 	void updateDS(VkDescriptorPool& descriptorPool);
+	void draw(Model& model);
 };
 }

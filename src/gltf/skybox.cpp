@@ -37,4 +37,12 @@ void Skybox::updateDS(VkDescriptorPool& descriptorPool)
 	}
 }
 
+void Skybox::draw(Model& model)
+{
+	aux::DescriptorSet dsSkybox(*m_rCurrentDS);
+	dsSkybox.bindToGraphics(*m_rCmdBuf, *m_rPipelineLayout);
+	m_rPipeline->bindToGraphic(*m_rCmdBuf);
+	model.draw(*m_rCmdBuf);
+}
+
 }

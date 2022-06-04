@@ -18,7 +18,6 @@ public:
 	Textures* m_pTextures; 
 	VkRenderPass* m_rRenderPass; // refer point to outside, do not destroy it
 
-public:
 	aux::Pipeline* pAuxPipelineBlend;
 	aux::Pipeline* pAuxPipelinePbr;
 	aux::Pipeline* pAuxPipelineSkybox;
@@ -37,9 +36,10 @@ public:
 	void createUB();
 	void preparePipeline(PbrConfig& settings);
 	VkPipelineLayout* getPipelineLayout() { return pAuxPipelineLayout->getP(); }
-	void updateMeshUBDS(vkglTF::Node* node, VkDescriptorPool& descriptorPool);
 	void applyShaderValues(uint32_t currentBuffer);
 	void updateShaderValues();
+	void updateDS(VkDescriptorPool& descriptorPool);
+	void createDPool(VkDescriptorPool& descriptorPool);
 	static aux::Image& generateBRDFLUT();
 	static void generateCubemaps(std::vector<aux::Image>& cubemaps, gltf::Model& skyboxMmodel, vks::Texture& texture);
 	static aux::Image* Pbr::generateCubemap(gltf::Model& skyboxModel, vks::Texture& texture, VkFormat format, int32_t dim,

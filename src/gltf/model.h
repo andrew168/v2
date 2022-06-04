@@ -46,15 +46,14 @@ class Model: public vkglTF::Model {
 	float m_animationTimer = 0.0f;
 	UBOMatrices shaderValues;
 
-	VkDescriptorSet* m_rSceneDescriptorSet;
+protected:
 	VkCommandBuffer* m_rCmdBuf;
 	VkPipelineLayout* m_rPipelineLayout;
 	aux::Pipeline* m_rPipeline;
 	aux::Pipeline* m_pAuxPipelineBlend;
-
-protected:
 	std::vector<Buffer> uniformBuffers;
 	std::vector<VkDescriptorSet> ds;  //本model所有Shader参数的descriptorSet
+	VkDescriptorSet* m_rCurrentDS;
 	Textures* m_rTextures;
 	std::vector<Buffer>* m_rParamUniformBuffers;
 	

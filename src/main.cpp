@@ -12,7 +12,7 @@ using namespace gltf;
 class VulkanExample : public VulkanExampleBase
 {
 public:
-	SkyboxRender pbrRender;
+	Pbr pbr;
 	gltf::Model sceneModel;
 	gltf::Skybox skyboxModel;
 	Textures textures;
@@ -116,10 +116,13 @@ public:
 
 			if (displayBackground) {
 				//skybox绘制： 先绑定 ds和pipeline，再绘制
-				pbrRender.draw(skyboxModel, static_cast<uint32_t>(i), currentCB);
+				skyboxModel.attachPbr(skyboxModel.getDS()[i], currentCB,
+					*pbr.getPipelineLayout(), *pbr.pAuxPipelineSkybox, nullptr);
+
+				skyboxModel.draw(skyboxModel);
 			}
 			sceneModel.attachPbr(sceneModel.getDS()[i], currentCB,
-				*pbrRender.getPipelineLayout(), *pbrRender.pAuxPipelinePbr, pbrRender.pAuxPipelineBlend);
+				*pbr.getPipelineLayout(), *pbr.pAuxPipelinePbr, pbr.pAuxPipelineBlend);
 			sceneModel.drawT(sceneModel);
 
 			// User interface
@@ -204,7 +207,7 @@ public:
 
 	void updateLights()
 	{
-		pbrRender.shaderValuesParams.lightDir = glm::vec4(
+		pbr.shaderValuesParams.lightDir = glm::vec4(
 			sin(glm::radians(lightSource.rotation.x)) * cos(glm::radians(lightSource.rotation.y)),
 			sin(glm::radians(lightSource.rotation.y)),
 			cos(glm::radians(lightSource.rotation.x)) * cos(glm::radians(lightSource.rotation.y)),
@@ -215,7 +218,7 @@ public:
 	{
 		recordCommandBuffers();
 		vkDeviceWaitIdle(device);
-		pbrRender.updateShaderValues();
+		pbr.updateShaderValues();
 		updateOverlay();
 	}
 
@@ -237,8 +240,8 @@ public:
 		presentCompleteSemaphores.resize(renderAhead);
 		renderCompleteSemaphores.resize(renderAhead);
 		commandBuffers.resize(swapChain.imageCount);
-		pbrRender.config(sceneModel, skyboxModel, textures);
-		pbrRender.init(swapChain.imageCount, camera, renderPass);
+		pbr.config(sceneModel, skyboxModel, textures);
+		pbr.init(swapChain.imageCount, camera, renderPass);
 
 		// Command buffer execution fences
 		for (auto& waitFence : waitFences) {
@@ -258,15 +261,15 @@ public:
 		v2::Pbr::generateCubemaps(auxCubemaps, skyboxModel, textures.environmentCube);
 		auxCubemaps[0].toVKS(textures.irradianceCube);
 		auxCubemaps[1].toVKS(textures.prefilteredCube);
-		pbrRender.shaderValuesParams.prefilteredCubeMipLevels = 
+		pbr.shaderValuesParams.prefilteredCubeMipLevels = 
 			static_cast<float>(auxCubemaps[1].getMipLevels());
 			static_cast<float>(auxCubemaps[1].getMipLevels());
-		pbrRender.createUB();
-		pbrRender.updateDS(descriptorPool);
+		pbr.createUB();
+		pbr.updateDS(descriptorPool);
 		PbrConfig pbrConfig;
 		pbrConfig.multiSampling = settings.multiSampling;
 		pbrConfig.sampleCount = settings.sampleCount;
-		pbrRender.preparePipeline(pbrConfig);
+		pbr.preparePipeline(pbrConfig);
 		ui = new UI(vulkanDevice, renderPass, queue, pipelineCache, settings.sampleCount);
 		updateOverlay();
 		recordCommandBuffers();
@@ -294,9 +297,9 @@ public:
 		}
 
 		// Update UBOs
-		pbrRender.updateShaderValues();
+		pbr.updateShaderValues();
 		sceneModel.applyShaderValues(currentBuffer);
-		pbrRender.applyShaderValues(currentBuffer);
+		pbr.applyShaderValues(currentBuffer);
 		skyboxModel.applyShaderValues(currentBuffer);
 		
 		aux::Queue auxQueue(queue);
@@ -337,11 +340,11 @@ public:
 			}
 			updateLights();
 			if (rotateModel) {
-				pbrRender.updateShaderValues();
+				pbr.updateShaderValues();
 			}
 		}
 		if (camera.updated) {
-			pbrRender.updateShaderValues();
+			pbr.updateShaderValues();
 		}
 	}
 };

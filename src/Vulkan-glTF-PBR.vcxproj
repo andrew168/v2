@@ -345,7 +345,6 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     <ClCompile Include="pbr\brdflut.cpp" />
     <ClCompile Include="pbr\cubemap.cpp" />
     <ClCompile Include="pbr\pbr.cpp" />
-    <ClCompile Include="pbr\skyboxRender.cpp" />
     <ClCompile Include="v2\v2.cpp" />
     <None Include="E:\projectsVK\glTF-PBR\data\shaders\filtercube.vert" />
     <None Include="E:\projectsVK\glTF-PBR\data\shaders\genbrdflut.frag" />
@@ -398,7 +397,6 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     <ClInclude Include="gltf\skybox.h" />
     <ClInclude Include="pbr\pbr.h" />
     <ClInclude Include="pbr\pbrCore.h" />
-    <ClInclude Include="pbr\skyboxRender.h" />
     <ClInclude Include="v2\v2.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

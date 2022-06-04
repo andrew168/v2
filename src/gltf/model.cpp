@@ -239,7 +239,7 @@ void Model::attachPbr(VkDescriptorSet& sceneDescriptorSet,
 	aux::Pipeline& pipeline,
 	aux::Pipeline* pPipelineBlend)
 {
-	m_rSceneDescriptorSet = &sceneDescriptorSet;
+	m_rCurrentDS = &sceneDescriptorSet;
 	m_rCmdBuf = &cmdBuf;
 	m_rPipelineLayout = &pipelineLayout;
 	m_rPipeline = &pipeline;
@@ -282,7 +282,7 @@ void Model::drawNode(vkglTF::Node* node,
 			if (primitive->material.alphaMode == alphaMode) {
 
 				const std::vector<VkDescriptorSet> dSets = {
-					*m_rSceneDescriptorSet,
+					*m_rCurrentDS,
 					primitive->material.descriptorSet,
 					node->mesh->uniformBuffer.descriptorSet,
 				};
