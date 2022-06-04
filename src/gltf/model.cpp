@@ -233,23 +233,19 @@ void Model::updateNodeUBDS(vkglTF::Node* node, VkDescriptorPool& descriptorPool)
 	}
 }
 
-void Model::attachPbr(uint32_t dsID,
-	VkCommandBuffer& cmdBuf,
-	VkPipelineLayout & pipelineLayout,
-	aux::Pipeline& pipeline,
-	aux::Pipeline* pPipelineBlend)
+void Model::drawT(
+	vkglTF::Model& model, 
+	VkCommandBuffer& cmdBuf,	
+	uint32_t dsID, 
+	pbr::Pbr& pbr)
 {
 	m_rCurrentDS = &ds[dsID];
 	m_rCmdBuf = &cmdBuf;
-	m_rPipelineLayout = &pipelineLayout;
-	m_rPipeline = &pipeline;
-	m_pAuxPipelineBlend = pPipelineBlend;
-}
+	m_rPipeline = pbr.pAuxPipelinePbr;
+	m_pAuxPipelineBlend = pbr.pAuxPipelineBlend;
+	m_rPipelineLayout = pbr.getPipelineLayout();
 
-void Model::drawT(vkglTF::Model& model)
-{
 	m_rPipeline->bindToGraphic(*m_rCmdBuf);
-
 	VkDeviceSize offsets[1] = { 0 };
 	aux::CommandBuffer auxCmdBuf(*m_rCmdBuf);
 	auxCmdBuf.bindVertexBuffers(0, 1, &model.vertices.buffer, offsets);

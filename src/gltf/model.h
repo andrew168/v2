@@ -3,6 +3,11 @@
 #include "..\auxVk\auxVk.h"
 #include "..\pbr\pbrCore.h"
 
+namespace pbr 
+{
+class Pbr;
+}
+
 struct Textures {
 	vks::TextureCubeMap environmentCube;
 	vks::Texture2D empty;
@@ -102,16 +107,11 @@ public:
 	void createUB();
 	std::vector<VkDescriptorSetLayout>& getDSLs();
 
-	void attachPbr(uint32_t dsID,
-		VkCommandBuffer& cmdBuf,
-		VkPipelineLayout& pipelineLayout,
-		aux::Pipeline& pipeline,
-		aux::Pipeline* pPipelineBlend = nullptr);
-
 	void drawNode(vkglTF::Node* node,
 		vkglTF::Material::AlphaMode alphaMode);
 
-	void drawT(vkglTF::Model& model); //T: Transparent supported, 
+	void drawT(vkglTF::Model& model, VkCommandBuffer& cmdBuf,
+		uint32_t dsID, pbr::Pbr &pbr); //T: Transparent supported, 
 
 	static void Model::createDSL(VkDescriptorPool& descriptorPool);
 };

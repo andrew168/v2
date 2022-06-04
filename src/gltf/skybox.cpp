@@ -37,12 +37,14 @@ void Skybox::updateDS(VkDescriptorPool& descriptorPool)
 	}
 }
 
-void Skybox::draw(Model& model)
+void Skybox::draw(Model& model, VkCommandBuffer& cmdBuf,
+	uint32_t dsID,
+	pbr::Pbr& pbr)
 {
-	aux::DescriptorSet dsSkybox(*m_rCurrentDS);
-	dsSkybox.bindToGraphics(*m_rCmdBuf, *m_rPipelineLayout);
-	m_rPipeline->bindToGraphic(*m_rCmdBuf);
-	model.draw(*m_rCmdBuf);
+	aux::DescriptorSet dsSkybox(ds[dsID]);
+	dsSkybox.bindToGraphics(cmdBuf, *pbr.getPipelineLayout());
+	pbr.pAuxPipelineSkybox->bindToGraphic(cmdBuf);
+	model.draw(cmdBuf);
 }
 
 }
