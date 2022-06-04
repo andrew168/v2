@@ -15,7 +15,6 @@ public:
 	SkyboxRender pbrRender;
 	gltf::Model sceneModel;
 	gltf::Skybox skyboxModel;
-	v2::Render sceneRender;
 	Textures textures;
 	// VkPipelineLayout pipelineLayout;
 
@@ -119,7 +118,7 @@ public:
 				//skybox绘制： 先绑定 ds和pipeline，再绘制
 				pbrRender.draw(skyboxModel, static_cast<uint32_t>(i), currentCB);
 			}
-			sceneModel.config(sceneModel.getDS()[i], currentCB,
+			sceneModel.attachPbr(sceneModel.getDS()[i], currentCB,
 				*pbrRender.getPipelineLayout(), *pbrRender.pAuxPipelinePbr, pbrRender.pAuxPipelineBlend);
 			sceneModel.drawT(sceneModel);
 

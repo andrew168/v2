@@ -1,6 +1,7 @@
 ﻿#pragma once
 #include "..\vk.h"
 #include "..\auxVk\auxVk.h"
+#include "..\pbr\pbrCore.h"
 
 struct Textures {
 	vks::TextureCubeMap environmentCube;
@@ -19,10 +20,31 @@ struct UBOMatrices {
 	glm::vec3 camPos;
 };
 
+enum PBRWorkflows {
+	PBR_WORKFLOW_METALLIC_ROUGHNESS = 0,
+	PBR_WORKFLOW_SPECULAR_GLOSINESS = 1
+};
+
+struct PushConstBlockMaterial {
+	glm::vec4 baseColorFactor;
+	glm::vec4 emissiveFactor;
+	glm::vec4 diffuseFactor;
+	glm::vec4 specularFactor;
+	float workflow;
+	int colorTextureSet;
+	int PhysicalDescriptorTextureSet;
+	int normalTextureSet;
+	int occlusionTextureSet;
+	int emissiveTextureSet;
+	float metallicFactor;
+	float roughnessFactor;
+	float alphaMask;
+	float alphaMaskCutoff;
+};
+
 class Model: public vkglTF::Model {
 	float m_animationTimer = 0.0f;
 	UBOMatrices shaderValues;
-	aux::DescriptorSetLayout* m_pMaterialDSL;
 
 	VkDescriptorSet* m_rSceneDescriptorSet;
 	VkCommandBuffer* m_rCmdBuf;
@@ -37,6 +59,8 @@ protected:
 	std::vector<Buffer>* m_rParamUniformBuffers;
 	
 	static aux::DescriptorSetLayout* m_pDSL;
+	aux::DescriptorSetLayout* m_pMaterialDSL;
+	aux::DescriptorSetLayout* m_pMeshDSL;
 
 public:
 	Model();
@@ -51,16 +75,19 @@ public:
 	void updateMaterialDS(VkDescriptorPool &descriptorPool,
 		VkDescriptorImageInfo &defaultTextureDesc);
 	void updateDS(VkDescriptorPool& descriptorPool);
+	void updateMeshUBDS(VkDescriptorPool& descriptorPool);
+	void updateNodeUBDS(vkglTF::Node* node, VkDescriptorPool& descriptorPool);
 	void update(int32_t animationIndex, float frameTimer);
 	void updateShaderValues(Camera& camera);
-	void Model::centerAndScale();
+	void centerAndScale();
 	void applyShaderValues(uint32_t currentBuffer);
 	void createUB();
 	VkDescriptorSetLayout* getMaterialDSL() { return m_pMaterialDSL->get(); }
 	VkDescriptorSetLayout* getDSL() { return m_pDSL->get(); }
+	VkDescriptorSetLayout* getMeshDSL() { return m_pMeshDSL->get(); }
 	std::vector<VkDescriptorSet>& getDS() { return ds; }
 
-	void config(VkDescriptorSet& sceneDescriptorSet,
+	void attachPbr(VkDescriptorSet& sceneDescriptorSet,
 		VkCommandBuffer& cmdBuf,
 		VkPipelineLayout& pipelineLayout,
 		aux::Pipeline& pipeline,
@@ -70,7 +97,6 @@ public:
 		vkglTF::Material::AlphaMode alphaMode);
 
 	void drawT(vkglTF::Model& model); //T: Transparent supported, 
-
 
 	static void Model::createDSL(VkDescriptorPool& descriptorPool);
 };

@@ -1,6 +1,6 @@
-﻿#include "model.h"
-#include "../auxVk/auxVk.h"
+﻿#include "../auxVk/auxVk.h"
 #include "../pbr/pbr.h"
+#include "model.h"
 
 namespace gltf
 {
@@ -29,6 +29,7 @@ Model::~Model()
 {
 	delete m_pDSL;
 	m_pDSL = nullptr;
+	delete m_pMeshDSL;
 
 	destroy(Device::getR());
 	for (auto buffer : uniformBuffers) {
@@ -197,7 +198,42 @@ void Model::updateDS(VkDescriptorPool & descriptorPool)
 		aux::DescriptorSet::updateW(writeDescriptorSets);
 	}
 }
-void Model::config(VkDescriptorSet& sceneDescriptorSet,
+
+// 遍历Model的每一个Node，给每个mesh 分配DS，记录在mesh中，存放mesh的matrix
+void Model::updateMeshUBDS(VkDescriptorPool& descriptorPool)
+{
+	// 虽然只有1个D，也要遵循上传参数到device的4步法：
+	//  binding到槽，生成layout，allocate DS，update到device
+	// Model node (matrices)
+	std::vector<VkDescriptorSetLayoutBinding> setLayoutBindings = {
+		{ 0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1, VK_SHADER_STAGE_VERTEX_BIT, nullptr },
+	};
+	m_pMeshDSL = new aux::DescriptorSetLayout(setLayoutBindings);
+
+	// Per-Node descriptor set
+	for (auto& node : nodes) {
+		updateNodeUBDS(node, descriptorPool);
+	}
+}
+
+/* 更新每一个Mesh's UB的DS，更新到Device上，直接利用vkGLTF对象的node
+*/
+void Model::updateNodeUBDS(vkglTF::Node* node, VkDescriptorPool& descriptorPool)
+{
+	if (node->mesh) {
+		// 先allocate，再update
+		// mesh 保存自己的DS
+		aux::DescriptorSet::allocate(node->mesh->uniformBuffer.descriptorSet,
+			descriptorPool, m_pMeshDSL->get());
+		aux::Describe::bufferUpdate(node->mesh->uniformBuffer.descriptorSet,
+			0, &node->mesh->uniformBuffer.descriptor);
+	}
+	for (auto& child : node->children) {
+		updateNodeUBDS(child, descriptorPool);
+	}
+}
+
+void Model::attachPbr(VkDescriptorSet& sceneDescriptorSet,
 	VkCommandBuffer& cmdBuf,
 	VkPipelineLayout & pipelineLayout,
 	aux::Pipeline& pipeline,

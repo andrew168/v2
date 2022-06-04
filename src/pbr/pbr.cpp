@@ -13,7 +13,6 @@ Pbr::Pbr()
 
 Pbr::~Pbr()
 {
-	delete pAuxDSLayoutNode;
 	delete pAuxPipelineBlend;
 	delete pAuxPipelinePbr;
 	delete pAuxPipelineSkybox;
@@ -57,11 +56,11 @@ void Pbr::preparePipeline(PbrConfig &settings)
 	const std::vector<VkDescriptorSetLayout> setLayouts = {
 		*(m_pSceneModel->getDSL()),
 		*(m_pSceneModel->getMaterialDSL()),
-		*(pAuxDSLayoutNode->get())
+		*(m_pSceneModel->getMeshDSL())
 	};
 
 	VkPushConstantRange pushConstantRange{};
-	pushConstantRange.size = sizeof(PushConstBlockMaterial);
+	pushConstantRange.size = sizeof(gltf::PushConstBlockMaterial);
 	pushConstantRange.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
 
 	aux::PipelineLayoutCI auxPipelineLayoutCI{ &pushConstantRange };
@@ -115,23 +114,6 @@ void Pbr::preparePipeline(PbrConfig &settings)
 	auxPipelineCI.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
 	auxPipelineCI.alphaBlendOp = VK_BLEND_OP_ADD;
 	pAuxPipelineBlend = new aux::Pipeline(*pAuxPipelineLayout, *m_rRenderPass, auxPipelineCI);
-}
-
-/* 更新每一个Mesh's UB的DS，更新到Device上，直接利用vkGLTF对象的node
-*/
-void Pbr::updateMeshUBDS(vkglTF::Node* node, VkDescriptorPool& descriptorPool)
-{
-	if (node->mesh) {
-		// 先allocate，再update
-		// mesh 保存自己的DS
-		aux::DescriptorSet::allocate(node->mesh->uniformBuffer.descriptorSet,
-			descriptorPool, pAuxDSLayoutNode->get());
-		aux::Describe::bufferUpdate(node->mesh->uniformBuffer.descriptorSet,
-			0, &node->mesh->uniformBuffer.descriptor);
-	}
-	for (auto& child : node->children) {
-		updateMeshUBDS(child, descriptorPool);
-	}
 }
 
 /*

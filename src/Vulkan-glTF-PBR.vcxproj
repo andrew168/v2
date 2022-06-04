@@ -397,6 +397,7 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     <ClInclude Include="gltf\model.h" />
     <ClInclude Include="gltf\skybox.h" />
     <ClInclude Include="pbr\pbr.h" />
+    <ClInclude Include="pbr\pbrCore.h" />
     <ClInclude Include="pbr\skyboxRender.h" />
     <ClInclude Include="v2\v2.h" />
   </ItemGroup>

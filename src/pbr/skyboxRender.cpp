@@ -74,25 +74,8 @@ void SkyboxRender::updateDS(VkDescriptorPool& descriptorPool)
 	m_pSceneModel->updateDS(descriptorPool);  //DS: scene的Uniform Buffer，pbr参数的UB， 3个环境Cubemap
 	// 材质的DS归material自己保存，各个SwapChain公用（因为不改变）
 	m_pSceneModel->updateMaterialDS(descriptorPool, m_pTextures->empty.descriptor);
-	updateSceneMeshUBDS(descriptorPool); // 更新每一个Mesh's UB的DS，mesh记录自己的DS
+	m_pSceneModel->updateMeshUBDS(descriptorPool); // 更新每一个Mesh's UB的DS，mesh记录自己的DS
 	m_pSkyboxModel->updateDS(descriptorPool); //DS: skybox的Uniform Buffer，pbr参数的UB， 1个环境Cubemap: Prefilted
-}
-
-// 遍历Model的每一个Node，给每个mesh 分配DS，记录在mesh中，存放mesh的matrix
-void SkyboxRender::updateSceneMeshUBDS(VkDescriptorPool& descriptorPool)
-{
-	// 虽然只有1个D，也要遵循上传参数到device的4步法：
-	//  binding到槽，生成layout，allocate DS，update到device
-	// Model node (matrices)
-	std::vector<VkDescriptorSetLayoutBinding> setLayoutBindings = {
-		{ 0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1, VK_SHADER_STAGE_VERTEX_BIT, nullptr },
-	};
-	pAuxDSLayoutNode = new aux::DescriptorSetLayout(setLayoutBindings);
-
-	// Per-Node descriptor set
-	for (auto& node : m_pSceneModel->nodes) {
-		updateMeshUBDS(node, descriptorPool);
-	}
 }
 
 void SkyboxRender::draw(gltf::Model& model, uint32_t dsID, VkCommandBuffer& cmdBuf)
