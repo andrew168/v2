@@ -5,7 +5,7 @@
 
 using namespace aux;
 
-namespace v2
+namespace pbr
 {
 Pbr::Pbr()
 {

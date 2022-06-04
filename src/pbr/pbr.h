@@ -2,7 +2,7 @@
 #include "..\vk.h"
 #include "..\gltf\gltf.h"
 #include "pbrCore.h"
-namespace v2
+namespace pbr
 {
 class aux::Image;
 class gltf::Model;

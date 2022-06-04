@@ -2,7 +2,7 @@
 #include "..\auxVk\auxVk.h"
 #include "pbr.h"
 
-namespace v2
+namespace pbr
 {
 using namespace aux;
 

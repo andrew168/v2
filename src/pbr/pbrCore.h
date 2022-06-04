@@ -1,7 +1,7 @@
 ﻿#pragma once
 #include "..\vk.h"
 #include "..\gltf\gltf.h"
-namespace v2
+namespace pbr
 {
 struct ShaderValuesParams {
 	glm::vec4 lightDir;
