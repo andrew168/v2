@@ -34,7 +34,7 @@ public:
 		gltf::Skybox& skyboxModel,
 		Textures& textures);
 	void createUB();
-	void preparePipeline(PbrConfig& settings);
+	void createPipeline(PbrConfig& settings);
 	VkPipelineLayout* getPipelineLayout() { return pAuxPipelineLayout->getP(); }
 	void applyShaderValues(uint32_t currentBuffer);
 	void updateShaderValues();

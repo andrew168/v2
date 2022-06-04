@@ -41,7 +41,7 @@ void Pbr::config(gltf::Model& sceneModel,
 	m_pTextures = &textures;
 }
 
-void Pbr::preparePipeline(PbrConfig &settings)
+void Pbr::createPipeline(PbrConfig &settings)
 {
 	aux::PipelineCI auxPipelineCI{};
 	auxPipelineCI.cullMode = VK_CULL_MODE_BACK_BIT;

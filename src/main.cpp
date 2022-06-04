@@ -269,7 +269,7 @@ public:
 		PbrConfig pbrConfig;
 		pbrConfig.multiSampling = settings.multiSampling;
 		pbrConfig.sampleCount = settings.sampleCount;
-		pbr.preparePipeline(pbrConfig);
+		pbr.createPipeline(pbrConfig);
 		ui = new UI(vulkanDevice, renderPass, queue, pipelineCache, settings.sampleCount);
 		updateOverlay();
 		recordCommandBuffers();
