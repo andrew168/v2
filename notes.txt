@@ -1,0 +1,15 @@
+"ERROR" 定义的冲突：
+在wingdi.h和Draco 都定义了，
+所以要undef
+
+#if defined(_WIN32) && defined(ERROR) && defined(TINYGLTF_ENABLE_DRACO) 
+#undef ERROR
+#pragma message ("ERROR constant already defined, undefining")
+#endif
+
+
+
+#if defined(TINYGLTF_ENABLE_DRACO)
+	std::cout << "Draco mesh compression is enabled" << std::endl;
+#endif
+

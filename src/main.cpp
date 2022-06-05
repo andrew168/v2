@@ -8,10 +8,7 @@ using namespace pbr;
 using namespace gltf;
 VulkanExample::VulkanExample() : VulkanExampleBase()
 {
-	title = "V2--Vulkan library from beginner to professinonal";
-#if defined(TINYGLTF_ENABLE_DRACO)
-	std::cout << "Draco mesh compression is enabled" << std::endl;
-#endif
+	title = "V2-- make Vulkan faster, easier";
 }
 
 VulkanExample::~VulkanExample()
