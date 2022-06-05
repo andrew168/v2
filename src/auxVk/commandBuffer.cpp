@@ -14,14 +14,14 @@ CommandBuffer::CommandBuffer(VkCommandBuffer& cmdBuf) :
 {
 }
 
-void CommandBuffer::begin(const VkCommandBufferBeginInfo* pBeginInfo)
+void CommandBuffer::begin(VkCommandBufferBeginInfo* pBeginInfo)
 {
 	if (!pBeginInfo) {
-		Device::getVksDevice()->beginCommandBuffer(*m_pCmdBuf);
+		VkCommandBufferBeginInfo bi{};
+		fillBI(bi);
+		pBeginInfo = &bi;
 	}
-	else {
-		VK_CHECK_RESULT(vkBeginCommandBuffer(*m_pCmdBuf, pBeginInfo));
-	}
+	VK_CHECK_RESULT(vkBeginCommandBuffer(*m_pCmdBuf, pBeginInfo));
 }
 
 void CommandBuffer::end()
@@ -127,6 +127,11 @@ CommandBuffer::~CommandBuffer()
 
 	delete m_pCmdBuf;
 	m_pCmdBuf = nullptr;
+}
+
+void CommandBuffer::fillBI(VkCommandBufferBeginInfo& bi)
+{
+	bi.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
 }
 
 }

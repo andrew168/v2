@@ -86,9 +86,6 @@ public:
 
 	void recordCommandBuffers()
 	{
-		VkCommandBufferBeginInfo cmdBufferBeginInfo{};
-		cmdBufferBeginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-
 		VkClearValue clearValues[3];
 		if (settings.multiSampling) {
 			clearValues[0].color = { { 0.0f, 0.0f, 0.0f, 1.0f } };
@@ -101,22 +98,23 @@ public:
 		}
 
 		// 1个RenderPass， 1个BeginInfo，被多个CmdBuf使用
-		aux::RenderPass auxRenderPass(renderPass);
+		VkCommandBufferBeginInfo cmdBufferBeginInfo{};
+		RenderPass auxRenderPass(renderPass);
 		VkRenderPassBeginInfo renderPassBeginInfo{};
 		auxRenderPass.fillBI(renderPassBeginInfo, width, height, settings.multiSampling ? 3 : 2, clearValues);
 		for (size_t i = 0; i < commandBuffers.size(); ++i) {
 			renderPassBeginInfo.framebuffer = frameBuffers[i];
 
 			VkCommandBuffer currentCB = commandBuffers[i];
-			aux::CommandBuffer auxCmdBuf(currentCB);
+			CommandBuffer auxCmdBuf(currentCB);
+			auxCmdBuf.fillBI(cmdBufferBeginInfo);
 			auxCmdBuf.begin(&cmdBufferBeginInfo);
 			auxRenderPass.begin(currentCB, renderPassBeginInfo);
 			auxCmdBuf.setViewport(width, height);
 			auxCmdBuf.setScissor(width, height);
 
 			if (displayBackground) {
-				//skybox绘制： 先绑定 ds和pipeline，再绘制
-				
+				//skybox绘制： 先绑定 ds和pipeline，再绘制				
 				skyboxModel.draw(skyboxModel, currentCB, static_cast<uint32_t>(i), pbr1);
 			}
 			sceneModel.drawT(sceneModel, currentCB, static_cast<uint32_t>(i), pbr1);
@@ -221,8 +219,8 @@ public:
 	void prepare()
 	{
 		VulkanExampleBase::prepare();
-		aux::Device::set(&device, &queue, vulkanDevice);
-		aux::Pipeline::setCache(&pipelineCache);
+		Device::set(&device, &queue, vulkanDevice);
+		Pipeline::setCache(&pipelineCache);
 
 		camera.type = Camera::CameraType::lookat;
 
@@ -241,19 +239,19 @@ public:
 
 		// Command buffer execution fences
 		for (auto& waitFence : waitFences) {
-			aux::Fence::create(waitFence, true);
+			Fence::create(waitFence, true);
 		}
 		// Queue ordering semaphores
 		for (auto& semaphore : presentCompleteSemaphores) {
-			aux::Semaphore::create(semaphore);
+			Semaphore::create(semaphore);
 		}
 		for (auto& semaphore : renderCompleteSemaphores) {
-			aux::Semaphore::create(semaphore);
+			Semaphore::create(semaphore);
 		}
-		aux::CommandBuffer::allocate(cmdPool, commandBuffers);		
+		CommandBuffer::allocate(cmdPool, commandBuffers);		
 		loadAssets();
 		Pbr::generateBRDFLUT().toVKS(textures.lutBrdf);
-		std::vector<aux::Image> auxCubemaps{};
+		std::vector<Image> auxCubemaps{};
 		Pbr::generateCubemaps(auxCubemaps, skyboxModel, textures.environmentCube);
 		auxCubemaps[0].toVKS(textures.irradianceCube);
 		auxCubemaps[1].toVKS(textures.prefilteredCube);
@@ -281,8 +279,8 @@ public:
 
 		updateOverlay();
 
-		aux::Fence::wait(waitFences[frameIndex]);
-		aux::Fence::reset(waitFences[frameIndex]);
+		Fence::wait(waitFences[frameIndex]);
+		Fence::reset(waitFences[frameIndex]);
 
 		VkResult acquire = swapChain.acquireNextImage(presentCompleteSemaphores[frameIndex], &currentBuffer);
 		if ((acquire == VK_ERROR_OUT_OF_DATE_KHR) || (acquire == VK_SUBOPTIMAL_KHR)) {
@@ -298,7 +296,7 @@ public:
 		pbr1.applyShaderValues(currentBuffer);
 		skyboxModel.applyShaderValues(currentBuffer);
 		
-		aux::Queue auxQueue(queue);
+		Queue auxQueue(queue);
 		auxQueue.submit(std::vector<VkCommandBuffer>({ commandBuffers[currentBuffer] }),
 			VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
 			std::vector<VkSemaphore>({ presentCompleteSemaphores[frameIndex] }),

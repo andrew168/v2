@@ -13,8 +13,8 @@ public:
     CommandBuffer();
     CommandBuffer(VkCommandBuffer& cmdBuf);
     ~CommandBuffer();
-    
-    void begin(const VkCommandBufferBeginInfo* pBeginInfo = nullptr);
+    void fillBI(VkCommandBufferBeginInfo& pBeginInfo);
+    void begin(VkCommandBufferBeginInfo* pBeginInfo = nullptr);    
     void end();
     void flush(VkQueue& queue, bool free = true);
     void setViewport(uint32_t width, uint32_t height);
