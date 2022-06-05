@@ -23,28 +23,28 @@ Pbr::~Pbr()
 	}
 
 	destroyCubemaps();
-	textures.lutBrdf.destroy();
-	textures.empty.destroy();
+	m_textures.lutBrdf.destroy();
+	m_textures.empty.destroy();
 }
 
 void Pbr::destroyCubemaps() {
-	textures.environmentCube.destroy();
-	textures.irradianceCube.destroy();
-	textures.prefilteredCube.destroy();
+	m_textures.environmentCube.destroy();
+	m_textures.irradianceCube.destroy();
+	m_textures.prefilteredCube.destroy();
 }
 
 void Pbr::setEnvMap(std::string filename)
 {
-	if (textures.environmentCube.image) {
+	if (m_textures.environmentCube.image) {
 		destroyCubemaps();
 	}
-	textures.environmentCube.loadFromFile(filename, VK_FORMAT_R16G16B16A16_SFLOAT, 
+	m_textures.environmentCube.loadFromFile(filename, VK_FORMAT_R16G16B16A16_SFLOAT, 
 		Device::getVksDevice(), Device::getQueue());
 }
 
 void Pbr::setEmptyMap(std::string filename)
 {
-	textures.empty.loadFromFile(filename, VK_FORMAT_R8G8B8A8_UNORM,
+	m_textures.empty.loadFromFile(filename, VK_FORMAT_R8G8B8A8_UNORM,
 		Device::getVksDevice(), Device::getQueue());
 }
 void Pbr::init(PbrConfig& config,
@@ -55,8 +55,8 @@ void Pbr::init(PbrConfig& config,
 	m_pCamera = &camera;
 	m_swapChainImageCount = swapChainCount;
 	shaderParamsUBs.resize(swapChainCount);
-	m_pSceneModel->init(swapChainCount, shaderParamsUBs, *m_pTextures);
-	m_pSkyboxModel->init(swapChainCount, shaderParamsUBs, *m_pTextures);
+	m_pSceneModel->init(swapChainCount, shaderParamsUBs, m_textures);
+	m_pSkyboxModel->init(swapChainCount, shaderParamsUBs, m_textures);
 	generateBRDFLUT();
 	generateCubemaps(*m_pSkyboxModel);
 	createUB();
@@ -68,7 +68,6 @@ void Pbr::config(gltf::Model& sceneModel,
 {
 	m_pSceneModel = &sceneModel;
 	m_pSkyboxModel = &skyboxModel;	
-	m_pTextures = &textures;
 }
 
 void Pbr::createPipeline(PbrConfig &settings)
@@ -196,7 +195,7 @@ void Pbr::updateDS(VkDescriptorPool& descriptorPool)
 	createDPool(descriptorPool);
 	m_pSceneModel->updateDS(descriptorPool);  //DS: scene的Uniform Buffer，pbr参数的UB， 3个环境Cubemap
 	// 材质的DS归material自己保存，各个SwapChain公用（因为不改变）
-	m_pSceneModel->updateMaterialDS(descriptorPool, m_pTextures->empty.descriptor);
+	m_pSceneModel->updateMaterialDS(descriptorPool, m_textures.empty.descriptor);
 	m_pSceneModel->updateMeshUBDS(descriptorPool); // 更新每一个Mesh's UB的DS，mesh记录自己的DS
 	m_pSkyboxModel->updateDS(descriptorPool); //DS: skybox的Uniform Buffer，pbr参数的UB， 1个环境Cubemap: Prefilted
 }

@@ -54,6 +54,6 @@ void Pbr::generateBRDFLUT()
 	auto tDiff = std::chrono::duration<double, std::milli>(tEnd - tStart).count();
 	std::cout << "Generating BRDF LUT took " << tDiff << " ms" << std::endl;
 
-	brdfLutImage.toVKS(m_pTextures->lutBrdf);
+	brdfLutImage.toVKS(m_textures.lutBrdf);
 }
 }

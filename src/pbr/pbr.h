@@ -10,14 +10,13 @@ class gltf::Model;
 class Pbr
 {
 public:
-	Textures textures;
+	Textures m_textures;
 
 	uint32_t m_swapChainImageCount;
 
 	static aux::Image* m_pBrdfLutImage; // 依赖vks,不能delete，
 	gltf::Model *m_pSceneModel;
 	gltf::Skybox *m_pSkyboxModel;
-	Textures* m_pTextures; 
 	VkRenderPass* m_rRenderPass; // refer point to outside, do not destroy it
 
 	aux::Pipeline* pAuxPipelineBlend;

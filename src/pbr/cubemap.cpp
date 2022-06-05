@@ -25,7 +25,7 @@ struct PushBlockIrradiance {
 */
 void Pbr::generateCubemaps(gltf::Model& skyboxModel)
 {
-	vks::Texture& texture = m_pTextures->environmentCube;
+	vks::Texture& texture = m_textures.environmentCube;
 	VkFormat format;
 	int32_t dim;
 
@@ -38,7 +38,7 @@ void Pbr::generateCubemaps(gltf::Model& skyboxModel)
 
 	Image* pIrradiamnceCube;
 	generateCubemap(&pIrradiamnceCube, skyboxModel, texture, format, dim, shaders, sizeof(PushBlockIrradiance), &shaders);
-	pIrradiamnceCube->toVKS(m_pTextures->irradianceCube);
+	pIrradiamnceCube->toVKS(m_textures.irradianceCube);
 	shaderParams.prefilteredCubeMipLevels =
 		static_cast<float>(pIrradiamnceCube->getMipLevels());
 
@@ -55,7 +55,7 @@ void Pbr::generateCubemaps(gltf::Model& skyboxModel)
 	Image* pPrefilterCube;
 	generateCubemap(&pPrefilterCube, skyboxModel, texture,
 		format, dim, shadersEnv, sizeof(PushBlockPrefilterEnv), nullptr);
-	pPrefilterCube->toVKS(textures.prefilteredCube);
+	pPrefilterCube->toVKS(m_textures.prefilteredCube);
 	delete pPrefilterCube;
 }
 
