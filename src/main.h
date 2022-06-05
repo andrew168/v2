@@ -19,7 +19,7 @@ public:
 	// VkPipelineLayout pipelineLayout;
 
 	std::vector<VkCommandBuffer> commandBuffers;
-	std::vector<VkFence> waitFences;
+	FenceMgr fenceMgr;
 	std::vector<VkSemaphore> renderCompleteSemaphores;
 	std::vector<VkSemaphore> presentCompleteSemaphores;
 

@@ -17,3 +17,4 @@
 #include "semaphore.h"
 #include "queue.h"
 #include "fence.h"
+#include "fenceMgr.h"

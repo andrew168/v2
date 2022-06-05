@@ -16,9 +16,6 @@ VulkanExample::VulkanExample() : VulkanExampleBase()
 
 VulkanExample::~VulkanExample()
 {
-	for (auto fence : waitFences) {
-		vkDestroyFence(device, fence, nullptr);
-	}
 	for (auto semaphore : renderCompleteSemaphores) {
 		vkDestroySemaphore(device, semaphore, nullptr);
 	}
@@ -179,17 +176,13 @@ void VulkanExample::prepare()
 	camera.setPosition({ 0.0f, 0.0f, 1.0f });
 	camera.setRotation({ 0.0f, 0.0f, 0.0f });
 
-	waitFences.resize(renderAhead);
+	fenceMgr.create(renderAhead);
 	presentCompleteSemaphores.resize(renderAhead);
 	renderCompleteSemaphores.resize(renderAhead);
 	commandBuffers.resize(swapChain.imageCount);
 	pbr1.config(sceneModel, skyboxModel, textures);
 	pbr1.init(swapChain.imageCount, camera, renderPass);
 
-	// Command buffer execution fences
-	for (auto& waitFence : waitFences) {
-		Fence::create(waitFence, true);
-	}
 	// Queue ordering semaphores
 	for (auto& semaphore : presentCompleteSemaphores) {
 		Semaphore::create(semaphore);
@@ -227,9 +220,8 @@ void VulkanExample::render()
 
 	updateOverlay();
 
-	Fence::wait(waitFences[frameIndex]);
-	Fence::reset(waitFences[frameIndex]);
-
+	fenceMgr.wait(frameIndex);
+	fenceMgr.reset(frameIndex);
 	VkResult acquire = swapChain.acquireNextImage(presentCompleteSemaphores[frameIndex], &currentBuffer);
 	if ((acquire == VK_ERROR_OUT_OF_DATE_KHR) || (acquire == VK_SUBOPTIMAL_KHR)) {
 		windowResize();
@@ -249,7 +241,7 @@ void VulkanExample::render()
 		VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
 		std::vector<VkSemaphore>({ presentCompleteSemaphores[frameIndex] }),
 		std::vector<VkSemaphore>({ renderCompleteSemaphores[frameIndex] }),
-		waitFences[frameIndex]);
+		fenceMgr.get(frameIndex));
 
 	VkResult present = swapChain.queuePresent(queue, currentBuffer, renderCompleteSemaphores[frameIndex]);
 	if (!((present == VK_SUCCESS) || (present == VK_SUBOPTIMAL_KHR))) {
