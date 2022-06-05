@@ -1,4 +1,8 @@
-﻿// OS specific macros for the example main entry points
+﻿#include "main.h"
+
+VulkanExample* vulkanExample;
+
+// OS specific macros for the example main entry points
 #if defined(_WIN32)
 LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
