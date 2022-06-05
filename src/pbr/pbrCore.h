@@ -3,7 +3,7 @@
 #include "..\gltf\gltf.h"
 namespace pbr
 {
-struct ShaderValuesParams {
+struct ShaderParams {
 	glm::vec4 lightDir;
 	float exposure = 4.5f;
 	float gamma = 2.2f;

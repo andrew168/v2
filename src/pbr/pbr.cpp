@@ -18,7 +18,7 @@ Pbr::~Pbr()
 	delete pAuxPipelineSkybox;
 	delete pAuxPipelineLayout;
 
-	for (auto buffer : paramUniformBuffers) {
+	for (auto buffer : shaderParamsUBs) {
 		buffer.destroy();
 	}
 }
@@ -28,9 +28,9 @@ void Pbr::init(uint32_t swapChainCount, Camera &camera, VkRenderPass& renderPass
 	m_rRenderPass = &renderPass;
 	m_pCamera = &camera;
 	m_swapChainImageCount = swapChainCount;
-	paramUniformBuffers.resize(swapChainCount);
-	m_pSceneModel->init(swapChainCount, paramUniformBuffers, *m_pTextures);
-	m_pSkyboxModel->init(swapChainCount, paramUniformBuffers, *m_pTextures);
+	shaderParamsUBs.resize(swapChainCount);
+	m_pSceneModel->init(swapChainCount, shaderParamsUBs, *m_pTextures);
+	m_pSkyboxModel->init(swapChainCount, shaderParamsUBs, *m_pTextures);
 }
 void Pbr::config(gltf::Model& sceneModel,
 	gltf::Skybox& skyboxModel,
@@ -116,8 +116,8 @@ void Pbr::createUB()
 {
 	m_pSceneModel->createUB();
 	m_pSkyboxModel->createUB();
-	for (auto& uniformBuffer : paramUniformBuffers) {
-		uniformBuffer.create(Device::getVksDevice(), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, sizeof(shaderValuesParams));
+	for (auto& uniformBuffer : shaderParamsUBs) {
+		uniformBuffer.create(Device::getVksDevice(), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, sizeof(shaderParams));
 	}
 	updateShaderValues();
 }
@@ -180,6 +180,6 @@ void Pbr::updateShaderValues()
 
 void Pbr::applyShaderValues(uint32_t currentBuffer)
 {
-	memcpy(paramUniformBuffers[currentBuffer].mapped, &shaderValuesParams, sizeof(ShaderValuesParams));
+	memcpy(shaderParamsUBs[currentBuffer].mapped, &shaderParams, sizeof(ShaderParams));
 }
 }

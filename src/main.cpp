@@ -201,7 +201,7 @@ public:
 
 	void updateLights()
 	{
-		pbr1.shaderValuesParams.lightDir = glm::vec4(
+		pbr1.shaderParams.lightDir = glm::vec4(
 			sin(glm::radians(lightSource.rotation.x)) * cos(glm::radians(lightSource.rotation.y)),
 			sin(glm::radians(lightSource.rotation.y)),
 			cos(glm::radians(lightSource.rotation.x)) * cos(glm::radians(lightSource.rotation.y)),
@@ -255,7 +255,7 @@ public:
 		Pbr::generateCubemaps(auxCubemaps, skyboxModel, textures.environmentCube);
 		auxCubemaps[0].toVKS(textures.irradianceCube);
 		auxCubemaps[1].toVKS(textures.prefilteredCube);
-		pbr1.shaderValuesParams.prefilteredCubeMipLevels = 
+		pbr1.shaderParams.prefilteredCubeMipLevels = 
 			static_cast<float>(auxCubemaps[1].getMipLevels());
 			static_cast<float>(auxCubemaps[1].getMipLevels());
 		pbr1.createUB();
@@ -292,8 +292,8 @@ public:
 
 		// Update UBOs
 		pbr1.updateShaderValues();
-		sceneModel.applyShaderValues(currentBuffer);
 		pbr1.applyShaderValues(currentBuffer);
+		sceneModel.applyShaderValues(currentBuffer);
 		skyboxModel.applyShaderValues(currentBuffer);
 		
 		Queue auxQueue(queue);

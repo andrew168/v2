@@ -31,7 +31,7 @@ void Skybox::updateDS(VkDescriptorPool& descriptorPool)
 
 		std::vector<VkWriteDescriptorSet> writeDescriptorSets(3);
 		aux::Describe::buffer(writeDescriptorSets[0], ds[i], 0, &(uniformBuffers[i].descriptor));
-		aux::Describe::buffer(writeDescriptorSets[1], ds[i], 1, &(*m_rParamUniformBuffers)[i].descriptor);
+		aux::Describe::buffer(writeDescriptorSets[1], ds[i], 1, &(*m_rPbrShaderParamUBs)[i].descriptor);
 		aux::Describe::image(writeDescriptorSets[2], ds[i], 2, &m_rTextures->prefilteredCube.descriptor);
 		aux::DescriptorSet::updateW(writeDescriptorSets);
 	}

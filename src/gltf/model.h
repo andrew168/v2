@@ -60,7 +60,7 @@ protected:
 	std::vector<VkDescriptorSet> ds;  //本model所有Shader参数的descriptorSet
 	VkDescriptorSet* m_rCurrentDS;
 	Textures* m_rTextures;
-	std::vector<Buffer>* m_rParamUniformBuffers;
+	std::vector<Buffer>* m_rPbrShaderParamUBs;
 	
 	static aux::DescriptorSetLayout* m_pDSL;
 	aux::DescriptorSetLayout* m_pMaterialDSL;

@@ -17,10 +17,10 @@ Model::Model():
 }
 
 void Model::init(uint32_t swapChainCount,
-	std::vector<Buffer>& paramUniformBuffers,
+	std::vector<Buffer>& pbrShaderParamsUBs,
 	Textures& textures)
 {
-	m_rParamUniformBuffers = &paramUniformBuffers;
+	m_rPbrShaderParamUBs = &pbrShaderParamsUBs;
 	m_rTextures = &textures;
 	uniformBuffers.resize(swapChainCount);
 	ds.resize(swapChainCount);
@@ -189,7 +189,7 @@ void Model::updateDS(VkDescriptorPool & descriptorPool)
 		// VkWriteDescriptorSet本来可以集合多个D，为了简化，这里只存1个D
 		std::vector<VkWriteDescriptorSet> writeDescriptorSets(5);
 		aux::Describe::buffer(writeDescriptorSets[0], ds[i], 0, &(uniformBuffers[i].descriptor));
-		aux::Describe::buffer(writeDescriptorSets[1], ds[i], 1, &(*m_rParamUniformBuffers)[i].descriptor);
+		aux::Describe::buffer(writeDescriptorSets[1], ds[i], 1, &(*m_rPbrShaderParamUBs)[i].descriptor);
 		aux::Describe::image(writeDescriptorSets[2], ds[i], 2, &m_rTextures->irradianceCube.descriptor);
 		aux::Describe::image(writeDescriptorSets[3], ds[i], 3, &m_rTextures->prefilteredCube.descriptor);
 		aux::Describe::image(writeDescriptorSets[4], ds[i], 4, &m_rTextures->lutBrdf.descriptor);

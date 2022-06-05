@@ -89,13 +89,13 @@ void VulkanExample::updateOverlay()
 		if (ui->checkbox("Background", &displayBackground)) {
 			updateShaderParams = true;
 		}
-		if (ui->slider("Exposure", &pbr1.shaderValuesParams.exposure, 0.1f, 10.0f)) {
+		if (ui->slider("Exposure", &pbr1.shaderParams.exposure, 0.1f, 10.0f)) {
 			updateShaderParams = true;
 		}
-		if (ui->slider("Gamma", &pbr1.shaderValuesParams.gamma, 0.1f, 4.0f)) {
+		if (ui->slider("Gamma", &pbr1.shaderParams.gamma, 0.1f, 4.0f)) {
 			updateShaderParams = true;
 		}
-		if (ui->slider("IBL", &pbr1.shaderValuesParams.scaleIBLAmbient, 0.0f, 1.0f)) {
+		if (ui->slider("IBL", &pbr1.shaderParams.scaleIBLAmbient, 0.0f, 1.0f)) {
 			updateShaderParams = true;
 		}
 	}
@@ -105,14 +105,14 @@ void VulkanExample::updateOverlay()
 			"none", "Base color", "Normal", "Occlusion", "Emissive", "Metallic", "Roughness"
 		};
 		if (ui->combo("Inputs", &debugViewInputs, debugNamesInputs)) {
-			pbr1.shaderValuesParams.debugViewInputs = (float)debugViewInputs;
+			pbr1.shaderParams.debugViewInputs = (float)debugViewInputs;
 			updateShaderParams = true;
 		}
 		const std::vector<std::string> debugNamesEquation = {
 			"none", "Diff (l,n)", "F (l,h)", "G (l,v,h)", "D (h)", "Specular"
 		};
 		if (ui->combo("PBR equation", &debugViewEquation, debugNamesEquation)) {
-			pbr1.shaderValuesParams.debugViewEquation = (float)debugViewEquation;
+			pbr1.shaderParams.debugViewEquation = (float)debugViewEquation;
 			updateShaderParams = true;
 		}
 	}

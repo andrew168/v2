@@ -22,8 +22,8 @@ public:
 	aux::Pipeline* pAuxPipelinePbr;
 	aux::Pipeline* pAuxPipelineSkybox;
 	aux::PipelineLayout* pAuxPipelineLayout;
-	std::vector<Buffer> paramUniformBuffers;
-	ShaderValuesParams shaderValuesParams;
+	std::vector<Buffer> shaderParamsUBs;
+	ShaderParams shaderParams;
 	Camera *m_pCamera;
 
 public:
