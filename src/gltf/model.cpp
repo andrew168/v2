@@ -28,9 +28,16 @@ void Model::init(uint32_t swapChainCount,
 
 Model::~Model()
 {
+	if (m_pDSL != nullptr) {
 		delete m_pDSL;
+		m_pDSL = nullptr; // static公用的，防止被多次delete
+	}
+
+	if (m_pMeshDSL != nullptr) {
 		delete m_pMeshDSL;
-	
+		m_pMeshDSL = nullptr;
+	}
+
 	destroy(Device::getR());
 	for (auto buffer : uniformBuffers) {
 		buffer.destroy();
