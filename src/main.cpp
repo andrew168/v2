@@ -157,18 +157,14 @@ void VulkanExample::prepare()
 	presentSemaphoreMgr.create(renderAhead);
 	renderSemaphoreMgr.create(renderAhead);
 	commandBuffers.resize(swapChain.imageCount);
-	pbr1.config(sceneModel, skyboxModel);
-	pbr1.init(swapChain.imageCount, camera, renderPass);
 	CommandBuffer::allocate(cmdPool, commandBuffers);
 	loadAssets();
-	pbr1.generateBRDFLUT();
-	pbr1.generateCubemaps(skyboxModel);
-	pbr1.createUB();
-	pbr1.updateDS(descriptorPool);
+
 	PbrConfig pbrConfig;
 	pbrConfig.multiSampling = settings.multiSampling;
 	pbrConfig.sampleCount = settings.sampleCount;
-	pbr1.createPipeline(pbrConfig);
+	pbr1.config(sceneModel, skyboxModel);
+	pbr1.init(pbrConfig, descriptorPool, swapChain.imageCount, camera, renderPass);
 	ui = new UI(vulkanDevice, renderPass, queue, pipelineCache, settings.sampleCount);
 	updateOverlay();
 	recordCommandBuffers();

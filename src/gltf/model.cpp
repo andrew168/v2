@@ -185,10 +185,12 @@ void Model::createDSL(VkDescriptorPool& descriptorPool)
 
 void Model::updateDS(VkDescriptorPool & descriptorPool)
 {
+	// Model的Descriptor与环境texture的Descriptor被汇集在一个DS中，
+	// 供Shader使用，所有，Model需要知道环境图的信息
 	if (m_pDSL == nullptr) {
 		Model::createDSL(descriptorPool);
 	}
-		// 对所有SwapChain用的DS都update，
+	// 对所有SwapChain用的DS都update，
 	// 用1个DS一次性update描述SceneBody的5个D (1个整体UB + 1个pbr UB + 3个环境Sampler）
 	for (auto i = 0; i < ds.size(); i++) { // ds数量就是swapChain数量，
 		aux::DescriptorSet::allocate(ds[i], descriptorPool, m_pDSL->get());

@@ -31,7 +31,11 @@ public:
 public:
 	Pbr();
 	~Pbr();
-	void init(uint32_t swapChainCount, Camera& camera, VkRenderPass& renderPass);
+	void init(PbrConfig& config,
+		VkDescriptorPool& descriptorPool, 
+		uint32_t swapChainCount, 
+		Camera& camera, 
+		VkRenderPass& renderPass);
 	void config(gltf::Model& sceneModel,
 		gltf::Skybox& skyboxModel);
 	void createUB();

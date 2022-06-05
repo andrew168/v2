@@ -47,7 +47,9 @@ void Pbr::setEmptyMap(std::string filename)
 	textures.empty.loadFromFile(filename, VK_FORMAT_R8G8B8A8_UNORM,
 		Device::getVksDevice(), Device::getQueue());
 }
-void Pbr::init(uint32_t swapChainCount, Camera &camera, VkRenderPass& renderPass)
+void Pbr::init(PbrConfig& config,
+	VkDescriptorPool& descriptorPool,
+	uint32_t swapChainCount, Camera& camera, VkRenderPass& renderPass)
 {
 	m_rRenderPass = &renderPass;
 	m_pCamera = &camera;
@@ -55,6 +57,11 @@ void Pbr::init(uint32_t swapChainCount, Camera &camera, VkRenderPass& renderPass
 	shaderParamsUBs.resize(swapChainCount);
 	m_pSceneModel->init(swapChainCount, shaderParamsUBs, *m_pTextures);
 	m_pSkyboxModel->init(swapChainCount, shaderParamsUBs, *m_pTextures);
+	generateBRDFLUT();
+	generateCubemaps(*m_pSkyboxModel);
+	createUB();
+	updateDS(descriptorPool);
+	createPipeline(config);
 }
 void Pbr::config(gltf::Model& sceneModel,
 	gltf::Skybox& skyboxModel)
