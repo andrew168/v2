@@ -16,13 +16,6 @@ VulkanExample::VulkanExample() : VulkanExampleBase()
 
 VulkanExample::~VulkanExample()
 {
-	for (auto semaphore : renderCompleteSemaphores) {
-		vkDestroySemaphore(device, semaphore, nullptr);
-	}
-	for (auto semaphore : presentCompleteSemaphores) {
-		vkDestroySemaphore(device, semaphore, nullptr);
-	}
-
 	destroyCubemaps();
 	textures.lutBrdf.destroy();
 	textures.empty.destroy();
@@ -177,19 +170,11 @@ void VulkanExample::prepare()
 	camera.setRotation({ 0.0f, 0.0f, 0.0f });
 
 	fenceMgr.create(renderAhead);
-	presentCompleteSemaphores.resize(renderAhead);
-	renderCompleteSemaphores.resize(renderAhead);
+	presentSemaphoreMgr.create(renderAhead);
+	renderSemaphoreMgr.create(renderAhead);
 	commandBuffers.resize(swapChain.imageCount);
 	pbr1.config(sceneModel, skyboxModel, textures);
 	pbr1.init(swapChain.imageCount, camera, renderPass);
-
-	// Queue ordering semaphores
-	for (auto& semaphore : presentCompleteSemaphores) {
-		Semaphore::create(semaphore);
-	}
-	for (auto& semaphore : renderCompleteSemaphores) {
-		Semaphore::create(semaphore);
-	}
 	CommandBuffer::allocate(cmdPool, commandBuffers);
 	loadAssets();
 	Pbr::generateBRDFLUT().toVKS(textures.lutBrdf);
@@ -220,9 +205,10 @@ void VulkanExample::render()
 
 	updateOverlay();
 
+	// 确保以前此ID提交的任务没有完成，则需要等待，然后reset为unsignaled
 	fenceMgr.wait(frameIndex);
 	fenceMgr.reset(frameIndex);
-	VkResult acquire = swapChain.acquireNextImage(presentCompleteSemaphores[frameIndex], &currentBuffer);
+	VkResult acquire = swapChain.acquireNextImage(presentSemaphoreMgr.getR(frameIndex), &currentBuffer);
 	if ((acquire == VK_ERROR_OUT_OF_DATE_KHR) || (acquire == VK_SUBOPTIMAL_KHR)) {
 		windowResize();
 	}
@@ -237,13 +223,18 @@ void VulkanExample::render()
 	skyboxModel.applyShaderValues(currentBuffer);
 
 	Queue auxQueue(queue);
+	// 在Color Attachment这个Stage:
+	// 等到present完成信号出现才执行本cmd
+	// 完成本cmd之后发出render完成信号：
+	// 加fence，以确保本任务能够完成。
 	auxQueue.submit(std::vector<VkCommandBuffer>({ commandBuffers[currentBuffer] }),
 		VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
-		std::vector<VkSemaphore>({ presentCompleteSemaphores[frameIndex] }),
-		std::vector<VkSemaphore>({ renderCompleteSemaphores[frameIndex] }),
+		std::vector<VkSemaphore>({ presentSemaphoreMgr.getR(frameIndex) }),
+		std::vector<VkSemaphore>({ renderSemaphoreMgr.getR(frameIndex)}),
 		fenceMgr.get(frameIndex));
 
-	VkResult present = swapChain.queuePresent(queue, currentBuffer, renderCompleteSemaphores[frameIndex]);
+	// 等到render完成信号出现之后，才执行本任务，i.e. present
+	VkResult present = swapChain.queuePresent(queue, currentBuffer, renderSemaphoreMgr.getR(frameIndex));
 	if (!((present == VK_SUCCESS) || (present == VK_SUBOPTIMAL_KHR))) {
 		if (present == VK_ERROR_OUT_OF_DATE_KHR) {
 			windowResize();

@@ -20,9 +20,8 @@ public:
 
 	std::vector<VkCommandBuffer> commandBuffers;
 	FenceMgr fenceMgr;
-	std::vector<VkSemaphore> renderCompleteSemaphores;
-	std::vector<VkSemaphore> presentCompleteSemaphores;
-
+	SemaphoreMgr renderSemaphoreMgr;
+	SemaphoreMgr presentSemaphoreMgr;
 	const uint32_t renderAhead = 2;
 	uint32_t frameIndex = 0;
 	int32_t animationIndex = 0;
