@@ -15,8 +15,6 @@ public:
 	Pbr pbr1;
 	gltf::Model sceneModel;
 	gltf::Skybox skyboxModel;
-	Textures textures;
-	// VkPipelineLayout pipelineLayout;
 
 	std::vector<VkCommandBuffer> commandBuffers;
 	FenceMgr fenceMgr;

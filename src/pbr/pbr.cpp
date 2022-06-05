@@ -21,8 +21,32 @@ Pbr::~Pbr()
 	for (auto buffer : shaderParamsUBs) {
 		buffer.destroy();
 	}
+
+	destroyCubemaps();
+	textures.lutBrdf.destroy();
+	textures.empty.destroy();
 }
 
+void Pbr::destroyCubemaps() {
+	textures.environmentCube.destroy();
+	textures.irradianceCube.destroy();
+	textures.prefilteredCube.destroy();
+}
+
+void Pbr::setEnvMap(std::string filename)
+{
+	if (textures.environmentCube.image) {
+		destroyCubemaps();
+	}
+	textures.environmentCube.loadFromFile(filename, VK_FORMAT_R16G16B16A16_SFLOAT, 
+		Device::getVksDevice(), Device::getQueue());
+}
+
+void Pbr::setEmptyMap(std::string filename)
+{
+	textures.empty.loadFromFile(filename, VK_FORMAT_R8G8B8A8_UNORM,
+		Device::getVksDevice(), Device::getQueue());
+}
 void Pbr::init(uint32_t swapChainCount, Camera &camera, VkRenderPass& renderPass)
 {
 	m_rRenderPass = &renderPass;
@@ -33,8 +57,7 @@ void Pbr::init(uint32_t swapChainCount, Camera &camera, VkRenderPass& renderPass
 	m_pSkyboxModel->init(swapChainCount, shaderParamsUBs, *m_pTextures);
 }
 void Pbr::config(gltf::Model& sceneModel,
-	gltf::Skybox& skyboxModel,
-	Textures &textures)
+	gltf::Skybox& skyboxModel)
 {
 	m_pSceneModel = &sceneModel;
 	m_pSkyboxModel = &skyboxModel;	

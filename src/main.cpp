@@ -16,10 +16,6 @@ VulkanExample::VulkanExample() : VulkanExampleBase()
 
 VulkanExample::~VulkanExample()
 {
-	destroyCubemaps();
-	textures.lutBrdf.destroy();
-	textures.empty.destroy();
-
 	delete ui;
 }
 
@@ -75,20 +71,10 @@ void VulkanExample::loadScene(std::string filename)
 	camera.setRotation({ 0.0f, 0.0f, 0.0f });
 }
 
-void VulkanExample::destroyCubemaps() {
-	textures.environmentCube.destroy();
-	textures.irradianceCube.destroy();
-	textures.prefilteredCube.destroy();
-}
-
 void VulkanExample::loadEnvironment(std::string filename)
 {
 	std::cout << "Loading environment from " << filename << std::endl;
-	if (textures.environmentCube.image) {
-		destroyCubemaps();
-	}
-	textures.environmentCube.loadFromFile(filename, VK_FORMAT_R16G16B16A16_SFLOAT, vulkanDevice, queue);
-	// generateCubemaps();
+	pbr1.setEnvMap(filename);
 }
 
 void VulkanExample::loadAssets()
@@ -106,9 +92,7 @@ void VulkanExample::loadAssets()
 	}
 #endif
 	readDirectory(assetpath + "environments", "*.ktx", environments, false);
-
-	textures.empty.loadFromFile(assetpath + "textures/empty.ktx", VK_FORMAT_R8G8B8A8_UNORM, vulkanDevice, queue);
-
+	pbr1.setEmptyMap(assetpath + "textures/empty.ktx");		
 	std::string sceneFile = assetpath + "models/DamagedHelmet/glTF-Embedded/DamagedHelmet.gltf";
 	std::string envMapFile = assetpath + "environments/papermill.ktx";
 	for (size_t i = 0; i < args.size(); i++) {
@@ -173,18 +157,12 @@ void VulkanExample::prepare()
 	presentSemaphoreMgr.create(renderAhead);
 	renderSemaphoreMgr.create(renderAhead);
 	commandBuffers.resize(swapChain.imageCount);
-	pbr1.config(sceneModel, skyboxModel, textures);
+	pbr1.config(sceneModel, skyboxModel);
 	pbr1.init(swapChain.imageCount, camera, renderPass);
 	CommandBuffer::allocate(cmdPool, commandBuffers);
 	loadAssets();
-	Pbr::generateBRDFLUT().toVKS(textures.lutBrdf);
-	std::vector<Image> auxCubemaps{};
-	Pbr::generateCubemaps(auxCubemaps, skyboxModel, textures.environmentCube);
-	auxCubemaps[0].toVKS(textures.irradianceCube);
-	auxCubemaps[1].toVKS(textures.prefilteredCube);
-	pbr1.shaderParams.prefilteredCubeMipLevels =
-		static_cast<float>(auxCubemaps[1].getMipLevels());
-	static_cast<float>(auxCubemaps[1].getMipLevels());
+	pbr1.generateBRDFLUT();
+	pbr1.generateCubemaps(skyboxModel);
 	pbr1.createUB();
 	pbr1.updateDS(descriptorPool);
 	PbrConfig pbrConfig;

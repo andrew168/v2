@@ -10,6 +10,8 @@ class gltf::Model;
 class Pbr
 {
 public:
+	Textures textures;
+
 	uint32_t m_swapChainImageCount;
 
 	static aux::Image* m_pBrdfLutImage; // 依赖vks,不能delete，
@@ -31,8 +33,7 @@ public:
 	~Pbr();
 	void init(uint32_t swapChainCount, Camera& camera, VkRenderPass& renderPass);
 	void config(gltf::Model& sceneModel,
-		gltf::Skybox& skyboxModel,
-		Textures& textures);
+		gltf::Skybox& skyboxModel);
 	void createUB();
 	void createPipeline(PbrConfig& settings);
 	VkPipelineLayout* getPipelineLayout() { return pAuxPipelineLayout->getP(); }
@@ -40,10 +41,13 @@ public:
 	void updateShaderValues();
 	void updateDS(VkDescriptorPool& descriptorPool);
 	void createDPool(VkDescriptorPool& descriptorPool);
-	static aux::Image& generateBRDFLUT();
-	static void generateCubemaps(std::vector<aux::Image>& cubemaps, gltf::Model& skyboxMmodel, vks::Texture& texture);
-	static aux::Image* Pbr::generateCubemap(gltf::Model& skyboxModel, vks::Texture& texture, VkFormat format, int32_t dim,
+	void generateBRDFLUT();
+	void generateCubemaps(gltf::Model& skyboxMmodel);
+	void generateCubemap(aux::Image** pImage, gltf::Model& skyboxModel, vks::Texture& texture, VkFormat format, int32_t dim,
 		std::vector<aux::ShaderDescription> shaders,
 		uint32_t constsSize, const void* constsData);
+	void destroyCubemaps();
+	void setEnvMap(std::string filename);
+	void setEmptyMap(std::string filename);
 };
 }

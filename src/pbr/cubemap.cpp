@@ -23,8 +23,9 @@ struct PushBlockIrradiance {
 	- 预过滤的环境图： (Pre-filterd environment) cubemap, 
 先生成每一个面、每一个mip level，再合成到cubemap中。
 */
-void Pbr::generateCubemaps(std::vector<Image>& cubemaps, gltf::Model& skyboxModel, vks::Texture& texture)
+void Pbr::generateCubemaps(gltf::Model& skyboxModel)
 {
+	vks::Texture& texture = m_pTextures->environmentCube;
 	VkFormat format;
 	int32_t dim;
 
@@ -34,7 +35,14 @@ void Pbr::generateCubemaps(std::vector<Image>& cubemaps, gltf::Model& skyboxMode
 	{"filtercube.vert.spv", VK_SHADER_STAGE_VERTEX_BIT},
 	{ "irradiancecube.frag.spv", VK_SHADER_STAGE_FRAGMENT_BIT }
 	};
-	cubemaps.push_back(*generateCubemap(skyboxModel, texture, format, dim, shaders, sizeof(PushBlockIrradiance), &shaders));
+
+	Image* pIrradiamnceCube;
+	generateCubemap(&pIrradiamnceCube, skyboxModel, texture, format, dim, shaders, sizeof(PushBlockIrradiance), &shaders);
+	pIrradiamnceCube->toVKS(m_pTextures->irradianceCube);
+	shaderParams.prefilteredCubeMipLevels =
+		static_cast<float>(pIrradiamnceCube->getMipLevels());
+
+	delete pIrradiamnceCube;
 
 	format = VK_FORMAT_R16G16B16A16_SFLOAT;
 	dim = 512;
@@ -44,8 +52,11 @@ void Pbr::generateCubemaps(std::vector<Image>& cubemaps, gltf::Model& skyboxMode
 			{ "prefilterenvmap.frag.spv", VK_SHADER_STAGE_FRAGMENT_BIT }
 	};
 
-	cubemaps.push_back(*generateCubemap(skyboxModel, texture, 
-		format, dim, shadersEnv, sizeof(PushBlockPrefilterEnv), nullptr));
+	Image* pPrefilterCube;
+	generateCubemap(&pPrefilterCube, skyboxModel, texture,
+		format, dim, shadersEnv, sizeof(PushBlockPrefilterEnv), nullptr);
+	pPrefilterCube->toVKS(textures.prefilteredCube);
+	delete pPrefilterCube;
 }
 
 /*
@@ -53,7 +64,7 @@ void Pbr::generateCubemaps(std::vector<Image>& cubemaps, gltf::Model& skyboxMode
 * 用offscreen渲染生成每一个面、每一个mip level，
 * 再copy到cubemap中。
 */
-aux::Image* Pbr::generateCubemap(gltf::Model& skyboxModel, vks::Texture& texture,
+void Pbr::generateCubemap(Image ** pImage, gltf::Model& skyboxModel, vks::Texture& texture,
 	VkFormat format, int32_t dim,
 	std::vector<aux::ShaderDescription> shaders,
 	uint32_t constsSize, const void* constsData)
@@ -68,7 +79,8 @@ aux::Image* Pbr::generateCubemap(gltf::Model& skyboxModel, vks::Texture& texture
 	cubeCI.usage = VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT;
 	cubeCI.flags = VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT;
 	cubeCI.isCubemap = true;
-	aux::Image auxCube(cubeCI);
+	*pImage = new aux::Image(cubeCI);
+	aux::Image& auxCube = **pImage;
 	aux::SubpassDescription auxSubpassDescription(auxCube);
 	aux::RenderPass auxRenderPass(auxCube);
 
@@ -175,6 +187,5 @@ aux::Image* Pbr::generateCubemap(gltf::Model& skyboxModel, vks::Texture& texture
 	auto tEnd = std::chrono::high_resolution_clock::now();
 	auto tDiff = std::chrono::duration<double, std::milli>(tEnd - tStart).count();
 	std::cout << "Generating cube map with " << numMips << " mip levels took " << tDiff << " ms" << std::endl;
-	return &auxCube;
 }
 }

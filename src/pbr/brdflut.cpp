@@ -12,7 +12,7 @@ aux::Image* Pbr::m_pBrdfLutImage = nullptr; // 依赖vks,不能delete，
 	Generate a BRDF integration map storing roughness/NdotV as a look-up-table
 */
 
-aux::Image& Pbr::generateBRDFLUT()
+void Pbr::generateBRDFLUT()
 {
 	auto tStart = std::chrono::high_resolution_clock::now();
 	auto queue = Device::getQueue();
@@ -54,6 +54,6 @@ aux::Image& Pbr::generateBRDFLUT()
 	auto tDiff = std::chrono::duration<double, std::milli>(tEnd - tStart).count();
 	std::cout << "Generating BRDF LUT took " << tDiff << " ms" << std::endl;
 
-	return brdfLutImage;
+	brdfLutImage.toVKS(m_pTextures->lutBrdf);
 }
 }
