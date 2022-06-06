@@ -21,9 +21,6 @@ void VulkanExample::updateOverlay()
 	bool updateCBs = false;
 	float scale = 1.0f;
 
-#if defined(VK_USE_PLATFORM_ANDROID_KHR)
-	scale = (float)vks::android::screenDensity / (float)ACONFIGURATION_DENSITY_MEDIUM;
-#endif
 	ImGui::NewFrame();
 
 	ImGui::SetNextWindowPos(ImVec2(10, 10));
@@ -35,17 +32,9 @@ void VulkanExample::updateOverlay()
 	ui->text("%.1d fps (%.2f ms)", lastFPS, (1000.0f / lastFPS));
 
 	if (ui->header("Scene")) {
-#if defined(VK_USE_PLATFORM_ANDROID_KHR)
-		if (ui->combo("File", selectedScene, scenes)) {
-			vkDeviceWaitIdle(device);
-			loadScene(scenes[selectedScene]);
-			updateDS();
-			updateCBs = true;
-		}
-#else
 		if (ui->button("Open gltf file")) {
 			std::string filename = "";
-#if defined(_WIN32)
+
 			char buffer[MAX_PATH];
 			OPENFILENAME ofn;
 			ZeroMemory(&buffer, sizeof(buffer));
@@ -59,17 +48,7 @@ void VulkanExample::updateOverlay()
 			if (GetOpenFileNameA(&ofn)) {
 				filename = buffer;
 			}
-#elif defined(__linux__) && !defined(VK_USE_PLATFORM_ANDROID_KHR)
-			char buffer[1024];
-			FILE* file = popen("zenity --title=\"Select a glTF file to load\" --file-filter=\"glTF files | *.gltf *.glb\" --file-selection", "r");
-			if (file) {
-				while (fgets(buffer, sizeof(buffer), file)) {
-					filename += buffer;
-				};
-				filename.erase(std::remove(filename.begin(), filename.end(), '\n'), filename.end());
-				std::cout << filename << std::endl;
-			}
-#endif
+
 			if (!filename.empty()) {
 				vkDeviceWaitIdle(device);
 				loadScene(filename);
@@ -77,7 +56,7 @@ void VulkanExample::updateOverlay()
 				updateCBs = true;
 			}
 		}
-#endif
+
 		if (ui->combo("Environment", selectedEnvironment, environments)) {
 			vkDeviceWaitIdle(device);
 			loadEnvironment(environments[selectedEnvironment]);
@@ -186,10 +165,4 @@ void VulkanExample::updateOverlay()
 	if (updateShaderParams) {
 		updateLights();
 	}
-
-#if defined(VK_USE_PLATFORM_ANDROID_KHR)
-	if (mouseButtons.left) {
-		mouseButtons.left = false;
-	}
-#endif
 }
