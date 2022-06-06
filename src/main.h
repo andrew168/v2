@@ -33,11 +33,7 @@ public:
 
 	UI* ui;
 
-#if defined(VK_USE_PLATFORM_ANDROID_KHR)
-	const std::string assetpath = "";
-#else
 	const std::string assetpath = "./../data/";
-#endif
 
 	bool rotateModel = false;
 	glm::vec3 modelrot = glm::vec3(0.0f);
@@ -45,11 +41,6 @@ public:
 
     std::map<std::string, std::string> environments;
 	std::string selectedEnvironment = "papermill";
-
-#if !defined(_WIN32)
-	std::map<std::string, std::string> scenes;
-	std::string selectedScene = "DamagedHelmet";
-#endif
 
 	int32_t debugViewInputs = 0;
 	int32_t debugViewEquation = 0;

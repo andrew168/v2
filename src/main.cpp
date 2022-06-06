@@ -76,10 +76,6 @@ void VulkanExample::loadEnvironment(std::string filename)
 
 void VulkanExample::loadAssets()
 {
-#if defined(VK_USE_PLATFORM_ANDROID_KHR)
-	tinygltf::asset_manager = androidApp->activity->assetManager;
-	readDirectory(assetpath + "models", "*.gltf", scenes, true);
-#else
 	const std::string assetpath = "./../data/";
 	struct stat info;
 	if (stat(assetpath.c_str(), &info) != 0) {
@@ -87,7 +83,7 @@ void VulkanExample::loadAssets()
 		std::cerr << msg << std::endl;
 		exit(-1);
 	}
-#endif
+
 	readDirectory(assetpath + "environments", "*.ktx", environments, false);
 	pbr1.setEmptyMap(assetpath + "textures/empty.ktx");		
 	std::string sceneFile = assetpath + "models/DamagedHelmet/glTF-Embedded/DamagedHelmet.gltf";
