@@ -18,6 +18,8 @@ VulkanExample::~VulkanExample()
 
 void VulkanExample::recordCommandBuffers()
 {
+	// Clear Value数组为BI所用，
+	// 在auxRenderPass Begin之前，它必须存在，否则会出错
 	VkClearValue clearValues[3];
 	if (settings.multiSampling) {
 		clearValues[0].color = { { 0.0f, 0.0f, 0.0f, 1.0f } };
