@@ -70,51 +70,13 @@ void VulkanExample::loadScene(std::string filename)
 	camera.setRotation({ 0.0f, 0.0f, 0.0f });
 }
 
-void VulkanExample::loadEnvironment(std::string filename)
-{
-	std::cout << "Loading environment from " << filename << std::endl;
-	pbr1.setEnvMap(filename);
-}
-
 void VulkanExample::loadAssets()
 {
 	const std::string assetpath = "./../data/";
-	struct stat info;
-	if (stat(assetpath.c_str(), &info) != 0) {
-		std::string msg = "Could not locate asset path in \"" + assetpath + "\".\nMake sure binary is run from correct relative directory!";
-		std::cerr << msg << std::endl;
-		exit(-1);
-	}
-
-	readDirectory(assetpath + "environments", "*.ktx", environments, false);
-	pbr1.setEmptyMap(assetpath + "textures/empty.ktx");		
-	std::string sceneFile = assetpath + "models/DamagedHelmet/glTF-Embedded/DamagedHelmet.gltf";
-	std::string envMapFile = assetpath + "environments/papermill.ktx";
-	for (size_t i = 0; i < args.size(); i++) {
-		if (std::string(args[i]).find(".gltf") != std::string::npos) {
-			std::ifstream file(args[i]);
-			if (file.good()) {
-				sceneFile = args[i];
-			}
-			else {
-				std::cout << "could not load \"" << args[i] << "\"" << std::endl;
-			}
-		}
-		if (std::string(args[i]).find(".ktx") != std::string::npos) {
-			std::ifstream file(args[i]);
-			if (file.good()) {
-				envMapFile = args[i];
-			}
-			else {
-				std::cout << "could not load \"" << args[i] << "\"" << std::endl;
-			}
-		}
-	}
-
-	loadScene(sceneFile.c_str());
+	pbr1.setEmptyMap(assetpath + "textures/empty.ktx");
+	pbr1.setEnvMap(assetpath + "environments/papermill.ktx");
 	skyboxModel.loadFromFile(assetpath + "models/Box/glTF-Embedded/Box.gltf", vulkanDevice, queue);
-
-	loadEnvironment(envMapFile.c_str());
+	loadScene(assetpath + "models/DamagedHelmet/glTF-Embedded/DamagedHelmet.gltf");
 }
 
 void VulkanExample::updateLights()

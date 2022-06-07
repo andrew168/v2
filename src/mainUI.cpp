@@ -56,13 +56,6 @@ void VulkanExample::updateOverlay()
 				updateCBs = true;
 			}
 		}
-
-		if (ui->combo("Environment", selectedEnvironment, environments)) {
-			vkDeviceWaitIdle(device);
-			loadEnvironment(environments[selectedEnvironment]);
-			pbr1.updateDS(descriptorPool);
-			updateCBs = true;
-		}
 	}
 
 	if (ui->header("Environment")) {

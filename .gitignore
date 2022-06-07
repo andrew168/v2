@@ -244,3 +244,4 @@ external/draco/*
 /screenshots
 *.spv
 data/models/glTF-Embedded/
+/data/environments/LearningVulkan.ktx

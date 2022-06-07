@@ -40,7 +40,6 @@ public:
 	glm::vec3 modelrot = glm::vec3(0.0f);
 	glm::vec3 modelPos = glm::vec3(0.0f);
 
-    std::map<std::string, std::string> environments;
 	std::string selectedEnvironment = "papermill";
 
 	int32_t debugViewInputs = 0;
@@ -51,7 +50,6 @@ public:
 	~VulkanExample();
 	void recordCommandBuffers();
 	void loadScene(std::string filename);
-	void loadEnvironment(std::string filename);
 	void loadAssets();
 	void updateLights();
 	void windowResized();
