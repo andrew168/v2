@@ -243,3 +243,4 @@ external/draco/*
 /external
 /screenshots
 *.spv
+data/models/glTF-Embedded/

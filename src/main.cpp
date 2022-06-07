@@ -168,6 +168,10 @@ void VulkanExample::prepare()
 
 void VulkanExample::render()
 {
+	// 这就是Game的mainloop， 包括update和render
+	// 此app的模型不改变，只改变UI的参数，模型的旋转角， 
+	// 所以,绘制模型的CmdBuf是提前record好的， 不需要改动。
+	// 每次只改变曝光度、旋转角等有限的参数，加上预先录制的CmdBuff
 	if (!prepared) {
 		return;
 	}
