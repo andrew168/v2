@@ -51,7 +51,6 @@ public:
 	~VulkanExample();
 	void recordCommandBuffers();
 	void loadScene(std::string filename);
-	void destroyCubemaps();
 	void loadEnvironment(std::string filename);
 	void loadAssets();
 	void updateLights();
