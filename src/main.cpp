@@ -147,10 +147,16 @@ void VulkanExample::prepare()
 	camera.movementSpeed = 0.1f;
 	camera.setPosition({ 0.0f, 0.0f, 1.0f });
 	camera.setRotation({ 0.0f, 0.0f, 0.0f });
-
+	
+	// fence和semaphore有2套替换使用
+	// fence有两套替换: （不是3套）：因为1套彻底结束之后，2套执行，3套才能开始写，所以1套可以被3重复使用。
 	fenceMgr.create(renderAhead);
 	presentSemaphoreMgr.create(renderAhead);
 	renderSemaphoreMgr.create(renderAhead);
+	
+	//CmdBuf, FrameBuffers, UniformBuffers, DS, 3套，与swapChain.imageCount一样多
+	//1 - 在执行，2 - 刚刚提交等待执行；3等待1完成才开始写; 确保GPU有任务
+	//必须至少3套，因为提交到执行需要时间上传，执行|上传|写任务 三者并行
 	commandBuffers.resize(swapChain.imageCount);
 	CommandBuffer::allocate(cmdPool, commandBuffers);
 	loadAssets();
@@ -175,10 +181,13 @@ void VulkanExample::render()
 	if (!prepared) {
 		return;
 	}
-
+	// update 到内存
 	updateOverlay();
+	pbr1.updateShaderValues();
+	update();
 
-	// 确保以前此ID提交的任务没有完成，则需要等待，然后reset为unsignaled
+	// draw，上传、提交，etc
+	// 确保以前此ID提交的任务完成，先等待，再reset为unsignaled以重复使用
 	fenceMgr.wait(frameIndex);
 	fenceMgr.reset(frameIndex);
 	VkResult acquire = swapChain.acquireNextImage(presentSemaphoreMgr.getR(frameIndex), &currentBuffer);
@@ -190,7 +199,6 @@ void VulkanExample::render()
 	}
 
 	// Update UBOs
-	pbr1.updateShaderValues();
 	pbr1.applyShaderValues(currentBuffer);
 	sceneModel.applyShaderValues(currentBuffer);
 	skyboxModel.applyShaderValues(currentBuffer);
@@ -220,7 +228,6 @@ void VulkanExample::render()
 
 	frameIndex += 1;
 	frameIndex %= renderAhead;
-	update();
 }
 
 void VulkanExample::update()
