@@ -20,6 +20,7 @@ public:
 	FenceMgr fenceMgr;
 	SemaphoreMgr renderSemaphoreMgr;
 	SemaphoreMgr presentSemaphoreMgr;
+	SwapChain auxSwapChain;
 	const uint32_t renderAhead = 2; //ToDo: 需要与UB，FB的数量保持一致吗？
 	uint32_t frameIndex = 0;
 	int32_t animationIndex = 0;

@@ -154,10 +154,11 @@ void VulkanExample::prepare()
 	presentSemaphoreMgr.create(renderAhead);
 	renderSemaphoreMgr.create(renderAhead);
 	
-	//CmdBuf, FrameBuffers, UniformBuffers, DS, 3套，与swapChain.imageCount一样多
+	//CmdBuf, FrameBuffers, UniformBuffers, DS, 3套，与auxSwapChain.imageCount()一样多
 	//1 - 在执行，2 - 刚刚提交等待执行；3等待1完成才开始写; 确保GPU有任务
 	//必须至少3套，因为提交到执行需要时间上传，执行|上传|写任务 三者并行
-	commandBuffers.resize(swapChain.imageCount);
+	auxSwapChain.init(swapChain);
+	commandBuffers.resize(auxSwapChain.imageCount());
 	CommandBuffer::allocate(cmdPool, commandBuffers);
 	loadAssets();
 
@@ -165,7 +166,7 @@ void VulkanExample::prepare()
 	pbrConfig.multiSampling = settings.multiSampling;
 	pbrConfig.sampleCount = settings.sampleCount;
 	pbr1.config(sceneModel, skyboxModel);
-	pbr1.init(pbrConfig, descriptorPool, swapChain.imageCount, camera, renderPass);
+	pbr1.init(pbrConfig, descriptorPool, auxSwapChain.imageCount(), camera, renderPass);
 	ui = new UI(vulkanDevice, renderPass, queue, pipelineCache, settings.sampleCount);
 	updateOverlay();
 	recordCommandBuffers();
@@ -190,7 +191,8 @@ void VulkanExample::render()
 	// 确保以前此ID提交的任务完成，先等待，再reset为unsignaled以重复使用
 	fenceMgr.wait(frameIndex);
 	fenceMgr.reset(frameIndex);
-	VkResult acquire = swapChain.acquireNextImage(presentSemaphoreMgr.getR(frameIndex), &currentBuffer);
+
+	VkResult acquire = auxSwapChain.acquireNextImage(presentSemaphoreMgr.getR(frameIndex), &currentBuffer);
 	if ((acquire == VK_ERROR_OUT_OF_DATE_KHR) || (acquire == VK_SUBOPTIMAL_KHR)) {
 		windowResize();
 	}
@@ -214,8 +216,7 @@ void VulkanExample::render()
 		std::vector<VkSemaphore>({ renderSemaphoreMgr.getR(frameIndex)}),
 		fenceMgr.get(frameIndex));
 
-	// 等到render完成信号出现之后，才执行本任务，i.e. present
-	VkResult present = swapChain.queuePresent(queue, currentBuffer, renderSemaphoreMgr.getR(frameIndex));
+	VkResult present = auxSwapChain.queuePresent(queue, currentBuffer, renderSemaphoreMgr.getR(frameIndex));
 	if (!((present == VK_SUCCESS) || (present == VK_SUBOPTIMAL_KHR))) {
 		if (present == VK_ERROR_OUT_OF_DATE_KHR) {
 			windowResize();

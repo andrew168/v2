@@ -5,6 +5,7 @@
 #include "image.h"
 #include "renderPass.h"
 #include "framebuffer.h"
+#include "swapChain.h"
 #include "pipelineLayout.h"
 #include "pipeline.h"
 #include "attachmentDescription.h"
