@@ -207,11 +207,8 @@ void VulkanExample::update()
 			sceneModel.update(animationIndex, frameTimer);
 		}
 		updateLights();
-		if (rotateModel) {
-			pbr1.updateShaderValues();
-		}
 	}
-	if (camera.updated) {
+	if (camera.updated || rotateModel) {
 		pbr1.updateShaderValues();
 	}
 }
