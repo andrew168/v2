@@ -18,6 +18,15 @@ VulkanExample::~VulkanExample()
 
 void VulkanExample::recordCommandBuffers()
 {
+	// 缺点：
+    // 1）集中录制N个CB的方法，不好，因为在频繁change的时候，会被改动，
+	// 	   不适合实时的case
+	// 2) 每一帧只有1个大submit，不利于并行，
+	//    应该是多个submit A,B,C，P 在绘制A的时候，提交B，准备C，最后再P, present
+	//    绘制普通物体A1,A2,A3(无顺序），完成，
+	//    绘制透明物体（T1, T2, T3)(无顺序）, Tx,必须在Ax之后
+	//    prenent      必须在T之后
+
 	// Clear Value数组为BI所用，
 	// 在auxRenderPass Begin之前，它必须存在，否则会出错
 	VkClearValue clearValues[3];
