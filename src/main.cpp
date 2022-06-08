@@ -144,7 +144,7 @@ void VulkanExample::render()
 	if (!prepared) {
 		return;
 	}
-	// update 到内存
+	// update 到内存(也包括到UB，因为是多UB轮番模式，不允许正在绘制的UB）
 	updateOverlay();
 	pbr1.updateShaderValues();
 	update();
@@ -204,6 +204,8 @@ void VulkanExample::update()
 		}
 		if (animate)
 		{
+			// animation的update，直接写到了UniformBuffer中，通过mapped的地址
+			// 所以，必须使用多UB轮番的方法，自动确保写UB的时候，Shader不使用UB
 			sceneModel.update(animationIndex, frameTimer);
 		}
 		updateLights();

@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Vulkan glTF model and texture loading class based on tinyglTF (https://github.com/syoyo/tinygltf)
  *
  * Copyright (C) 2018-2021 by Sascha Willems - www.saschawillems.de
@@ -374,6 +374,8 @@ namespace vkglTF
 					mesh->uniformBlock.jointMatrix[i] = jointMat;
 				}
 				mesh->uniformBlock.jointcount = (float)numJoints;
+				// animation的update，直接写到了UniformBuffer中，通过mapped的地址
+				// 所以，必须使用多UB轮番的方法，自动确保写UB的时候，Shader不使用UB
 				memcpy(mesh->uniformBuffer.mapped, &mesh->uniformBlock, sizeof(mesh->uniformBlock));
 			} else {
 				memcpy(mesh->uniformBuffer.mapped, &m, sizeof(glm::mat4));
