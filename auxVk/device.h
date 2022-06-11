@@ -1,9 +1,6 @@
 #pragma once
 #include "..\vk-all.h"
-#include "VulkanExampleBase.h"
-#include "VulkanTexture.hpp"
-#include "VulkanglTFModel.h"
-#include "VulkanUtils.hpp"
+#include "VulkanDevice.h"
 
 namespace aux
 {
