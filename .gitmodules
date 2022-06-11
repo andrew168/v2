@@ -6,4 +6,4 @@
 	url = https://github.com/g-truc/gli
 [submodule "src/v2"]
 	path = src/v2
-	url = https://github.com/andrew168/v2.git
+	url = git@github.com:andrew168/v2.git
