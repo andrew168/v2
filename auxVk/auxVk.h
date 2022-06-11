@@ -7,6 +7,7 @@
 #include "framebuffer.h"
 #include "swapChain.h"
 #include "pipelineLayout.h"
+#include "shaderStage.h"
 #include "pipeline.h"
 #include "attachmentDescription.h"
 #include "subpassDescription.h"

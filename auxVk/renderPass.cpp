@@ -1,4 +1,5 @@
-﻿#include "auxVk.h"
+﻿#include <array> // std::array
+#include "auxVk.h"
 #include "attachmentDescription.h"
 
 namespace aux

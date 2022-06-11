@@ -1,4 +1,5 @@
 ﻿#include "pipeline.h"
+#include "shaderStage.h"
 
 namespace aux
 {
@@ -81,7 +82,7 @@ Pipeline::Pipeline(aux::PipelineLayout& pipelineLayout, VkRenderPass& renderPass
 	std::vector<VkPipelineShaderStageCreateInfo> shaderStages;
 
 	for (auto item : m_auxCI.shaders) {
-		shaderStages.push_back(loadShader(device, item.m_fileName, item.m_stage));
+		shaderStages.push_back(ShaderStage::loadShader(device, item.m_fileName, item.m_stage));
 	}
 
 	VkGraphicsPipelineCreateInfo pipelineCI{};
