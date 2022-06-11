@@ -1,5 +1,6 @@
 #pragma once
 #include "auxVk.h"
+#include "..\base\VulkanSwapChain.h"
 
 namespace aux
 {
