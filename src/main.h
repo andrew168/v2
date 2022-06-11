@@ -1,7 +1,14 @@
-﻿#include "auxVk/auxVk.h"
-#include "gltf/gltf.h"
-#include "pbr/pbr.h"
-#include "v2/v2.h"
+﻿#include "v2/v2.h"
+#include "VulkanExampleBase.h"
+#include "VulkanTexture.hpp"
+#include "VulkanglTFModel.h"
+#include "VulkanUtils.hpp"
+#include "ui.hpp"
+
+#define GLM_FORCE_RADIANS
+#define GLM_FORCE_DEPTH_ZERO_TO_ONE
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
 using namespace aux;
 using namespace pbr;

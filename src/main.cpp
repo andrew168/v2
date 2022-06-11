@@ -1,7 +1,4 @@
-﻿#include "auxVk/auxVk.h"
-#include "gltf/gltf.h"
-#include "pbr/pbr.h"
-#include "v2/v2.h"
+﻿#include "v2/v2.h"
 #include "main.h"
 using namespace aux;
 using namespace pbr;
