@@ -119,4 +119,23 @@ Pipeline::~Pipeline()
 {
 	vkDestroyPipeline(Device::getR(), m_pipeline, nullptr);
 }
+
+bool PipelineCI::validate() 
+{
+	if (pVertexInputBindings != nullptr) {
+		for (uint32_t i = 0; i < pVertexInputBindings->size(); i++) {
+			assert((*pVertexInputBindings)[i].binding == i);
+		}
+	}
+
+	if (pVertexInputAttributes != nullptr) {
+		for (uint32_t i = 0; i < pVertexInputAttributes->size(); i++) {
+			VkVertexInputAttributeDescription* pAttrib = &(*pVertexInputAttributes)[i];
+			assert(pAttrib->location == i);
+			assert(pAttrib->location > pAttrib->binding);
+		}
+	}
+	return true;
+}
+
 }

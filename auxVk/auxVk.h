@@ -21,3 +21,4 @@
 #include "queue.h"
 #include "fence.h"
 #include "fenceMgr.h"
+#include "vertexInput.h"

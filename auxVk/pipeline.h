@@ -48,6 +48,8 @@ struct PipelineCI {
         pVertexInputAttributes(nullptr)
     {
     }
+
+    bool validate();
 };
 
 class Pipeline
@@ -74,6 +76,7 @@ public:
         Assert(Pipeline::m_pPipelineCache != nullptr, "initialize first!");
         return Pipeline::m_pPipelineCache;
     }
+
 private:
 };
 
