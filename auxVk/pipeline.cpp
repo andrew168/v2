@@ -17,12 +17,16 @@ Pipeline::Pipeline(aux::PipelineLayout& pipelineLayout, VkRenderPass& renderPass
 	VkPipelineInputAssemblyStateCreateInfo inputAssemblyStateCI{};
 	inputAssemblyStateCI.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
 	inputAssemblyStateCI.topology = m_auxCI.primitiveTopology;
+	inputAssemblyStateCI.flags = 0;
+	inputAssemblyStateCI.primitiveRestartEnable = VK_FALSE;
 
 	VkPipelineRasterizationStateCreateInfo rasterizationStateCI{};
 	rasterizationStateCI.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
 	rasterizationStateCI.polygonMode = VK_POLYGON_MODE_FILL;
 	rasterizationStateCI.cullMode = m_auxCI.cullMode;
 	rasterizationStateCI.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
+	rasterizationStateCI.flags = 0;
+	rasterizationStateCI.depthClampEnable = VK_FALSE;
 	rasterizationStateCI.lineWidth = 1.0f;
 
 	VkPipelineColorBlendAttachmentState blendAttachmentState{};

@@ -9,15 +9,21 @@ VkPipelineShaderStageCreateInfo ShaderStage::loadShader(VkDevice device, std::st
 	shaderStage.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
 	shaderStage.stage = stage;
 	shaderStage.pName = "main";
+	std::ifstream ifs;
+	
+	ifs.open(filename, std::ios::binary | std::ios::in | std::ios::ate);
 
-	std::ifstream is("./../data/shaders/" + filename, std::ios::binary | std::ios::in | std::ios::ate);
+	if (!ifs.is_open())
+	{
+		ifs.open("./../data/shaders/" + filename, std::ios::binary | std::ios::in | std::ios::ate);
+	}
 
-	if (is.is_open()) {
-		size_t size = is.tellg();
-		is.seekg(0, std::ios::beg);
+	if (ifs.is_open()) {
+		size_t size = ifs.tellg();
+		ifs.seekg(0, std::ios::beg);
 		char* shaderCode = new char[size];
-		is.read(shaderCode, size);
-		is.close();
+		ifs.read(shaderCode, size);
+		ifs.close();
 		assert(size > 0);
 		VkShaderModuleCreateInfo moduleCreateInfo{};
 		moduleCreateInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;

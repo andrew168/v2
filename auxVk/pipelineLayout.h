@@ -24,6 +24,14 @@ struct PipelineLayoutCI : public VkPipelineLayoutCreateInfo
         pSetLayouts(nullptr)
     {
     }
+
+    PipelineLayoutCI(const std::vector<VkDescriptorSetLayout>& dsls) :
+        pPcRange(nullptr),
+        pDslBindings(nullptr),
+        pImageInfo(nullptr),
+        pSetLayouts(&dsls)
+    {
+    }
 };
 class PipelineLayout
 {

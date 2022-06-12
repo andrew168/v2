@@ -29,6 +29,11 @@ void CommandBuffer::end()
 	VK_CHECK_RESULT(vkEndCommandBuffer(*m_pCmdBuf));
 }
 
+// vks::Flush已经包括了：
+// ** end CmdBuf，
+// ** 创建fence
+// ** submit
+// ** 最后 free CmdBuf
 void CommandBuffer::flush(VkQueue &queue, bool free)
 {
 	Device::getVksDevice()->flushCommandBuffer(*m_pCmdBuf, queue, free);

@@ -12,5 +12,6 @@ public:
     ~DescriptorSetLayout();
 
     VkDescriptorSetLayout* get() { return &m_dsLayout; }
+    VkDescriptorSetLayout& getR() { return m_dsLayout; }
 };
 }
