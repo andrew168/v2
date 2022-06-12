@@ -27,6 +27,15 @@ void Describe::buffer(VkWriteDescriptorSet& ds,
 	ds.pBufferInfo = pBufferInfo;
 }
 
+//VkWriteDescriptorSet Describe::image(VkDescriptorSet& dstSet,
+//	uint32_t dstBinding,
+//	const VkDescriptorImageInfo* pImageInfo)
+//{
+//	VkWriteDescriptorSet ds;
+//	image(ds, dstSet, dstBinding, pImageInfo);
+//	return ds;
+//}
+
 void Describe::bufferUpdate(VkDescriptorSet& dstSet,
 	uint32_t dstBinding,
 	const VkDescriptorBufferInfo* pBufferInfo) {
