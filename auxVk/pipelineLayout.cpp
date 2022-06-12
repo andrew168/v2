@@ -16,13 +16,13 @@ PipelineLayout::PipelineLayout(PipelineLayoutCI &ci):
 	pipelineLayoutCI.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
 
 	if (ci.pSetLayouts == nullptr) {
-		VkDescriptorSetLayoutCreateInfo descriptorSetLayoutCI{};
-		descriptorSetLayoutCI.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+		VkDescriptorSetLayoutCreateInfo dslCI{};
+		dslCI.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
 		if (ci.pDslBindings != nullptr) {
-			descriptorSetLayoutCI.pBindings = ci.pDslBindings;
-			descriptorSetLayoutCI.bindingCount = 1;
+			dslCI.pBindings = ci.pDslBindings;
+			dslCI.bindingCount = 1;
 		}
-		VK_CHECK_RESULT(vkCreateDescriptorSetLayout(device, &descriptorSetLayoutCI, nullptr, &m_descriptorSetLayout));
+		VK_CHECK_RESULT(vkCreateDescriptorSetLayout(device, &dslCI, nullptr, &m_descriptorSetLayout));
 		pipelineLayoutCI.setLayoutCount = 1;
 		pipelineLayoutCI.pSetLayouts = &m_descriptorSetLayout;
 	}
@@ -30,6 +30,7 @@ PipelineLayout::PipelineLayout(PipelineLayoutCI &ci):
 		pipelineLayoutCI.setLayoutCount = static_cast<uint32_t> (ci.pSetLayouts->size());
 		pipelineLayoutCI.pSetLayouts = ci.pSetLayouts->data();
 	}
+
 	if (ci.pPcRange != nullptr) {
 		pipelineLayoutCI.pushConstantRangeCount = 1;  // ToDo:: Support N>1 cases
 		pipelineLayoutCI.pPushConstantRanges = ci.pPcRange;
