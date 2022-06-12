@@ -151,10 +151,58 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="auxVk\attachmentDescription.h" />
+    <ClInclude Include="auxVk\auxVk.h" />
+    <ClInclude Include="auxVk\commandBuffer.h" />
+    <ClInclude Include="auxVk\describe.h" />
+    <ClInclude Include="auxVk\descriptorPool.h" />
+    <ClInclude Include="auxVk\descriptorSet.h" />
+    <ClInclude Include="auxVk\descriptorSetLayout.h" />
+    <ClInclude Include="auxVk\device.h" />
+    <ClInclude Include="auxVk\fence.h" />
+    <ClInclude Include="auxVk\fenceMgr.h" />
+    <ClInclude Include="auxVk\Framebuffer.h" />
+    <ClInclude Include="auxVk\image.h" />
+    <ClInclude Include="auxVk\imBarrier.h" />
+    <ClInclude Include="auxVk\pipeline.h" />
+    <ClInclude Include="auxVk\pipelineLayout.h" />
+    <ClInclude Include="auxVk\queue.h" />
+    <ClInclude Include="auxVk\renderPass.h" />
+    <ClInclude Include="auxVk\semaphore.h" />
+    <ClInclude Include="auxVk\semaphoreMgr.h" />
+    <ClInclude Include="auxVk\shaderDescription.h" />
+    <ClInclude Include="auxVk\shaderStage.h" />
+    <ClInclude Include="auxVk\subpassDescription.h" />
+    <ClInclude Include="auxVk\swapChain.h" />
+    <ClInclude Include="auxVk\util.h" />
+    <ClInclude Include="auxVk\vertexInput.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="pch.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="auxVk\attachmentDescription.cpp" />
+    <ClCompile Include="auxVk\auxVk.cpp" />
+    <ClCompile Include="auxVk\commandBuffer.cpp" />
+    <ClCompile Include="auxVk\describe.cpp" />
+    <ClCompile Include="auxVk\descriptorPool.cpp" />
+    <ClCompile Include="auxVk\descriptorSet.cpp" />
+    <ClCompile Include="auxVk\descriptorSetLayout.cpp" />
+    <ClCompile Include="auxVk\device.cpp" />
+    <ClCompile Include="auxVk\fence.cpp" />
+    <ClCompile Include="auxVk\fenceMgr.cpp" />
+    <ClCompile Include="auxVk\Framebuffer.cpp" />
+    <ClCompile Include="auxVk\image.cpp" />
+    <ClCompile Include="auxVk\imBarrier.cpp" />
+    <ClCompile Include="auxVk\pipeline.cpp" />
+    <ClCompile Include="auxVk\pipelineLayout.cpp" />
+    <ClCompile Include="auxVk\queue.cpp" />
+    <ClCompile Include="auxVk\renderPass.cpp" />
+    <ClCompile Include="auxVk\semaphore.cpp" />
+    <ClCompile Include="auxVk\semaphoreMgr.cpp" />
+    <ClCompile Include="auxVk\shaderStage.cpp" />
+    <ClCompile Include="auxVk\subpassDescription.cpp" />
+    <ClCompile Include="auxVk\swapChain.cpp" />
+    <ClCompile Include="auxVk\util.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
