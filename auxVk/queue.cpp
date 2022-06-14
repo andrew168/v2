@@ -13,9 +13,23 @@ void Queue::submit(std::vector< VkCommandBuffer> &cmdBufs,
 	std::vector< VkSemaphore>& waits,
 	std::vector< VkSemaphore>& signals, VkFence fence)
 {
+
+	std::vector<VkPipelineStageFlags> stages = {waitDstStageMask};
+	Queue::submit(cmdBufs,
+		stages,
+		waits,
+		signals,
+		fence);
+}
+
+void Queue::submit(std::vector< VkCommandBuffer>& cmdBufs,
+	std::vector< VkPipelineStageFlags>& waitDstStageMasks,
+	std::vector< VkSemaphore>& waits,
+	std::vector< VkSemaphore>& signals, VkFence fence)
+{
 	VkSubmitInfo submitInfo{};
 	submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-	submitInfo.pWaitDstStageMask = &waitDstStageMask;
+	submitInfo.pWaitDstStageMask = waitDstStageMasks.data();
 	submitInfo.pWaitSemaphores = waits.data();
 	submitInfo.waitSemaphoreCount = static_cast<uint32_t>(waits.size());
 	submitInfo.pSignalSemaphores = signals.data();
@@ -24,4 +38,5 @@ void Queue::submit(std::vector< VkCommandBuffer> &cmdBufs,
 	submitInfo.commandBufferCount = static_cast<uint32_t>(cmdBufs.size());
 	VK_CHECK_RESULT(vkQueueSubmit(*m_pQueue, 1, &submitInfo, fence));
 }
+
 }
