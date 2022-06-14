@@ -39,10 +39,16 @@ void Image::createImageView(ImageCI &auxCi)
     viewCI.format = auxCi.format;
     viewCI.subresourceRange = {};
     viewCI.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+    viewCI.subresourceRange.baseMipLevel = 0; // 缺省值
+    viewCI.subresourceRange.baseArrayLayer = 0; // 缺省值
     viewCI.subresourceRange.levelCount = auxCi.mipLevels;
     viewCI.subresourceRange.layerCount = auxCi.arrayLayers;
     viewCI.image = m_image;
-    
+    if (auxCi.pComponentMapping != nullptr) { 
+        //RGBA分量存储的内容不一定是R、G、B、A，而可能是0， 1，Identiy
+        viewCI.components = *auxCi.pComponentMapping;
+    }
+
     // default value?
     viewCI.flags = 0;
     viewCI.subresourceRange.baseMipLevel = 0;
@@ -59,11 +65,12 @@ void Image::createSampler(ImageCI& auxCi) {
     samplerCI.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
     samplerCI.addressModeU = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
     samplerCI.addressModeV = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
-    samplerCI.addressModeW = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+    samplerCI.addressModeW = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;    
     samplerCI.minLod = 0.0f;
     samplerCI.maxLod = static_cast<float>(auxCi.mipLevels);
     samplerCI.maxAnisotropy = 1.0f;
     samplerCI.borderColor = VK_BORDER_COLOR_FLOAT_OPAQUE_WHITE;
+    samplerCI.compareOp = VK_COMPARE_OP_NEVER; // 缺省值
     VK_CHECK_RESULT(vkCreateSampler(Device::getR(), &samplerCI, nullptr, &m_sampler));
 }
 

@@ -8,6 +8,7 @@ namespace aux
 struct ImageCI: public VkImageCreateInfo
 {
     bool isCubemap;
+    VkComponentMapping* pComponentMapping = nullptr;
     ImageCI(VkFormat _format = VK_FORMAT_R32G32B32A32_SFLOAT, 
         int32_t _width = 1, 
         int32_t _height = 1,
@@ -44,14 +45,15 @@ class Image {
     VkSampler m_sampler;
 
 public:
+    // 顺序： ctor, dtor, static, .... get/set
+    Image(ImageCI &ci);
     static void copyOneMip2Cube(
-        VkCommandBuffer& cmdBuf, 
+        VkCommandBuffer& cmdBuf,
         aux::Image& auxImage,
         VkExtent3D& region,
-        aux::Image& cube, 
+        aux::Image& cube,
         uint32_t arrayLayers,
         uint32_t mipLevels);
-    Image(ImageCI &ci);
     VkFormat getFormat() { return m_format; }
     VkImage getImage() { return m_image; }
     VkDeviceMemory getDeviceMemory() { return m_deviceMemory; }
