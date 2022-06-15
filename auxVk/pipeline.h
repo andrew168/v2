@@ -52,30 +52,33 @@ struct PipelineCI {
     bool validate();
 };
 
-class Pipeline
-{
+class PipelineBase {
+protected:
+    VkPipeline m_pipeline;
     static VkPipelineCache* m_pPipelineCache;
 
-    VkPipeline m_pipeline;
+public:    
+    inline VkPipeline get() { return m_pipeline; }
+    inline VkPipeline& getR() { return m_pipeline; }
+
+    static void setCache(VkPipelineCache* cache) {
+        PipelineBase::m_pPipelineCache = cache;
+    }
+    static VkPipelineCache* getCache() {
+        Assert(PipelineBase::m_pPipelineCache != nullptr, "initialize first!");
+        return PipelineBase::m_pPipelineCache;
+    }
+};
+
+class Pipeline : public PipelineBase
+{
     aux::PipelineLayout& m_pipelineLayout;
     VkRenderPass& m_renderPass;
-    std::vector<aux::ShaderDescription> m_shaderList;
     PipelineCI& m_auxCI;
 public:
     explicit Pipeline(aux::PipelineLayout& pipelineLayout, VkRenderPass& renderPass, PipelineCI &pipelineCI);
     ~Pipeline();
     void bindToGraphic(VkCommandBuffer& cmdBuf);
-    void setShaderStages(std::vector<aux::ShaderDescription> &shaders);
-    VkPipeline get() { return m_pipeline; }
-    VkPipeline& getR() { return m_pipeline; }
-    static void setCache(VkPipelineCache *cache) {
-        Pipeline::m_pPipelineCache = cache;
-    }
-
-    static VkPipelineCache *getCache() {
-        Assert(Pipeline::m_pPipelineCache != nullptr, "initialize first!");
-        return Pipeline::m_pPipelineCache;
-    }
 
 private:
 };

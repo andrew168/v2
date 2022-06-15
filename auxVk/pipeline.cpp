@@ -3,8 +3,7 @@
 
 namespace aux
 {
-
-VkPipelineCache* Pipeline::m_pPipelineCache;
+VkPipelineCache* PipelineBase::m_pPipelineCache;
 
 Pipeline::Pipeline(aux::PipelineLayout& pipelineLayout, VkRenderPass& renderPass, PipelineCI& auxci) :
 	m_pipelineLayout(pipelineLayout),

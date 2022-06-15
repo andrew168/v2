@@ -3,7 +3,10 @@
 
 namespace aux
 {
-VkPipelineShaderStageCreateInfo ShaderStage::loadShader(VkDevice device, std::string filename, VkShaderStageFlagBits stage)
+VkPipelineShaderStageCreateInfo ShaderStage::loadShader(
+	VkDevice device, 
+	std::string filename, 
+	VkShaderStageFlagBits stage) 
 {
 	VkPipelineShaderStageCreateInfo shaderStage{};
 	shaderStage.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
@@ -39,6 +42,17 @@ VkPipelineShaderStageCreateInfo ShaderStage::loadShader(VkDevice device, std::st
 
 	assert(shaderStage.module != VK_NULL_HANDLE);
 	return shaderStage;
+}
+
+VkPipelineShaderStageCreateInfo ShaderStage::loadShader(std::string filename,
+	VkShaderStageFlagBits stage)
+{
+	return loadShader(Device::getR(), filename, stage);
+}
+
+VkPipelineShaderStageCreateInfo ShaderStage::loadShader(aux::ShaderDescription& shaderDesc)
+{
+	return loadShader(Device::getR(), shaderDesc.m_fileName, shaderDesc.m_stage);
 }
 
 }

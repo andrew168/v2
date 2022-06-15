@@ -17,6 +17,12 @@ public:
         uint32_t dstBinding,
         const VkDescriptorBufferInfo* pBufferInfo);
 
+    static void any(VkWriteDescriptorSet& ds,
+        VkDescriptorType type,
+        VkDescriptorSet& dstSet,
+        uint32_t dstBinding,
+        const VkDescriptorImageInfo* pImageInfo);
+
     static void Describe::bufferUpdate(VkDescriptorSet& dstSet,
         uint32_t dstBinding,
         const VkDescriptorBufferInfo* pBufferInfo);
