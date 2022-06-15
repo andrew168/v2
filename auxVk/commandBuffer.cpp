@@ -39,10 +39,10 @@ void CommandBuffer::flush(VkQueue &queue, bool free)
 	Device::getVksDevice()->flushCommandBuffer(*m_pCmdBuf, queue, free);
 }
 
-void CommandBuffer::setViewport(uint32_t width,
-	uint32_t height,
-	uint32_t x0,
-	uint32_t y0)
+void CommandBuffer::setViewport(float width,
+	float height,
+	float x0,
+	float y0)
 {
 	VkViewport viewport{};
 	viewport.width = (float)width;
@@ -72,6 +72,18 @@ void CommandBuffer::allocate(
 	ai.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
 	ai.commandBufferCount = static_cast<uint32_t>(cmdBufs.size());
 	VK_CHECK_RESULT(vkAllocateCommandBuffers(Device::getR(), &ai, cmdBufs.data()));
+}
+
+void CommandBuffer::allocate(
+	VkCommandPool& cmdPool,
+	VkCommandBuffer& cmdBuf)
+{
+	VkCommandBufferAllocateInfo ai{};
+	ai.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+	ai.commandPool = cmdPool;
+	ai.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+	ai.commandBufferCount = 1;
+	VK_CHECK_RESULT(vkAllocateCommandBuffers(Device::getR(), &ai, &cmdBuf));
 }
 
 void CommandBuffer::pushConstantsToFS(VkPipelineLayout layout,

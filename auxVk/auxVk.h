@@ -17,6 +17,7 @@
 #include "attachmentDescription.h"
 #include "subpassDescription.h"
 #include "imBarrier.h"
+#include "commandPool.h"
 #include "commandBuffer.h"
 #include "semaphore.h"
 #include "semaphoreMgr.h"
