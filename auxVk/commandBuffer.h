@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "..\vk-all.h"
 #include "device.h"
 
@@ -17,7 +17,10 @@ public:
     void begin(VkCommandBufferBeginInfo* pBeginInfo = nullptr);    
     void end();
     void flush(VkQueue& queue, bool free = true);
-    void setViewport(uint32_t width, uint32_t height);
+    void setViewport(uint32_t width,
+            uint32_t height,
+            uint32_t x0 = 0,
+            uint32_t y0 = 0);
     void setScissor(uint32_t width, uint32_t height);
     void pushConstantsToFS(VkPipelineLayout layout,
         uint32_t offset,

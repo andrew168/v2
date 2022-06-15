@@ -40,11 +40,15 @@ void CommandBuffer::flush(VkQueue &queue, bool free)
 }
 
 void CommandBuffer::setViewport(uint32_t width,
-	uint32_t height)
+	uint32_t height,
+	uint32_t x0,
+	uint32_t y0)
 {
 	VkViewport viewport{};
 	viewport.width = (float)width;
 	viewport.height = (float)height;
+	viewport.x = x0;
+	viewport.y = y0;
 	viewport.minDepth = 0.0f;
 	viewport.maxDepth = 1.0f;
 	vkCmdSetViewport(*m_pCmdBuf, 0, 1, &viewport);
