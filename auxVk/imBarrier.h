@@ -6,6 +6,9 @@ namespace aux
 
 class IMBarrier {
 public:
+    static void csResult2Sampler(VkImage& image,
+        VkCommandBuffer& cmdBuf);
+
     static void convertLayoutToTransfer(aux::Image& auxImage,
         VkCommandBuffer& cmdBuf, 
         VkQueue& queue);
@@ -21,6 +24,6 @@ public:
 
     static void toColorAttachment(aux::Image& auxImage,
         VkQueue& queue);
-
+    
 };
 }

@@ -58,6 +58,35 @@ void IMBarrier::colorAttachment2Transfer(aux::Image& auxImage,
 	}
 }
 
+void IMBarrier::csResult2Sampler(VkImage& image,
+	VkCommandBuffer& cmdBuf)
+{
+	vks::VulkanDevice* vulkanDevice = aux::Device::getVksDevice();
+
+	VkImageSubresourceRange subresourceRange = { VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1 };
+	subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+	subresourceRange.baseMipLevel = 0;
+	subresourceRange.levelCount = 1;
+	subresourceRange.layerCount = 1;
+	VkImageMemoryBarrier imageMemoryBarrier{};
+	imageMemoryBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+	imageMemoryBarrier.image = image;
+	imageMemoryBarrier.oldLayout = VK_IMAGE_LAYOUT_GENERAL;
+	imageMemoryBarrier.newLayout = VK_IMAGE_LAYOUT_GENERAL;
+	imageMemoryBarrier.srcAccessMask = VK_ACCESS_SHADER_WRITE_BIT;
+	imageMemoryBarrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+	imageMemoryBarrier.subresourceRange = { VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1 };
+	imageMemoryBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+	imageMemoryBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+
+	vkCmdPipelineBarrier(cmdBuf,
+		VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,
+		VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
+		VK_FLAGS_NONE,
+		0, nullptr,
+		0, nullptr, 1, &imageMemoryBarrier);
+}
+
 void IMBarrier::transfer2ColorAttachment(aux::Image& auxImage,
 	VkCommandBuffer& cmdBuf)
 {

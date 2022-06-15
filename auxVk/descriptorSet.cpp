@@ -1,16 +1,38 @@
 ﻿#include "descriptorSet.h"
+#include "describe.h"
 
 namespace aux
 {
 DescriptorSet::DescriptorSet(VkDescriptorSet& ds):
-	m_pDescriptorset(&ds),
+	m_pDescriptorSet(&ds),
 	m_pDescriptorPool(nullptr),
 	m_isVK(true)
 {
 }
+DescriptorSet::DescriptorSet(VkDescriptorPool& pool, VkDescriptorSetLayout& dsl):
+	m_pDescriptorPool(&pool),
+	m_rDSL(&dsl)
+{
+	VkDescriptorSetAllocateInfo allocInfo =
+		vks::initializers::descriptorSetAllocateInfo(*m_pDescriptorPool, m_rDSL, 1);
+	m_pDescriptorSet = new VkDescriptorSet(); // ToDo: delete
+	VK_CHECK_RESULT(vkAllocateDescriptorSets(Device::getR(), &allocInfo, m_pDescriptorSet));
+}
+
+void DescriptorSet::write(std::vector<Descriptor> descs)
+{
+	std::vector<VkWriteDescriptorSet> computeWriteDescriptorSets(descs.size());
+	for (uint32_t i = 0; i < descs.size(); i++) 
+	{
+		auto& item = descs[i];
+		Describe::any(computeWriteDescriptorSets[i], item.descriptorType, *m_pDescriptorSet, item.dstBinding, item.pImageInfo);
+	}
+	vkUpdateDescriptorSets(Device::getR(), computeWriteDescriptorSets.size(), computeWriteDescriptorSets.data(), 0, NULL);
+}
 
 DescriptorSet::DescriptorSet(DescriptorSetCI &ci)
 {
+	assert(0, "ToDo: 应该把pool挪出去");
 	const VkDevice& device = Device::getR();
 
 	VkDescriptorPoolSize poolSize = { VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1 };
@@ -23,14 +45,14 @@ DescriptorSet::DescriptorSet(DescriptorSetCI &ci)
 	m_pDescriptorPool = new VkDescriptorPool();
 	VK_CHECK_RESULT(vkCreateDescriptorPool(device, &descriptorPoolCI, nullptr, m_pDescriptorPool));
 
-	m_pDescriptorset = new VkDescriptorSet();
-	DescriptorSet::allocate(*m_pDescriptorset, *m_pDescriptorPool, ci.pSetLayouts);
+	m_pDescriptorSet = new VkDescriptorSet();
+	DescriptorSet::allocate(*m_pDescriptorSet, *m_pDescriptorPool, ci.pSetLayouts);
 	
 	VkWriteDescriptorSet writeDescriptorSet{};
 	writeDescriptorSet.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
 	writeDescriptorSet.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
 	writeDescriptorSet.descriptorCount = 1;
-	writeDescriptorSet.dstSet = *m_pDescriptorset;
+	writeDescriptorSet.dstSet = *m_pDescriptorSet;
 	writeDescriptorSet.dstBinding = 0;
 	writeDescriptorSet.pImageInfo = ci.pImageInfo ;
 	vkUpdateDescriptorSets(device, 1, &writeDescriptorSet, 0, nullptr);
@@ -91,8 +113,8 @@ DescriptorSet::~DescriptorSet()
 	vkDestroyDescriptorPool(Device::getR(), *m_pDescriptorPool, nullptr);
 	delete m_pDescriptorPool;	m_pDescriptorPool = nullptr;
 	
-	if (m_pDescriptorset != nullptr) {
-		delete m_pDescriptorset;	m_pDescriptorset = nullptr;
+	if (m_pDescriptorSet != nullptr) {
+		delete m_pDescriptorSet;	m_pDescriptorSet = nullptr;
 	}
 }
 }
