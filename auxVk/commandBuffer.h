@@ -55,6 +55,11 @@ public:
         VkDeviceSize    offset = 0,
         VkIndexType     indexType = VK_INDEX_TYPE_UINT32);
 
+    void dispatch(
+        uint32_t groupCountX,
+        uint32_t groupCountY,
+        uint32_t groupCountZ);
+
     static void allocate(
         VkCommandPool& cmdPool, 
         std::vector<VkCommandBuffer>& cmdBufs);

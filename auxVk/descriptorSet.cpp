@@ -1,5 +1,6 @@
 ﻿#include "descriptorSet.h"
 #include "describe.h"
+#include "pipeline.h"
 
 namespace aux
 {
@@ -65,6 +66,17 @@ void DescriptorSet::bindToGraphics(VkCommandBuffer &cmdBuf,
 {
 	vkCmdBindDescriptorSets(cmdBuf, VK_PIPELINE_BIND_POINT_GRAPHICS, 
 		layout, 0, 1, get(), dynamicOffsetCount, pDynamicOffsets);
+}
+
+void DescriptorSet::bind(VkCommandBuffer& cmdBuf,
+	PipelineBase& pipeline,
+	uint32_t dynamicOffsetCount,
+	const uint32_t* pDynamicOffsets)
+{
+	VkPipelineBindPoint bp = pipeline.isGraphics()? VK_PIPELINE_BIND_POINT_GRAPHICS :
+		VK_PIPELINE_BIND_POINT_COMPUTE;
+	vkCmdBindDescriptorSets(cmdBuf, bp, *(pipeline.getLayout()),
+		0, 1, get(), dynamicOffsetCount, pDynamicOffsets);
 }
 
 void DescriptorSet::bindToGraphics(const std::vector<VkDescriptorSet> &sets, 

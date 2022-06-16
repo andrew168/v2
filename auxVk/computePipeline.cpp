@@ -18,4 +18,14 @@ ComputePipeline::ComputePipeline(VkDescriptorSetLayout& dsl,
 	VK_CHECK_RESULT(vkCreateComputePipelines(Device::getR(), *m_pPipelineCache, 1, &computePipelineCreateInfo, nullptr, &m_pipeline));
 }
 
+void ComputePipeline::bind(VkCommandBuffer& cmdBuf)
+{
+	vkCmdBindPipeline(cmdBuf, VK_PIPELINE_BIND_POINT_COMPUTE, get());
+}
+
+ComputePipeline::~ComputePipeline()
+{
+	vkDestroyPipelineLayout(Device::getR(), m_layout, nullptr);
+}
+
 }

@@ -54,6 +54,7 @@ struct PipelineCI {
 
 class PipelineBase {
 protected:
+    VkPipelineLayout m_layout;
     VkPipeline m_pipeline;
     static VkPipelineCache* m_pPipelineCache;
 
@@ -68,6 +69,9 @@ public:
         Assert(PipelineBase::m_pPipelineCache != nullptr, "initialize first!");
         return PipelineBase::m_pPipelineCache;
     }
+
+    VkPipelineLayout* getLayout() { return &m_layout; }
+    inline bool isGraphics() { return false; }
 };
 
 class Pipeline : public PipelineBase
@@ -79,6 +83,9 @@ public:
     explicit Pipeline(aux::PipelineLayout& pipelineLayout, VkRenderPass& renderPass, PipelineCI &pipelineCI);
     ~Pipeline();
     void bindToGraphic(VkCommandBuffer& cmdBuf);
+
+    VkPipelineLayout* getLayout() { return m_pipelineLayout.getP(); }
+    inline bool isGraphics() { return true; }
 
 private:
 };

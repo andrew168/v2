@@ -5,6 +5,9 @@
 
 namespace aux
 {
+class PipelineBase;
+class Pipeline;
+
 struct DescriptorSetCI {
     const VkDescriptorImageInfo* pImageInfo;
     const VkDescriptorSetLayout* pSetLayouts;
@@ -32,6 +35,12 @@ public:
         VkPipelineLayout layout,
         uint32_t dynamicOffsetCount = 0,
         const uint32_t* pDynamicOffsets = NULL);
+    
+    void DescriptorSet::bind(VkCommandBuffer& cmdBuf,
+        PipelineBase& pipeline,
+        uint32_t dynamicOffsetCount = 0,
+        const uint32_t* pDynamicOffsets = NULL);
+
     static void DescriptorSet::bindToGraphics(const std::vector<VkDescriptorSet> &sets,
         VkCommandBuffer& cmdBuf,
         VkPipelineLayout &layout,

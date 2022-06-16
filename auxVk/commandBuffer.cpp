@@ -34,7 +34,7 @@ void CommandBuffer::end()
 // ** 创建fence
 // ** submit
 // ** 最后 free CmdBuf
-void CommandBuffer::flush(VkQueue &queue, bool free)
+void CommandBuffer::flush(VkQueue& queue, bool free)
 {
 	Device::getVksDevice()->flushCommandBuffer(*m_pCmdBuf, queue, free);
 }
@@ -135,7 +135,7 @@ void CommandBuffer::bindVertexBuffers(
 void CommandBuffer::bindIndexBuffer(
 	VkBuffer        buffer,
 	VkDeviceSize    offset,
-	VkIndexType     indexType) 
+	VkIndexType     indexType)
 {
 	vkCmdBindIndexBuffer(*m_pCmdBuf, buffer, offset, indexType);
 }
@@ -153,6 +153,14 @@ CommandBuffer::~CommandBuffer()
 void CommandBuffer::fillBI(VkCommandBufferBeginInfo& bi)
 {
 	bi.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+}
+
+void CommandBuffer::dispatch(
+	uint32_t groupCountX,
+	uint32_t groupCountY,
+	uint32_t groupCountZ)
+{
+	vkCmdDispatch(*m_pCmdBuf, groupCountX, groupCountY, groupCountZ);
 }
 
 }

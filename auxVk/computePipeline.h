@@ -10,12 +10,12 @@ struct ShaderDescription;
 
 class ComputePipeline : public PipelineBase
 {
-    VkPipelineLayout m_layout;
 
 public:
     explicit ComputePipeline(VkDescriptorSetLayout& dsl,
         aux::ShaderDescription& shaderDesc);
-    VkPipelineLayout* getLayout() { return &m_layout; }
+    ~ComputePipeline();
+    void bind(VkCommandBuffer& cmdBuf);
 };
 
 }
