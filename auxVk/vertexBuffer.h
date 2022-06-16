@@ -25,12 +25,19 @@ class VertexBuffer: public BufferBase
 {
 public:
     VertexBuffer();
+	void bind(VkCommandBuffer& cmdBuf,
+		uint32_t firstBinding,
+		uint32_t bindingCount = 1,
+		const VkDeviceSize* pOffsets = nullptr);
 };
 
 class IndexBuffer : public BufferBase
 {
 public:
 	IndexBuffer();
+	void bind(VkCommandBuffer& cmdBuf,
+		VkDeviceSize  offset = 0,
+		VkIndexType indexType = VK_INDEX_TYPE_UINT32);
 };
 
 template<typename T>
