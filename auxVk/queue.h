@@ -10,6 +10,14 @@ class Queue
 public:
     Queue(VkQueue& queue);
     const VkQueue& getR() { return *m_pQueue; }
+    void Queue::submit(VkSemaphore signal = VK_NULL_HANDLE,
+        VkFence fence = VK_NULL_HANDLE);
+
+    void Queue::submit(VkPipelineStageFlags waitDstStageMask,
+        VkSemaphore wait,
+        VkSemaphore signal = VK_NULL_HANDLE, 
+        VkFence fence = VK_NULL_HANDLE);
+
     void submit(std::vector<VkCommandBuffer>& cmdBufs,
         VkPipelineStageFlags waitDstStageMask,
         std::vector<VkSemaphore>& waits,
@@ -19,5 +27,7 @@ public:
         std::vector<VkPipelineStageFlags>& waitDstStageMasks,
         std::vector<VkSemaphore>& waits,
         std::vector<VkSemaphore>& signals, VkFence fence = VK_NULL_HANDLE);
+
+    void waitIdle();
 };
 }

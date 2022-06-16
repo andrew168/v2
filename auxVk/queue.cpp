@@ -15,11 +15,7 @@ void Queue::submit(std::vector< VkCommandBuffer> &cmdBufs,
 {
 
 	std::vector<VkPipelineStageFlags> stages = {waitDstStageMask};
-	Queue::submit(cmdBufs,
-		stages,
-		waits,
-		signals,
-		fence);
+	Queue::submit(cmdBufs, stages, waits, signals, fence);
 }
 
 void Queue::submit(std::vector< VkCommandBuffer>& cmdBufs,
@@ -37,6 +33,50 @@ void Queue::submit(std::vector< VkCommandBuffer>& cmdBufs,
 	submitInfo.pCommandBuffers = cmdBufs.data();
 	submitInfo.commandBufferCount = static_cast<uint32_t>(cmdBufs.size());
 	VK_CHECK_RESULT(vkQueueSubmit(*m_pQueue, 1, &submitInfo, fence));
+}
+
+void Queue::submit(VkPipelineStageFlags waitDstStageMask,
+	VkSemaphore wait,
+	VkSemaphore signal, 
+	VkFence fence)
+{
+	VkSubmitInfo submitInfo{};
+	submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+	submitInfo.pWaitDstStageMask = &waitDstStageMask;
+	
+	if (wait != VK_NULL_HANDLE) {
+		submitInfo.pWaitSemaphores = &wait;
+		submitInfo.waitSemaphoreCount = 1;
+	}
+
+	if (signal != VK_NULL_HANDLE) {
+		submitInfo.pSignalSemaphores = &signal;
+		submitInfo.signalSemaphoreCount = 1;
+	}
+
+	submitInfo.pCommandBuffers =  nullptr;
+	submitInfo.commandBufferCount = 0;
+	VK_CHECK_RESULT(vkQueueSubmit(*m_pQueue, 1, &submitInfo, fence));
+}
+
+void Queue::submit(VkSemaphore signal,
+	VkFence fence)
+{
+	VkSubmitInfo submitInfo{};
+	submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+	if (signal != VK_NULL_HANDLE) {
+		submitInfo.pSignalSemaphores = &signal;
+		submitInfo.signalSemaphoreCount = 1;
+	}
+
+	submitInfo.pCommandBuffers = nullptr;
+	submitInfo.commandBufferCount = 0;
+	VK_CHECK_RESULT(vkQueueSubmit(*m_pQueue, 1, &submitInfo, fence));
+}
+
+void Queue::waitIdle()
+{
+	VK_CHECK_RESULT(vkQueueWaitIdle(*m_pQueue));
 }
 
 }
