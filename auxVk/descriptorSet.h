@@ -54,6 +54,7 @@ public:
     static void updateC(std::vector<VkCopyDescriptorSet> sets);
 
     VkDescriptorSet* get() { return m_pDescriptorSet; }
+    VkDescriptorSet& getR() { return *m_pDescriptorSet; }
 };
 
 }

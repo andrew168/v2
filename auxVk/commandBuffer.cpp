@@ -119,6 +119,7 @@ void CommandBuffer::drawIndexed(
 	int32_t   vertexOffset,
 	uint32_t  firstInstance)
 {
+	// 使用已经bind的vertex、Index和texture绘制
 	vkCmdDrawIndexed(*m_pCmdBuf, indexCount, instanceCount, firstIndex, vertexOffset, firstInstance);
 }
 

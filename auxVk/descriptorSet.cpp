@@ -93,6 +93,7 @@ void DescriptorSet::allocate(VkDescriptorSet& dSet,
 	const VkDescriptorPool& pool, 
 	const VkDescriptorSetLayout* pLayout) 
 {
+	Assert(0, "Depreciated"); //ToDo:被DS类的 ctor取代
 	VkDescriptorSetAllocateInfo ai{};
 	ai.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
 	ai.descriptorPool = pool;
