@@ -13,10 +13,13 @@ protected:
 	VkBufferUsageFlagBits m_bufferType = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
 	vks::Buffer m_buffer;
 public:
+	void* mapped = nullptr;
+
 	BufferBase(VkBufferUsageFlagBits bufferType);
 	~BufferBase();
 	template<typename T>
 	inline void create(std::vector<T>& data);
+	VkResult map(VkDeviceSize size = VK_WHOLE_SIZE, VkDeviceSize offset = 0);
 
 	vks::Buffer* get() { return &m_buffer; }
 };
@@ -40,6 +43,19 @@ public:
 		VkIndexType indexType = VK_INDEX_TYPE_UINT32);
 };
 
+class UniformBuffer : public BufferBase
+{
+public:
+	VkDescriptorBufferInfo descriptor;
+
+	UniformBuffer();
+	template<typename T>
+	inline void create();
+	void bind(VkCommandBuffer& cmdBuf,
+		VkDeviceSize  offset = 0,
+		VkIndexType indexType = VK_INDEX_TYPE_UINT32);
+};
+
 template<typename T>
 inline void BufferBase::create(std::vector<T>& data)
 {
@@ -52,6 +68,16 @@ inline void BufferBase::create(std::vector<T>& data)
 		&m_buffer,
 		data.size() * sizeof(T),
 		data.data()));
+}
+
+template<typename T>
+inline void UniformBuffer::create()
+{
+	VK_CHECK_RESULT(Device::getVksDevice()->createBuffer(
+		m_bufferType,
+		VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+		&m_buffer,
+		sizeof(T)));
 }
 
 }
