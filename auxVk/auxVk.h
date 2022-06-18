@@ -1,4 +1,5 @@
 #pragma once
+#include "..\util\log.h"
 #include "..\vk-all.h"
 #include "device.h"
 #include "describe.h"
