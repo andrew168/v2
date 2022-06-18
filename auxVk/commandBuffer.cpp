@@ -4,8 +4,11 @@ namespace aux
 {
 CommandBuffer::CommandBuffer()
 {
+	// ToDo: 从Device剥离CmdPool。
+	// 因为CmdPool与Queue family有关，图形和计算Queue有各自的pool，
 	m_pCmdBuf = new VkCommandBuffer();
-	*m_pCmdBuf = Device::getVksDevice()->createCommandBuffer(VK_COMMAND_BUFFER_LEVEL_PRIMARY, true);
+	VkCommandPool& cmdPool = (Device::getVksDevice())->commandPool;
+	CommandBuffer::allocate(cmdPool, *m_pCmdBuf);
 }
 
 CommandBuffer::CommandBuffer(VkCommandBuffer& cmdBuf) :

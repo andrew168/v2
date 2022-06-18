@@ -69,5 +69,6 @@ public:
         VkCommandBuffer& cmdBuf);
 
     VkCommandBuffer* get() { return m_pCmdBuf; }
+    VkCommandBuffer& getR() { return *m_pCmdBuf; }
 };
 }
