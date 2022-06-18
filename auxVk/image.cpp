@@ -3,11 +3,11 @@
 
 namespace aux
 {
-Image::Image(ImageCI& auxCi):
+Image::Image(ImageCI& auxCi) :
     m_deviceMemory(nullptr),
     m_view(nullptr)
 {
-    VK_CHECK_RESULT(vkCreateImage(Device::getR(), static_cast<VkImageCreateInfo *>(&auxCi), nullptr, &m_image));
+    VK_CHECK_RESULT(vkCreateImage(Device::getR(), static_cast<VkImageCreateInfo*>(&auxCi), nullptr, &m_image));
 
     allocMemory(auxCi);
     VK_CHECK_RESULT(vkBindImageMemory(Device::getR(), m_image, m_deviceMemory, 0));
@@ -31,7 +31,7 @@ void Image::allocMemory(ImageCI& auxCi) {
     VK_CHECK_RESULT(vkAllocateMemory(Device::getR(), &memAllocInfo, nullptr, &m_deviceMemory));
 }
 
-void Image::createImageView(ImageCI &auxCi)
+void Image::createImageView(ImageCI& auxCi)
 {
     VkImageViewCreateInfo viewCI{};
     viewCI.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
@@ -44,7 +44,7 @@ void Image::createImageView(ImageCI &auxCi)
     viewCI.subresourceRange.levelCount = auxCi.mipLevels;
     viewCI.subresourceRange.layerCount = auxCi.arrayLayers;
     viewCI.image = m_image;
-    if (auxCi.pComponentMapping != nullptr) { 
+    if (auxCi.pComponentMapping != nullptr) {
         //RGBA分量存储的内容不一定是R、G、B、A，而可能是0， 1，Identiy
         viewCI.components = *auxCi.pComponentMapping;
     }
@@ -65,7 +65,7 @@ void Image::createSampler(ImageCI& auxCi) {
     samplerCI.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
     samplerCI.addressModeU = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
     samplerCI.addressModeV = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
-    samplerCI.addressModeW = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;    
+    samplerCI.addressModeW = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
     samplerCI.minLod = 0.0f;
     samplerCI.maxLod = static_cast<float>(auxCi.mipLevels);
     samplerCI.maxAnisotropy = 1.0f;
