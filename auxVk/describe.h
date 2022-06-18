@@ -21,7 +21,7 @@ public:
         VkDescriptorType type,
         VkDescriptorSet& dstSet,
         uint32_t dstBinding,
-        const VkDescriptorImageInfo* pImageInfo);
+        const void* pImageOrBufferInfo);
 
     static void Describe::bufferUpdate(VkDescriptorSet& dstSet,
         uint32_t dstBinding,
