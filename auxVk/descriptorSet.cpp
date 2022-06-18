@@ -33,7 +33,7 @@ void DescriptorSet::write(std::vector<Descriptor> descs)
 
 DescriptorSet::DescriptorSet(DescriptorSetCI &ci)
 {
-	assert(0, "ToDo: 应该把pool挪出去");
+	Assert(0, "ToDo: "); // 应该把pool挪出去
 	const VkDevice& device = Device::getR();
 
 	VkDescriptorPoolSize poolSize = { VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1 };

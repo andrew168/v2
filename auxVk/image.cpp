@@ -19,6 +19,9 @@ Image::Image(ImageCI& auxCi) :
 	m_format = auxCi.format;
 	m_mipLevels = auxCi.mipLevels;
 	m_arrayLayers = auxCi.arrayLayers;
+	m_descriptor.imageLayout = m_layout;
+	m_descriptor.imageView = m_view;
+	m_descriptor.sampler = m_sampler;
 }
 
 void Image::allocMemory(ImageCI& auxCi) {

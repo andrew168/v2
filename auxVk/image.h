@@ -44,7 +44,7 @@ class Image {
     VkImageView m_view;
     VkSampler m_sampler;
     VkImageLayout m_layout = VK_IMAGE_LAYOUT_UNDEFINED;
-
+    VkDescriptorImageInfo m_descriptor;
 public:
     // 顺序： ctor, dtor, static, .... get/set
     Image(ImageCI& ci);
@@ -61,8 +61,11 @@ public:
         aux::Image& cube,
         uint32_t arrayLayers,
         uint32_t mipLevels);
+    VkDescriptorImageInfo* getDescriptor() { return &m_descriptor; }
+    VkDescriptorImageInfo& getDescriptorR() { return m_descriptor; }
     VkFormat getFormat() { return m_format; }
-    VkImage getImage() { return m_image; }
+    VkImage getImage() { Assert(0, "ToDo: TBD");  return m_image; }
+    VkImage& getImageR() { return m_image; }
     VkDeviceMemory getDeviceMemory() { return m_deviceMemory; }
     VkImageView getView() { return m_view; }
     VkImageView* getViewP() { return &m_view; }
