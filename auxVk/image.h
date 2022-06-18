@@ -43,10 +43,17 @@ class Image {
     VkDeviceMemory m_deviceMemory;
     VkImageView m_view;
     VkSampler m_sampler;
+    VkImageLayout m_layout = VK_IMAGE_LAYOUT_UNDEFINED;
 
 public:
     // 顺序： ctor, dtor, static, .... get/set
     Image(ImageCI& ci);
+    void changeLayout(VkCommandBuffer& cmdbuffer,
+        VkImageLayout newImageLayout,
+        VkImageAspectFlags aspectMask,
+        VkPipelineStageFlags srcStageMask = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT,
+        VkPipelineStageFlags dstStageMask = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT);
+    
     static void copyOneMip2Cube(
         VkCommandBuffer& cmdBuf,
         aux::Image& auxImage,
