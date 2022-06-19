@@ -1,4 +1,5 @@
 ﻿#include "commandBuffer.h"
+#include "image.h"
 
 namespace aux
 {
@@ -37,9 +38,20 @@ void CommandBuffer::end()
 // ** 创建fence
 // ** submit
 // ** 最后 free CmdBuf
-void CommandBuffer::flush(VkQueue& queue, bool free)
+void CommandBuffer::flush(VkQueue queue, bool free)
 {
+	if (queue == VK_NULL_HANDLE) {
+		queue = Device::getQueue();
+	}
 	Device::getVksDevice()->flushCommandBuffer(*m_pCmdBuf, queue, free);
+}
+
+void CommandBuffer::free()
+{
+	//ToDo: CmdBuf应该记录自己属于哪一个Pool，哪一个Device，唯一的， （记录上级、上线）
+	// 而Device可能有多个Pool
+	VkCommandPool& cmdPool = (Device::getVksDevice())->commandPool;
+	vkFreeCommandBuffers(Device::getR(), cmdPool, 1, m_pCmdBuf);
 }
 
 void CommandBuffer::setViewport(float width,
@@ -165,6 +177,30 @@ void CommandBuffer::dispatch(
 	uint32_t groupCountZ)
 {
 	vkCmdDispatch(*m_pCmdBuf, groupCountX, groupCountY, groupCountZ);
+}
+
+void CommandBuffer::copyBufferToImage(
+	    VkBuffer srcBuffer,
+		Image  dstImage,
+		VkImageLayout dstImageLayout)
+{
+	VkBufferImageCopy bufferCopyRegion = {};
+	bufferCopyRegion.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+	bufferCopyRegion.imageSubresource.mipLevel = 1;
+	bufferCopyRegion.imageSubresource.baseArrayLayer = 1;
+	bufferCopyRegion.imageSubresource.layerCount = 1;
+	bufferCopyRegion.imageExtent.width = dstImage.getWidth();
+	bufferCopyRegion.imageExtent.height = dstImage.getHeight();
+	bufferCopyRegion.imageExtent.depth = 1;
+	bufferCopyRegion.bufferOffset = 0;
+
+	vkCmdCopyBufferToImage(
+		*m_pCmdBuf,
+		srcBuffer,
+		dstImage.getImageR(),
+		dstImageLayout,
+		1,
+		&bufferCopyRegion);		
 }
 
 }

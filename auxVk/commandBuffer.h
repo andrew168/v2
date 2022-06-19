@@ -4,6 +4,8 @@
 
 namespace aux
 {
+class Image;
+
 class CommandBuffer
 {
     VkCommandBuffer* m_pCmdBuf;
@@ -16,7 +18,8 @@ public:
     void fillBI(VkCommandBufferBeginInfo& pBeginInfo);
     void begin(VkCommandBufferBeginInfo* pBeginInfo = nullptr);    
     void end();
-    void flush(VkQueue& queue, bool free = true);
+    void flush(VkQueue queue = VK_NULL_HANDLE, bool free = false); //ToDo: 这个free参数，误导用户， 不留它
+    void free();
     void setViewport(float width,
         float height,
         float x0 = 0,
@@ -31,6 +34,11 @@ public:
         uint32_t offset,
         uint32_t size,
         const void* pConstants);
+
+    void copyBufferToImage(
+        VkBuffer srcBuffer,
+        Image  dstImage,
+        VkImageLayout dstImageLayout);
 
     void draw(uint32_t  vertexCount,
         uint32_t  instanceCount = 1,
