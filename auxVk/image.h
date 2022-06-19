@@ -76,8 +76,8 @@ public:
     uint32_t getHeight() { return m_height; }
     void toVKS(vks::Texture& vks);
 private:
-    void allocMemory(ImageCI& auxCi);
-    void createImageView(ImageCI& auxCi);
-    void createSampler(ImageCI& auxCi);
+    void allocMemory(ImageCI& ci);
+    void createImageView(ImageCI& ci);
+    void createSampler(ImageCI& ci);
 };
 }

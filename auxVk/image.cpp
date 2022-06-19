@@ -3,28 +3,28 @@
 
 namespace aux
 {
-Image::Image(ImageCI& auxCi) :
+Image::Image(ImageCI& ci) :
 	m_deviceMemory(nullptr),
 	m_view(nullptr)
 {
-	VK_CHECK_RESULT(vkCreateImage(Device::getR(), static_cast<VkImageCreateInfo*>(&auxCi), nullptr, &m_image));
+	VK_CHECK_RESULT(vkCreateImage(Device::getR(), static_cast<VkImageCreateInfo*>(&ci), nullptr, &m_image));
 
-	allocMemory(auxCi);
+	allocMemory(ci);
 	VK_CHECK_RESULT(vkBindImageMemory(Device::getR(), m_image, m_deviceMemory, 0));
-	createImageView(auxCi);
-	createSampler(auxCi);
+	createImageView(ci);
+	createSampler(ci);
 
-	m_width = auxCi.extent.width;
-	m_height = auxCi.extent.height;
-	m_format = auxCi.format;
-	m_mipLevels = auxCi.mipLevels;
-	m_arrayLayers = auxCi.arrayLayers;
+	m_width = ci.extent.width;
+	m_height = ci.extent.height;
+	m_format = ci.format;
+	m_mipLevels = ci.mipLevels;
+	m_arrayLayers = ci.arrayLayers;
 	m_descriptor.imageLayout = m_layout;
 	m_descriptor.imageView = m_view;
 	m_descriptor.sampler = m_sampler;
 }
 
-void Image::allocMemory(ImageCI& auxCi) {
+void Image::allocMemory(ImageCI& ci) {
 	VkMemoryRequirements memReqs;
 	vkGetImageMemoryRequirements(Device::getR(), m_image, &memReqs);
 	VkMemoryAllocateInfo memAllocInfo{};
@@ -34,22 +34,22 @@ void Image::allocMemory(ImageCI& auxCi) {
 	VK_CHECK_RESULT(vkAllocateMemory(Device::getR(), &memAllocInfo, nullptr, &m_deviceMemory));
 }
 
-void Image::createImageView(ImageCI& auxCi)
+void Image::createImageView(ImageCI& ci)
 {
 	VkImageViewCreateInfo viewCI{};
 	viewCI.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-	viewCI.viewType = auxCi.isCubemap ? VK_IMAGE_VIEW_TYPE_CUBE : VK_IMAGE_VIEW_TYPE_2D;
-	viewCI.format = auxCi.format;
+	viewCI.viewType = ci.isCubemap ? VK_IMAGE_VIEW_TYPE_CUBE : VK_IMAGE_VIEW_TYPE_2D;
+	viewCI.format = ci.format;
 	viewCI.subresourceRange = {};
 	viewCI.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
 	viewCI.subresourceRange.baseMipLevel = 0; // 缺省值
 	viewCI.subresourceRange.baseArrayLayer = 0; // 缺省值
-	viewCI.subresourceRange.levelCount = auxCi.mipLevels;
-	viewCI.subresourceRange.layerCount = auxCi.arrayLayers;
+	viewCI.subresourceRange.levelCount = ci.mipLevels;
+	viewCI.subresourceRange.layerCount = ci.arrayLayers;
 	viewCI.image = m_image;
-	if (auxCi.pComponentMapping != nullptr) {
+	if (ci.pComponentMapping != nullptr) {
 		//RGBA分量存储的内容不一定是R、G、B、A，而可能是0， 1，Identiy
-		viewCI.components = *auxCi.pComponentMapping;
+		viewCI.components = *ci.pComponentMapping;
 	}
 
 	// default value?
@@ -60,7 +60,7 @@ void Image::createImageView(ImageCI& auxCi)
 	VK_CHECK_RESULT(vkCreateImageView(Device::getR(), &viewCI, nullptr, &m_view));
 }
 
-void Image::createSampler(ImageCI& auxCi) {
+void Image::createSampler(ImageCI& ci) {
 	VkSamplerCreateInfo samplerCI{};
 	samplerCI.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
 	samplerCI.magFilter = VK_FILTER_LINEAR;
@@ -70,7 +70,7 @@ void Image::createSampler(ImageCI& auxCi) {
 	samplerCI.addressModeV = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
 	samplerCI.addressModeW = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
 	samplerCI.minLod = 0.0f;
-	samplerCI.maxLod = static_cast<float>(auxCi.mipLevels);
+	samplerCI.maxLod = static_cast<float>(ci.mipLevels);
 	samplerCI.maxAnisotropy = 1.0f;
 	samplerCI.borderColor = VK_BORDER_COLOR_FLOAT_OPAQUE_WHITE;
 	samplerCI.compareOp = VK_COMPARE_OP_NEVER; // 缺省值
