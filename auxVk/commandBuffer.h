@@ -38,7 +38,8 @@ public:
     void copyBufferToImage(
         VkBuffer srcBuffer,
         Image  dstImage,
-        VkImageLayout dstImageLayout);
+        VkImageLayout dstLayout,
+        std::vector<VkBufferImageCopy>* pSrcRegions = nullptr);
 
     void draw(uint32_t  vertexCount,
         uint32_t  instanceCount = 1,

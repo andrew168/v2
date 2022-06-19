@@ -34,7 +34,7 @@ Image::Image(
 	ktxResult result = loadKTXFile(filename, &ktxTexture);
 	assert(result == KTX_SUCCESS);
 
-	ImageCI ci(format, ktxTexture->baseWidth, ktxTexture->baseHeight, ktxTexture->numLayers, 1,
+	ImageCI ci(format, ktxTexture->baseWidth, ktxTexture->baseHeight, ktxTexture->numLevels, ktxTexture->numLayers,
 		ktxTexture_GetData(ktxTexture),
 		ktxTexture_GetSize(ktxTexture));
 
@@ -45,33 +45,28 @@ Image::Image(
 	}
 	ci.usage = imageUsageFlags;
 
-	init(ci, imageLayout);
+	init(ci, imageLayout, ktxTexture);
 	// ToDo: 能不能立即删除？ 是否需要等upload结束之后再destroy？
 	ktxTexture_Destroy(ktxTexture);
 }
 
 void Image::init(ImageCI& ci, VkImageLayout imageLayout, ktxTexture* pKtxTexture)
 {
-	VK_CHECK_RESULT(vkCreateImage(Device::getR(), static_cast<VkImageCreateInfo*>(&ci), nullptr, &m_image));
+	createImage(ci);
 
 	if (ci.m_pData != nullptr)
 	{
-		copyData(ci, *pKtxTexture, imageLayout);
+		if (pKtxTexture->numLevels == 1) {
+			copyData(ci, *pKtxTexture, imageLayout);
+		}
+		else {
+			std::vector<VkBufferImageCopy> regions;
+			calRegions(regions, pKtxTexture);
+			copyData(ci, *pKtxTexture, imageLayout, &regions);
+		}
 	}
 
-	allocMemory(ci);
-	VK_CHECK_RESULT(vkBindImageMemory(Device::getR(), m_image, m_deviceMemory, 0));
-	createImageView(ci);
-	createSampler(ci);
-
-	m_width = ci.extent.width;
-	m_height = ci.extent.height;
-	m_format = ci.format;
-	m_mipLevels = ci.mipLevels;
-	m_arrayLayers = ci.arrayLayers;
-	m_descriptor.imageLayout = m_layout;
-	m_descriptor.imageView = m_view;
-	m_descriptor.sampler = m_sampler;
+	init9(ci.format, ci);
 }
 
 ktxResult Image::loadKTXFile(std::string filename, ktxTexture** target)
@@ -320,7 +315,8 @@ void Image::changeLayout(VkCommandBuffer& cmdbuffer,
 
 void Image::copyData(ImageCI& ci,
 	ktxTexture& ktxTexture, 
-	VkImageLayout imageLayout)
+	VkImageLayout imageLayout,
+	std::vector<VkBufferImageCopy>* pRegions)
 {
 	vks::VulkanDevice& device = *Device::getVksDevice();
 	const VkQueue& queue = Device::getQueue();
@@ -332,8 +328,6 @@ void Image::copyData(ImageCI& ci,
 	}
 	//使用optimal tiling，因为linear tiling只支持少量formats和features (mip maps, cubemaps, arrays等)		
 	// Create a host-visible staging buffer that contains the raw image data
-	VkBuffer stagingBuffer;
-	VkDeviceMemory stagingMemory;
 	VkBufferCreateInfo bufferCreateInfo = vks::initializers::bufferCreateInfo();
 	bufferCreateInfo.size = ci.m_dataSize;
 	// This buffer is used as a transfer source for the buffer copy
@@ -372,10 +366,10 @@ void Image::copyData(ImageCI& ci,
 
 	// Image barrier for optimal image (target)
 	// Optimal image will be used as destination for the copy
-	changeLayout(auxCmd.getR(), VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL); // subresourceRange);
+	changeLayout(auxCmd.getR(), VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
 
 	// 从staging buffer 到image，复制image数据
-	auxCmd.copyBufferToImage(stagingBuffer, *this, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+	auxCmd.copyBufferToImage(stagingBuffer, *this, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, pRegions);
 
 	//修改Image的layout，准备shader 采样
 	changeLayout(auxCmd.getR(), imageLayout);
@@ -395,11 +389,56 @@ void Image::loadFromFile(
 	VkImageUsageFlags imageUsageFlags,
 	VkImageLayout imageLayout)
 {
+	ktxTexture* pKtxTexture;
+	loadToStage(&pKtxTexture, filename, format, copyQueue, imageUsageFlags, imageLayout);
+
+	auto& ktxTexture = pKtxTexture;
+
+	ImageCI ci(format, ktxTexture->baseWidth, ktxTexture->baseHeight,
+		ktxTexture->numLevels, ktxTexture->numLayers,
+		ktxTexture_GetData(ktxTexture),
+		ktxTexture_GetSize(ktxTexture));
+
+	// 确保有TRANSFER_DST标识
+	if (!(imageUsageFlags & VK_IMAGE_USAGE_TRANSFER_DST_BIT))
+	{
+		imageUsageFlags |= VK_IMAGE_USAGE_TRANSFER_DST_BIT;
+	}
+	ci.usage = imageUsageFlags;
+
+	createImage(ci);
+	fromStageToImage(format, imageUsageFlags, imageLayout, ktxTexture, ci);
+	ktxTexture_Destroy(ktxTexture);
+	init9(format, ci);
+}
+
+void Image::createImage(ImageCI &ci)
+{
 	vks::VulkanDevice* device = Device::getVksDevice();
 	const VkQueue& queue = Device::getQueue();
 
-	ktxTexture* ktxTexture;
+	VK_CHECK_RESULT(vkCreateImage(device->logicalDevice, &ci, nullptr, &m_image));
+
+	VkMemoryRequirements memReqs;
+	vkGetImageMemoryRequirements(device->logicalDevice, m_image, &memReqs);
+
+	allocMemory(ci);
+	VK_CHECK_RESULT(vkBindImageMemory(Device::getR(), m_image, m_deviceMemory, 0));
+}
+
+void Image::loadToStage(
+	ktxTexture** ppKtxTexture,
+	std::string filename,
+	VkFormat format,
+	VkQueue copyQueue,
+	VkImageUsageFlags imageUsageFlags,
+	VkImageLayout imageLayout)
+{
+    vks::VulkanDevice* device = Device::getVksDevice();
+	const VkQueue& queue = Device::getQueue();
+	ktxTexture* ktxTexture = *ppKtxTexture;
 	ktxResult result = loadKTXFile(filename, &ktxTexture);
+	*ppKtxTexture = ktxTexture;
 	assert(result == KTX_SUCCESS);
 
 	// this->device = device;
@@ -410,10 +449,6 @@ void Image::loadFromFile(
 	ktx_uint8_t* ktxTextureData = ktxTexture_GetData(ktxTexture);
 	ktx_size_t ktxTextureSize = ktxTexture_GetSize(ktxTexture);
 
-	ImageCI ci(format, ktxTexture->baseWidth, ktxTexture->baseHeight, ktxTexture->numLayers, 1,
-		ktxTexture_GetData(ktxTexture),
-		ktxTexture_GetSize(ktxTexture));
-
 	// Get device properties for the requested texture format
 	VkFormatProperties formatProperties;
 	vkGetPhysicalDeviceFormatProperties(device->physicalDevice, format, &formatProperties);
@@ -423,147 +458,112 @@ void Image::loadFromFile(
 	// optimal tiling instead
 	// On most implementations linear tiling will only support a very
 	// limited amount of formats and features (mip maps, cubemaps, arrays, etc.)
-	VkBool32 useStaging = true;
-
 	VkMemoryAllocateInfo memAllocInfo = vks::initializers::memoryAllocateInfo();
 	VkMemoryRequirements memReqs;
+	// Create a host-visible staging buffer that contains the raw image data
 
-	if (useStaging)
-	{
-		// Create a host-visible staging buffer that contains the raw image data
-		VkBuffer stagingBuffer;
-		VkDeviceMemory stagingMemory;
+	VkBufferCreateInfo bufferCreateInfo = vks::initializers::bufferCreateInfo();
+	bufferCreateInfo.size = ktxTextureSize;
+	// This buffer is used as a transfer source for the buffer copy
+	bufferCreateInfo.usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
+	bufferCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
-		VkBufferCreateInfo bufferCreateInfo = vks::initializers::bufferCreateInfo();
-		bufferCreateInfo.size = ktxTextureSize;
-		// This buffer is used as a transfer source for the buffer copy
-		bufferCreateInfo.usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
-		bufferCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+	VK_CHECK_RESULT(vkCreateBuffer(device->logicalDevice, &bufferCreateInfo, nullptr, &stagingBuffer));
 
-		VK_CHECK_RESULT(vkCreateBuffer(device->logicalDevice, &bufferCreateInfo, nullptr, &stagingBuffer));
+	// Get memory requirements for the staging buffer (alignment, memory type bits)
+	vkGetBufferMemoryRequirements(device->logicalDevice, stagingBuffer, &memReqs);
 
-		// Get memory requirements for the staging buffer (alignment, memory type bits)
-		vkGetBufferMemoryRequirements(device->logicalDevice, stagingBuffer, &memReqs);
+	memAllocInfo.allocationSize = memReqs.size;
+	// Get memory type index for a host visible buffer
+	memAllocInfo.memoryTypeIndex = device->getMemoryType(memReqs.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 
-		memAllocInfo.allocationSize = memReqs.size;
-		// Get memory type index for a host visible buffer
-		memAllocInfo.memoryTypeIndex = device->getMemoryType(memReqs.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+	VK_CHECK_RESULT(vkAllocateMemory(device->logicalDevice, &memAllocInfo, nullptr, &stagingMemory));
+	VK_CHECK_RESULT(vkBindBufferMemory(device->logicalDevice, stagingBuffer, stagingMemory, 0));
 
-		VK_CHECK_RESULT(vkAllocateMemory(device->logicalDevice, &memAllocInfo, nullptr, &stagingMemory));
-		VK_CHECK_RESULT(vkBindBufferMemory(device->logicalDevice, stagingBuffer, stagingMemory, 0));
+	// Copy texture data into staging buffer
+	uint8_t* data;
+	VK_CHECK_RESULT(vkMapMemory(device->logicalDevice, stagingMemory, 0, memReqs.size, 0, (void**)&data));
+	memcpy(data, ktxTextureData, ktxTextureSize);
+	vkUnmapMemory(device->logicalDevice, stagingMemory);
+}
 
-		// Copy texture data into staging buffer
-		uint8_t* data;
-		VK_CHECK_RESULT(vkMapMemory(device->logicalDevice, stagingMemory, 0, memReqs.size, 0, (void**)&data));
-		memcpy(data, ktxTextureData, ktxTextureSize);
-		vkUnmapMemory(device->logicalDevice, stagingMemory);
+void Image::fromStageToImage(
+	VkFormat format,
+	VkImageUsageFlags imageUsageFlags,
+	VkImageLayout imageLayout, 
+	ktxTexture* ktxTexture, 
+	ImageCI& ci)
+{
+	vks::VulkanDevice* device = Device::getVksDevice();
+	const VkQueue& queue = Device::getQueue();
+	
+	// Use a separate command buffer for texture loading
+	CommandBuffer auxCmd;
+	auxCmd.begin();
+	VkCommandBuffer copyCmd = auxCmd.getR();
+	// Image barrier for optimal image (target)
+	// Optimal image will be used as destination for the copy
+	changeLayout(auxCmd.getR(), VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
 
-		// Setup buffer copy regions for each mip level
-		std::vector<VkBufferImageCopy> bufferCopyRegions;
-
-		for (uint32_t i = 0; i < m_mipLevels; i++)
-		{
-			ktx_size_t offset;
-			KTX_error_code result = ktxTexture_GetImageOffset(ktxTexture, i, 0, 0, &offset);
-			assert(result == KTX_SUCCESS);
-
-			VkBufferImageCopy bufferCopyRegion = {};
-			bufferCopyRegion.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-			bufferCopyRegion.imageSubresource.mipLevel = i;
-			bufferCopyRegion.imageSubresource.baseArrayLayer = 0;
-			bufferCopyRegion.imageSubresource.layerCount = 1;
-			bufferCopyRegion.imageExtent.width = std::max(1u, ktxTexture->baseWidth >> i);
-			bufferCopyRegion.imageExtent.height = std::max(1u, ktxTexture->baseHeight >> i);
-			bufferCopyRegion.imageExtent.depth = 1;
-			bufferCopyRegion.bufferOffset = offset;
-
-			bufferCopyRegions.push_back(bufferCopyRegion);
-		}
-
-		// Create optimal tiled target image
-		VkImageCreateInfo imageCreateInfo = vks::initializers::imageCreateInfo();
-		imageCreateInfo.imageType = VK_IMAGE_TYPE_2D;
-		imageCreateInfo.format = format;
-		imageCreateInfo.mipLevels = m_mipLevels;
-		imageCreateInfo.arrayLayers = 1;
-		imageCreateInfo.samples = VK_SAMPLE_COUNT_1_BIT;
-		imageCreateInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
-		imageCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
-		imageCreateInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-		imageCreateInfo.extent = { m_width, m_height, 1 };
-		imageCreateInfo.usage = imageUsageFlags;
-		// Ensure that the TRANSFER_DST bit is set for staging
-		if (!(imageCreateInfo.usage & VK_IMAGE_USAGE_TRANSFER_DST_BIT))
-		{
-			imageCreateInfo.usage |= VK_IMAGE_USAGE_TRANSFER_DST_BIT;
-		}
-		VK_CHECK_RESULT(vkCreateImage(device->logicalDevice, &imageCreateInfo, nullptr, &m_image));
-
-		vkGetImageMemoryRequirements(device->logicalDevice, m_image, &memReqs);		
-
-		allocMemory(ci);
-		VK_CHECK_RESULT(vkBindImageMemory(Device::getR(), m_image, m_deviceMemory, 0));
-
-		VkImageSubresourceRange subresourceRange = {};
-		subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-		subresourceRange.baseMipLevel = 0;
-		subresourceRange.levelCount = m_mipLevels;
-		subresourceRange.layerCount = 1;
-
-		// Use a separate command buffer for texture loading
-		VkCommandBuffer copyCmd = device->createCommandBuffer(VK_COMMAND_BUFFER_LEVEL_PRIMARY, true);
-
-		// Image barrier for optimal image (target)
-		// Optimal image will be used as destination for the copy
-		vks::tools::setImageLayout(
-			copyCmd,
-			m_image,
-			VK_IMAGE_LAYOUT_UNDEFINED,
-			VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-			subresourceRange);
-
+	if (m_mipLevels > 1) {
 		// Copy mip levels from staging buffer
-		vkCmdCopyBufferToImage(
-			copyCmd,
-			stagingBuffer,
-			m_image,
-			VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-			static_cast<uint32_t>(bufferCopyRegions.size()),
-			bufferCopyRegions.data()
-		);
-
-		// Change texture m_image layout to shader read after all mip levels have been copied
-		this->m_layout = imageLayout;
-		vks::tools::setImageLayout(
-			copyCmd,
-			m_image,
-			VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-			imageLayout,
-			subresourceRange);
-
-		device->flushCommandBuffer(copyCmd, copyQueue);
-
-		// Clean up staging resources
-		vkFreeMemory(device->logicalDevice, stagingMemory, nullptr);
-		vkDestroyBuffer(device->logicalDevice, stagingBuffer, nullptr);
+		std::vector<VkBufferImageCopy> bufferCopyRegions;
+		calRegions(bufferCopyRegions, ktxTexture);
+		auxCmd.copyBufferToImage(stagingBuffer, *this, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, &bufferCopyRegions);
+	}
+	else {
+		auxCmd.copyBufferToImage(stagingBuffer, *this, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
 	}
 
-	ktxTexture_Destroy(ktxTexture);
+	//修改Image的layout，准备shader 采样
+	changeLayout(auxCmd.getR(), imageLayout);
 
+	auxCmd.flush(); //ToDo: 用copyQueue，是否会更快？ 
+	auxCmd.free();
+
+	// Clean up staging resources
+	vkFreeMemory(device->logicalDevice, stagingMemory, nullptr);
+	vkDestroyBuffer(device->logicalDevice, stagingBuffer, nullptr);
+}
+
+void Image::init9(
+	VkFormat format,
+	ImageCI& ci)
+{
 	createSampler(ci);
 	createImageView(ci);
 
-	// m_width = ci.extent.width;
-	// m_height = ci.extent.height;
-	m_format = format;
-	// m_mipLevels = mipLevels;
-	m_arrayLayers = 1;
+	m_width = ci.extent.width;
+	m_height = ci.extent.height;
+	m_format = ci.format;
+	m_mipLevels = ci.mipLevels;
+	m_arrayLayers = ci.arrayLayers;
 	m_descriptor.imageLayout = m_layout;
 	m_descriptor.imageView = m_view;
 	m_descriptor.sampler = m_sampler;
+}
 
-	// Update descriptor image info member that can be used for setting up descriptor sets
-	// updateDescriptor();
+void Image::calRegions(std::vector<VkBufferImageCopy>& bufferCopyRegions, ktxTexture* ktxTexture)
+{
+	auto mipLevels = ktxTexture->numLevels;
+	for (uint32_t i = 0; i < mipLevels; i++)
+	{
+		ktx_size_t offset;
+		KTX_error_code result = ktxTexture_GetImageOffset(ktxTexture, i, 0, 0, &offset);
+		assert(result == KTX_SUCCESS);
+
+		VkBufferImageCopy bufferCopyRegion = {};
+		bufferCopyRegion.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+		bufferCopyRegion.imageSubresource.mipLevel = i;
+		bufferCopyRegion.imageSubresource.baseArrayLayer = 0;
+		bufferCopyRegion.imageSubresource.layerCount = 1;
+		bufferCopyRegion.imageExtent.width = std::max(1u, ktxTexture->baseWidth >> i);
+		bufferCopyRegion.imageExtent.height = std::max(1u, ktxTexture->baseHeight >> i);
+		bufferCopyRegion.imageExtent.depth = 1;
+		bufferCopyRegion.bufferOffset = offset;
+
+		bufferCopyRegions.push_back(bufferCopyRegion);
+	}
 }
 
 }

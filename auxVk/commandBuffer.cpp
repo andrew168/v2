@@ -180,27 +180,30 @@ void CommandBuffer::dispatch(
 }
 
 void CommandBuffer::copyBufferToImage(
-	    VkBuffer srcBuffer,
-		Image  dstImage,
-		VkImageLayout dstImageLayout)
+	VkBuffer srcBuffer,
+	Image  dstImage,
+	VkImageLayout dstLayout,
+	std::vector<VkBufferImageCopy>* pSrcRegions)
 {
-	VkBufferImageCopy bufferCopyRegion = {};
-	bufferCopyRegion.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-	bufferCopyRegion.imageSubresource.mipLevel = 1;
-	bufferCopyRegion.imageSubresource.baseArrayLayer = 1;
-	bufferCopyRegion.imageSubresource.layerCount = 1;
-	bufferCopyRegion.imageExtent.width = dstImage.getWidth();
-	bufferCopyRegion.imageExtent.height = dstImage.getHeight();
-	bufferCopyRegion.imageExtent.depth = 1;
-	bufferCopyRegion.bufferOffset = 0;
+	if (pSrcRegions == nullptr) {
+		VkBufferImageCopy bufferCopyRegion = {};
+		bufferCopyRegion.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+		bufferCopyRegion.imageSubresource.mipLevel = 1;
+		// 欲copy图像中的哪些layer：从baseArrayLayer（0）开始，总共layerCount个
+		bufferCopyRegion.imageSubresource.baseArrayLayer = 0;
+		bufferCopyRegion.imageSubresource.layerCount = 1;
+		bufferCopyRegion.imageExtent.width = std::max(1u, dstImage.getWidth());
+		bufferCopyRegion.imageExtent.height = std::max(1u, dstImage.getHeight());
+		bufferCopyRegion.imageExtent.depth = 1;
+		bufferCopyRegion.bufferOffset = 0;
 
-	vkCmdCopyBufferToImage(
-		*m_pCmdBuf,
-		srcBuffer,
-		dstImage.getImageR(),
-		dstImageLayout,
-		1,
-		&bufferCopyRegion);		
+		vkCmdCopyBufferToImage(*m_pCmdBuf, srcBuffer, dstImage.getImageR(), dstLayout, 1, &bufferCopyRegion);
+	}
+	else 
+	{
+		vkCmdCopyBufferToImage(*m_pCmdBuf, srcBuffer, dstImage.getImageR(), dstLayout,
+			static_cast<uint32_t>(pSrcRegions->size()), pSrcRegions->data());
+	}
 }
 
 }

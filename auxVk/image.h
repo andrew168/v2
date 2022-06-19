@@ -79,7 +79,8 @@ public:
         ktxTexture**    target);
     void copyData(ImageCI& ci,
         ktxTexture&     ktxTexture,
-        VkImageLayout   imageLayout);
+        VkImageLayout   imageLayout,
+        std::vector<VkBufferImageCopy>* pRegions = nullptr);
 
     void changeLayout(VkCommandBuffer& cmdbuffer,
         VkImageLayout newImageLayout,
@@ -94,6 +95,8 @@ public:
         aux::Image& cube,
         uint32_t arrayLayers,
         uint32_t mipLevels);
+    static void calRegions(std::vector<VkBufferImageCopy>& bufferCopyRegions, ktxTexture* ktxTexture);
+
     VkDescriptorImageInfo* getDescriptor() { return &m_descriptor; }
     VkDescriptorImageInfo& getDescriptorR() { return m_descriptor; }
     VkFormat getFormat() { return m_format; }
@@ -119,5 +122,26 @@ private:
         ImageCI& ci, 
         ktxTexture& ktxTexture, 
         VkBuffer& stagingBuffer);
+
+    void loadToStage(
+        ktxTexture** ppKtxTexture,
+        std::string filename,
+        VkFormat format,
+        VkQueue copyQueue,
+        VkImageUsageFlags imageUsageFlags,
+        VkImageLayout imageLayout);
+    void fromStageToImage(
+        VkFormat format,
+        VkImageUsageFlags imageUsageFlags,
+        VkImageLayout imageLayout,
+        ktxTexture* ktxTexture, 
+        ImageCI& ci);
+    void Image::init9(VkFormat format,
+        ImageCI& ci);
+
+    void createImage(ImageCI& ci);
+    VkBuffer stagingBuffer;
+    VkDeviceMemory stagingMemory;
+
 };
 }
