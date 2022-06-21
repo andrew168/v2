@@ -9,11 +9,14 @@ class Image;
 class CommandBuffer
 {
     VkCommandBuffer* m_pCmdBuf;
+    VkCommandPool m_cmdPool;
+
     bool m_isVK = false;
 
 public:
     CommandBuffer();
     CommandBuffer(VkCommandBuffer& cmdBuf);
+    CommandBuffer(VkCommandPool& pool);
     ~CommandBuffer();
     void fillBI(VkCommandBufferBeginInfo& pBeginInfo);
     void begin(VkCommandBufferBeginInfo* pBeginInfo = nullptr);    

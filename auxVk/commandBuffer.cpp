@@ -8,8 +8,15 @@ CommandBuffer::CommandBuffer()
 	// ToDo: 从Device剥离CmdPool。
 	// 因为CmdPool与Queue family有关，图形和计算Queue有各自的pool，
 	m_pCmdBuf = new VkCommandBuffer();
-	VkCommandPool& cmdPool = (Device::getVksDevice())->commandPool;
-	CommandBuffer::allocate(cmdPool, *m_pCmdBuf);
+	m_cmdPool = (Device::getVksDevice())->commandPool;
+	CommandBuffer::allocate(m_cmdPool, *m_pCmdBuf);
+}
+
+CommandBuffer::CommandBuffer(VkCommandPool& pool)
+{
+	m_cmdPool = pool;
+	m_pCmdBuf = new VkCommandBuffer();
+	CommandBuffer::allocate(m_cmdPool, *m_pCmdBuf);
 }
 
 CommandBuffer::CommandBuffer(VkCommandBuffer& cmdBuf) :
