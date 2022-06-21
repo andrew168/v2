@@ -22,6 +22,7 @@ public:
 	VkResult map(VkDeviceSize size = VK_WHOLE_SIZE, VkDeviceSize offset = 0);
 
 	vks::Buffer* get() { return &m_buffer; }
+	VkDescriptorBufferInfo& getDescriptor() { return m_buffer.descriptor; }
 };
 
 class VertexBuffer: public BufferBase
@@ -46,8 +47,6 @@ public:
 class UniformBuffer : public BufferBase
 {
 public:
-	VkDescriptorBufferInfo descriptor;
-
 	UniformBuffer();
 	template<typename T>
 	inline void create();
