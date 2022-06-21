@@ -57,8 +57,7 @@ void CommandBuffer::free()
 {
 	//ToDo: CmdBuf应该记录自己属于哪一个Pool，哪一个Device，唯一的， （记录上级、上线）
 	// 而Device可能有多个Pool
-	VkCommandPool& cmdPool = (Device::getVksDevice())->commandPool;
-	vkFreeCommandBuffers(Device::getR(), cmdPool, 1, m_pCmdBuf);
+	vkFreeCommandBuffers(Device::getR(), m_cmdPool, 1, m_pCmdBuf);
 }
 
 void CommandBuffer::setViewport(float width,
