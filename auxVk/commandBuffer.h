@@ -72,6 +72,13 @@ public:
         uint32_t groupCountY,
         uint32_t groupCountZ);
 
+    static inline VkCommandBufferBeginInfo bi()
+    {
+        VkCommandBufferBeginInfo cmdBufferBeginInfo{};
+        cmdBufferBeginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+        return cmdBufferBeginInfo;
+    }
+
     static void allocate(
         VkCommandPool& cmdPool, 
         std::vector<VkCommandBuffer>& cmdBufs);
