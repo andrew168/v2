@@ -3,11 +3,26 @@
 
 namespace aux
 {
-Queue::Queue(VkQueue& queue) :
-	m_pQueue(&queue)
+Queue::Queue() :
+	m_queue(VK_NULL_HANDLE)
 {
 
 }
+
+Queue::Queue(VkQueue& queue) :
+	m_queue(queue)
+{
+
+}
+
+void Queue::acquire(
+	VkDevice device,
+	uint32_t queueFamilyIndex, 
+	uint32_t queueIndex)
+{
+	vkGetDeviceQueue(device, queueFamilyIndex, queueIndex, &m_queue);
+}
+
 void Queue::submit(VkCommandBuffer* pCmdBuf,
 	VkPipelineStageFlags waitDstStageMask,
 	VkSemaphore wait,
@@ -31,7 +46,7 @@ void Queue::submit(VkCommandBuffer* pCmdBuf,
 		submitInfo.signalSemaphoreCount = 1;
 	}
 
-	VK_CHECK_RESULT(vkQueueSubmit(*m_pQueue, 1, &submitInfo, fence));
+	VK_CHECK_RESULT(vkQueueSubmit(m_queue, 1, &submitInfo, fence));
 }
 
 void Queue::submit(std::vector< VkCommandBuffer> &cmdBufs,
@@ -58,7 +73,7 @@ void Queue::submit(std::vector< VkCommandBuffer>& cmdBufs,
 	submitInfo.signalSemaphoreCount = static_cast<uint32_t>(signals.size());
 	submitInfo.pCommandBuffers = cmdBufs.data();
 	submitInfo.commandBufferCount = static_cast<uint32_t>(cmdBufs.size());
-	VK_CHECK_RESULT(vkQueueSubmit(*m_pQueue, 1, &submitInfo, fence));
+	VK_CHECK_RESULT(vkQueueSubmit(m_queue, 1, &submitInfo, fence));
 }
 
 void Queue::submit(VkPipelineStageFlags waitDstStageMask,
@@ -83,7 +98,7 @@ void Queue::submit(VkPipelineStageFlags waitDstStageMask,
 		submitInfo.signalSemaphoreCount = 1;
 	}
 
-	VK_CHECK_RESULT(vkQueueSubmit(*m_pQueue, 1, &submitInfo, fence));
+	VK_CHECK_RESULT(vkQueueSubmit(m_queue, 1, &submitInfo, fence));
 }
 
 void Queue::submit(VkSemaphore signal,
@@ -98,12 +113,12 @@ void Queue::submit(VkSemaphore signal,
 
 	submitInfo.pCommandBuffers = nullptr;
 	submitInfo.commandBufferCount = 0;
-	VK_CHECK_RESULT(vkQueueSubmit(*m_pQueue, 1, &submitInfo, fence));
+	VK_CHECK_RESULT(vkQueueSubmit(m_queue, 1, &submitInfo, fence));
 }
 
 void Queue::waitIdle()
 {
-	VK_CHECK_RESULT(vkQueueWaitIdle(*m_pQueue));
+	VK_CHECK_RESULT(vkQueueWaitIdle(m_queue));
 }
 
 }
