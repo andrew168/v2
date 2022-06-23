@@ -6,6 +6,15 @@ namespace aux
 
 class IMBarrier {
 public:
+    inline static VkImageMemoryBarrier create()
+    {
+        VkImageMemoryBarrier imageMemoryBarrier{};
+        imageMemoryBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+        imageMemoryBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+        imageMemoryBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+        return imageMemoryBarrier;
+    }
+
     static void csResult2Sampler(VkImage& image,
         VkCommandBuffer& cmdBuf);
 
@@ -24,6 +33,5 @@ public:
 
     static void toColorAttachment(aux::Image& auxImage,
         VkQueue& queue);
-    
 };
 }

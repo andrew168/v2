@@ -7,6 +7,7 @@
 #include "descriptorPool.h"
 #include "descriptorSet.h"
 #include "descriptorSetLayout.h"
+#include "memory.h"
 #include "image.h"
 #include "renderPass.h"
 #include "framebuffer.h"

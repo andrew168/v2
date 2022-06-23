@@ -50,6 +50,19 @@ public:
         const VkDescriptorPool& pool, 
         const VkDescriptorSetLayout* pLayout);
 
+    inline static VkDescriptorSetAllocateInfo ai(
+        VkDescriptorPool descriptorPool,
+        const VkDescriptorSetLayout* pSetLayouts,
+        uint32_t descriptorSetCount)
+    {
+        VkDescriptorSetAllocateInfo descriptorSetAllocateInfo{};
+        descriptorSetAllocateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+        descriptorSetAllocateInfo.descriptorPool = descriptorPool;
+        descriptorSetAllocateInfo.pSetLayouts = pSetLayouts;
+        descriptorSetAllocateInfo.descriptorSetCount = descriptorSetCount;
+        return descriptorSetAllocateInfo;
+    }
+
     static void updateW(std::vector<VkWriteDescriptorSet> sets);
     static void updateC(std::vector<VkCopyDescriptorSet> sets);
 

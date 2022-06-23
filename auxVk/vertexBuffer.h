@@ -19,6 +19,13 @@ public:
 	~BufferBase();
 	template<typename T>
 	inline void create(std::vector<T>& data);
+	inline static VkBufferCreateInfo ci()
+	{
+		VkBufferCreateInfo bufCreateInfo{};
+		bufCreateInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+		return bufCreateInfo;
+	}
+
 	VkResult map(VkDeviceSize size = VK_WHOLE_SIZE, VkDeviceSize offset = 0);
 
 	vks::Buffer* get() { return &m_buffer; }

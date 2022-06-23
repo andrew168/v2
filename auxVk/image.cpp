@@ -1,5 +1,8 @@
 ﻿#include "device.h"
+#include "memory.h"
 #include "image.h"
+#include "imBarrier.h"
+#include "VertexBuffer.h"
 #include "commandBuffer.h"
 #include "../util/util.h"
 #include "../util/log.h"
@@ -199,7 +202,7 @@ void Image::changeLayout(VkCommandBuffer& cmdbuffer,
 
 
 	// Create an image barrier object
-	VkImageMemoryBarrier imageMemoryBarrier = vks::initializers::imageMemoryBarrier();
+	VkImageMemoryBarrier imageMemoryBarrier = IMBarrier::create();
 	imageMemoryBarrier.oldLayout = m_layout;
 	imageMemoryBarrier.newLayout = newImageLayout;
 	imageMemoryBarrier.image = m_image;
@@ -328,7 +331,7 @@ void Image::copyData(ImageCI& ci,
 	}
 	//使用optimal tiling，因为linear tiling只支持少量formats和features (mip maps, cubemaps, arrays等)		
 	// Create a host-visible staging buffer that contains the raw image data
-	VkBufferCreateInfo bufferCreateInfo = vks::initializers::bufferCreateInfo();
+	VkBufferCreateInfo bufferCreateInfo = BufferBase::ci();
 	bufferCreateInfo.size = ci.m_dataSize;
 	// This buffer is used as a transfer source for the buffer copy
 	bufferCreateInfo.usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
@@ -340,7 +343,7 @@ void Image::copyData(ImageCI& ci,
 	VkMemoryRequirements memReqs;
 	vkGetBufferMemoryRequirements(device.logicalDevice, stagingBuffer, &memReqs);
 
-	VkMemoryAllocateInfo memAllocInfo = vks::initializers::memoryAllocateInfo();
+	VkMemoryAllocateInfo memAllocInfo = Memory::ai();
 	memAllocInfo.allocationSize = memReqs.size;
 	// Get memory type index for a host visible buffer
 	memAllocInfo.memoryTypeIndex = device.getMemoryType(memReqs.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
@@ -458,11 +461,11 @@ void Image::loadToStage(
 	// optimal tiling instead
 	// On most implementations linear tiling will only support a very
 	// limited amount of formats and features (mip maps, cubemaps, arrays, etc.)
-	VkMemoryAllocateInfo memAllocInfo = vks::initializers::memoryAllocateInfo();
+	VkMemoryAllocateInfo memAllocInfo = Memory::ai();
 	VkMemoryRequirements memReqs;
 	// Create a host-visible staging buffer that contains the raw image data
 
-	VkBufferCreateInfo bufferCreateInfo = vks::initializers::bufferCreateInfo();
+	VkBufferCreateInfo bufferCreateInfo = BufferBase::ci();
 	bufferCreateInfo.size = ktxTextureSize;
 	// This buffer is used as a transfer source for the buffer copy
 	bufferCreateInfo.usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT;

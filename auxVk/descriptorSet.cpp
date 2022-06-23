@@ -14,8 +14,7 @@ DescriptorSet::DescriptorSet(VkDescriptorPool& pool, VkDescriptorSetLayout& dsl)
 	m_pDescriptorPool(&pool),
 	m_rDSL(&dsl)
 {
-	VkDescriptorSetAllocateInfo allocInfo =
-		vks::initializers::descriptorSetAllocateInfo(*m_pDescriptorPool, m_rDSL, 1);
+	VkDescriptorSetAllocateInfo allocInfo = ai(*m_pDescriptorPool, m_rDSL, 1);
 	m_pDescriptorSet = new VkDescriptorSet(); // ToDo: delete
 	VK_CHECK_RESULT(vkAllocateDescriptorSets(Device::getR(), &allocInfo, m_pDescriptorSet));
 }
