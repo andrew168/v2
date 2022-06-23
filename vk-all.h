@@ -11,6 +11,11 @@
 #if defined(__ANDROID__)
 #define TINYGLTF_ANDROID_LOAD_FROM_ASSETS
 #endif
+
+#include <vulkan/vulkan.h>
+
+#if defined(V2_PBR)
+
 #if !defined(VK_FLAGS_NONE)
 // Custom define for better code readability
 #define VK_FLAGS_NONE 0
@@ -18,17 +23,14 @@
 #define DEFAULT_FENCE_TIMEOUT 100000000000
 #endif
 
-#include <vulkan/vulkan.h>
-#include "..\..\base\VulkanUtils.hpp"
+#include "VulkanUtils.hpp"
 namespace vks
 {
-struct Vertex {
-    float pos[3];
-    float uv[2];
-};
 
 struct Buffer : public ::Buffer
 {
 
 };
 }
+
+#endif
