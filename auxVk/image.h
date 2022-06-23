@@ -1,5 +1,6 @@
 ﻿#pragma once
 #include "..\vk-all.h"
+#include "ktx.h"
 #include "..\base\VulkanTexture.h"
 
 namespace aux
