@@ -1,4 +1,5 @@
 ﻿#include "v2/v2.h"
+#include "../base/camera.hpp"
 #include "VulkanExampleBase.h"
 #include "VulkanTexture.hpp"
 #include "VulkanglTFModel.h"

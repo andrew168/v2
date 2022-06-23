@@ -342,6 +342,7 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     <ClCompile Include="v2\auxVk\renderPass.cpp" />
     <ClCompile Include="v2\auxVk\semaphore.cpp" />
     <ClCompile Include="v2\auxVk\semaphoreMgr.cpp" />
+    <ClCompile Include="v2\auxVk\shaderStage.cpp" />
     <ClCompile Include="v2\auxVk\subpassDescription.cpp" />
     <ClCompile Include="v2\auxVk\swapChain.cpp" />
     <ClCompile Include="v2\auxVk\util.cpp" />
@@ -398,6 +399,7 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     <ClInclude Include="v2\auxVk\semaphore.h" />
     <ClInclude Include="v2\auxVk\semaphoreMgr.h" />
     <ClInclude Include="v2\auxVk\shaderDescription.h" />
+    <ClInclude Include="v2\auxVk\shaderStage.h" />
     <ClInclude Include="v2\auxVk\subpassDescription.h" />
     <ClInclude Include="v2\auxVk\swapChain.h" />
     <ClInclude Include="v2\auxVk\util.h" />
