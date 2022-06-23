@@ -1,6 +1,9 @@
 ﻿#pragma once
 #include "..\vk-all.h"
 #include "..\auxVk\auxVk.h"
+#include "..\base\camera.hpp"
+#include "..\base\VulkanUtils.hpp"
+#include "..\base\VulkanglTFModel.h"
 #include "..\pbr\pbrCore.h"
 
 namespace pbr 

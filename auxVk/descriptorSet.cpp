@@ -89,6 +89,7 @@ void DescriptorSet::bindToGraphics(const std::vector<VkDescriptorSet> &sets,
 		layout, 0, static_cast<uint32_t>(sets.size()), sets.data(), dynamicOffsetCount, pDynamicOffsets);
 }
 
+// 直接allocate，免除ai，使用更方便
 void DescriptorSet::allocate(VkDescriptorSet& dSet, 
 	const VkDescriptorPool& pool, 
 	const VkDescriptorSetLayout* pLayout) 
