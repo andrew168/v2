@@ -42,6 +42,17 @@ class PipelineLayout
 public:
     explicit  PipelineLayout(PipelineLayoutCI &ci);
     ~PipelineLayout();
+    inline static VkPipelineLayoutCreateInfo ci(
+        const VkDescriptorSetLayout* pSetLayouts,
+        uint32_t setLayoutCount = 1)
+    {
+        VkPipelineLayoutCreateInfo pipelineLayoutCreateInfo{};
+        pipelineLayoutCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
+        pipelineLayoutCreateInfo.setLayoutCount = setLayoutCount;
+        pipelineLayoutCreateInfo.pSetLayouts = pSetLayouts;
+        return pipelineLayoutCreateInfo;
+    }
+
     VkPipelineLayout get() { return m_pipelineLayout; }
     VkPipelineLayout* getP() { return &m_pipelineLayout; }
     VkDescriptorSetLayout* getDSLayout() { return &m_descriptorSetLayout; }

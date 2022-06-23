@@ -154,6 +154,7 @@
     <ClInclude Include="auxVk\attachmentDescription.h" />
     <ClInclude Include="auxVk\auxVk.h" />
     <ClInclude Include="auxVk\commandBuffer.h" />
+    <ClInclude Include="auxVk\computePipeline.h" />
     <ClInclude Include="auxVk\describe.h" />
     <ClInclude Include="auxVk\descriptorPool.h" />
     <ClInclude Include="auxVk\descriptorSet.h" />
@@ -183,6 +184,7 @@
     <ClCompile Include="auxVk\attachmentDescription.cpp" />
     <ClCompile Include="auxVk\auxVk.cpp" />
     <ClCompile Include="auxVk\commandBuffer.cpp" />
+    <ClCompile Include="auxVk\computePipeline.cpp" />
     <ClCompile Include="auxVk\describe.cpp" />
     <ClCompile Include="auxVk\descriptorPool.cpp" />
     <ClCompile Include="auxVk\descriptorSet.cpp" />
