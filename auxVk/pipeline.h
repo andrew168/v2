@@ -37,6 +37,7 @@ struct PipelineCI {
         depthCompareOp(VK_COMPARE_OP_LESS_OR_EQUAL),  // 深度测试比较 函数： <= （如果Enable的话）
         rasterizationSamples(VK_SAMPLE_COUNT_1_BIT), // 1点采样
         blendEnable(VK_FALSE),      // 无blend
+        colorWriteMask(0xf), // R|G|B|A
         srcColorBlendFactor(VK_BLEND_FACTOR_SRC_ALPHA),  // RGB的blend参数方程：  结果= a *Src + (1-a)*Dst
         dstColorBlendFactor(VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA),
         colorBlendOp(VK_BLEND_OP_ADD),                   // 彩色blend: add

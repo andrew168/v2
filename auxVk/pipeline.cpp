@@ -22,15 +22,15 @@ Pipeline::Pipeline(VkPipelineLayout& pipelineLayout, VkRenderPass& renderPass, P
 	VkPipelineRasterizationStateCreateInfo rasterizationStateCI{};
 	rasterizationStateCI.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
 	rasterizationStateCI.polygonMode = VK_POLYGON_MODE_FILL;
-	rasterizationStateCI.cullMode = m_auxCI.cullMode;
+	rasterizationStateCI.cullMode = m_auxCI.cullMode;		// VK_CULL_MODE_NONE
 	rasterizationStateCI.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
 	rasterizationStateCI.flags = 0;
 	rasterizationStateCI.depthClampEnable = VK_FALSE;
 	rasterizationStateCI.lineWidth = 1.0f;
 
 	VkPipelineColorBlendAttachmentState blendAttachmentState{};
-	blendAttachmentState.colorWriteMask = 0XF;
-	// 0XF == VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
+	blendAttachmentState.colorWriteMask = m_auxCI.colorWriteMask; // 0xf;
+	// 0xf == VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
 	blendAttachmentState.blendEnable = m_auxCI.blendEnable;
 	if (blendAttachmentState.blendEnable) {  // VK_FALSE
 		blendAttachmentState.srcColorBlendFactor = m_auxCI.srcColorBlendFactor; // VK_BLEND_FACTOR_SRC_ALPHA
