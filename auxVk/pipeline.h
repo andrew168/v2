@@ -76,15 +76,16 @@ public:
 
 class Pipeline : public PipelineBase
 {
-    aux::PipelineLayout& m_pipelineLayout;
+    VkPipelineLayout m_pipelineLayout;
+
     VkRenderPass& m_renderPass;
     PipelineCI& m_auxCI;
 public:
-    explicit Pipeline(aux::PipelineLayout& pipelineLayout, VkRenderPass& renderPass, PipelineCI &pipelineCI);
+    explicit Pipeline(VkPipelineLayout& pipelineLayout, VkRenderPass& renderPass, PipelineCI &pipelineCI);
     ~Pipeline();
     void bindToGraphic(VkCommandBuffer& cmdBuf);
 
-    VkPipelineLayout* getLayout() { return m_pipelineLayout.getP(); }
+    VkPipelineLayout* getLayout() { return &m_pipelineLayout; }
     inline bool isGraphics() { return true; }
 
 private:

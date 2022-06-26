@@ -54,6 +54,7 @@ public:
     }
 
     VkPipelineLayout get() { return m_pipelineLayout; }
+    VkPipelineLayout& getR() { return m_pipelineLayout; }
     VkPipelineLayout* getP() { return &m_pipelineLayout; }
     VkDescriptorSetLayout* getDSLayout() { return &m_descriptorSetLayout; }
     DescriptorSet* getDSet() { return m_pDescriptorSet; }
