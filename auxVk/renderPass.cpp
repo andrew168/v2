@@ -64,18 +64,19 @@ void RenderPass::begin(VkCommandBuffer& cmdBuf,
 }
 
 
-void RenderPass::fillBI(VkRenderPassBeginInfo& bi, 
-    uint32_t width,
+VkRenderPassBeginInfo RenderPass::bi(uint32_t width,
     uint32_t height,
     uint32_t clearValueCount,
     const VkClearValue* pClearValues)
 {
+    VkRenderPassBeginInfo bi;
     bi.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
     bi.renderPass = *m_pRenderPass;
     bi.renderArea.extent.width = width;
     bi.renderArea.extent.height = height;
     bi.clearValueCount = clearValueCount;
     bi.pClearValues = pClearValues;
+    return bi;
 }
 
 void RenderPass::begin(VkCommandBuffer *pCmdBuf, 
