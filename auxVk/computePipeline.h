@@ -14,7 +14,19 @@ class ComputePipeline : public PipelineBase
 public:
     explicit ComputePipeline(VkDescriptorSetLayout& dsl,
         aux::ShaderDescription& shaderDesc);
-    ~ComputePipeline();
+
+	explicit ComputePipeline(VkPipelineLayout& layout,
+		aux::ShaderDescription& shaderDesc,
+		std::vector<VkSpecializationMapEntry> *pSpecializationMapEntries = nullptr,
+		uint32_t dataSize = 0,
+		void* pData = nullptr);
+
+	void init(aux::ShaderDescription& shaderDesc,
+		std::vector<VkSpecializationMapEntry>* pSpecializationMapEntries = nullptr,
+		uint32_t dataSize = 0,
+		void* pData = nullptr);
+
+	~ComputePipeline();
 	inline static VkComputePipelineCreateInfo ci(
 		VkPipelineLayout layout,
 		VkPipelineCreateFlags flags = 0)

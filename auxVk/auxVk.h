@@ -23,6 +23,7 @@
 #include "commandBuffer.h"
 #include "semaphore.h"
 #include "semaphoreMgr.h"
+#include "specialization.h"
 #include "queue.h"
 #include "fence.h"
 #include "fenceMgr.h"
