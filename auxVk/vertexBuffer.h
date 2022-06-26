@@ -40,6 +40,34 @@ public:
 		uint32_t firstBinding,
 		uint32_t bindingCount = 1,
 		const VkDeviceSize* pOffsets = nullptr);
+	inline static VkVertexInputBindingDescription bindings(
+		uint32_t binding,
+		uint32_t stride,
+		VkVertexInputRate inputRate)
+	{
+		VkVertexInputBindingDescription vInputBindDescription{};
+		vInputBindDescription.binding = binding;
+		vInputBindDescription.stride = stride;
+		vInputBindDescription.inputRate = inputRate;
+		return vInputBindDescription;
+	}
+
+	inline static VkVertexInputAttributeDescription desc(
+		uint32_t binding,
+		uint32_t location,
+		VkFormat format,
+		uint32_t offset = 0)
+	{
+		VkVertexInputAttributeDescription vInputAttribDescription{};
+		vInputAttribDescription.location = location;
+		vInputAttribDescription.binding = binding;
+		vInputAttribDescription.format = format;
+		vInputAttribDescription.offset = offset;
+		return vInputAttribDescription;
+	}
+
+
+
 };
 
 class IndexBuffer : public BufferBase
