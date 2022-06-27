@@ -39,7 +39,7 @@ Image::Image(
 
 	ImageCI ci(format, ktxTexture->baseWidth, ktxTexture->baseHeight, ktxTexture->numLevels, ktxTexture->numLayers,
 		ktxTexture_GetData(ktxTexture),
-		ktxTexture_GetSize(ktxTexture));
+		static_cast<uint32_t>(ktxTexture_GetSize(ktxTexture)));
 
 	// 确保有TRANSFER_DST标识
 	if (!(imageUsageFlags & VK_IMAGE_USAGE_TRANSFER_DST_BIT))
@@ -327,7 +327,7 @@ void Image::copyData(ImageCI& ci,
 	// 1 copy image data to stage, 
 	if (Device::hasLinearTiling(ci.format))
 	{
-		Log::info("支持linear tiling");
+		Log::info("linear tiling supportted");
 	}
 	//使用optimal tiling，因为linear tiling只支持少量formats和features (mip maps, cubemaps, arrays等)		
 	// Create a host-visible staging buffer that contains the raw image data
@@ -400,7 +400,7 @@ void Image::loadFromFile(
 	ImageCI ci(format, ktxTexture->baseWidth, ktxTexture->baseHeight,
 		ktxTexture->numLevels, ktxTexture->numLayers,
 		ktxTexture_GetData(ktxTexture),
-		ktxTexture_GetSize(ktxTexture));
+		static_cast<uint32_t>(ktxTexture_GetSize(ktxTexture)));
 
 	// 确保有TRANSFER_DST标识
 	if (!(imageUsageFlags & VK_IMAGE_USAGE_TRANSFER_DST_BIT))

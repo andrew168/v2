@@ -6,7 +6,7 @@ namespace aux
 void Fence::create(VkFence& fence, bool signaled)
 {
 	VkFenceCreateInfo fenceCI{ VK_STRUCTURE_TYPE_FENCE_CREATE_INFO, nullptr, 
-		signaled? VK_FENCE_CREATE_SIGNALED_BIT:0 };
+		signaled? VK_FENCE_CREATE_SIGNALED_BIT: static_cast<VkFenceCreateFlags>(0) }; // 0 转为enum,范围缩小
 	VK_CHECK_RESULT(vkCreateFence(Device::getR(), &fenceCI, nullptr, &fence));
 }
 

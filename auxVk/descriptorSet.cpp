@@ -27,7 +27,7 @@ void DescriptorSet::write(std::vector<Descriptor> descs)
 		auto& item = descs[i];
 		Describe::any(computeWriteDescriptorSets[i], item.descriptorType, *m_pDescriptorSet, item.dstBinding, item.pImageInfo);
 	}
-	vkUpdateDescriptorSets(Device::getR(), computeWriteDescriptorSets.size(), computeWriteDescriptorSets.data(), 0, NULL);
+	vkUpdateDescriptorSets(Device::getR(), static_cast<uint32_t>(computeWriteDescriptorSets.size()), computeWriteDescriptorSets.data(), 0, NULL);
 }
 
 DescriptorSet::DescriptorSet(DescriptorSetCI &ci)
