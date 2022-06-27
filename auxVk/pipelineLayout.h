@@ -41,7 +41,9 @@ class PipelineLayout
 
 public:
     explicit  PipelineLayout(PipelineLayoutCI &ci);
+    explicit  PipelineLayout(VkDescriptorSetLayout& dsl);
     ~PipelineLayout();
+    void init(PipelineLayoutCI& ci);    
     inline static VkPipelineLayoutCreateInfo ci(
         const VkDescriptorSetLayout* pSetLayouts,
         uint32_t setLayoutCount = 1)

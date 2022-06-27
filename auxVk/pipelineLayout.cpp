@@ -4,9 +4,24 @@ namespace aux
 {
 class Image;
 
-PipelineLayout::PipelineLayout(PipelineLayoutCI &ci):
+PipelineLayout::PipelineLayout(VkDescriptorSetLayout& dsl) :
 	m_pDescriptorSet(nullptr),
 	m_descriptorSetLayout(nullptr)
+{
+	std::vector<VkDescriptorSetLayout> dsls = { dsl};
+	PipelineLayoutCI ci(dsls);
+	init(ci);
+}
+
+
+PipelineLayout::PipelineLayout(PipelineLayoutCI& ci) :
+	m_pDescriptorSet(nullptr),
+	m_descriptorSetLayout(nullptr)
+{
+	init(ci);
+}
+
+void PipelineLayout::init(PipelineLayoutCI& ci) 
 {
 	const VkDevice& device = Device::getR();
 
