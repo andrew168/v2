@@ -40,6 +40,11 @@ public:
         std::vector<VkSemaphore>& waits,
         std::vector<VkSemaphore>& signals, VkFence fence = VK_NULL_HANDLE);
 
+    void submit(VkCommandBuffer& cmdBufs,
+        std::vector<VkPipelineStageFlags>& waitDstStageMasks,
+        std::vector<VkSemaphore>& waits,
+        std::vector<VkSemaphore>& signals, VkFence fence = VK_NULL_HANDLE);
+
     void submit(std::vector<VkCommandBuffer>& cmdBufs,
         std::vector<VkPipelineStageFlags>& waitDstStageMasks,
         std::vector<VkSemaphore>& waits,

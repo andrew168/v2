@@ -54,9 +54,17 @@ void Queue::submit(std::vector< VkCommandBuffer> &cmdBufs,
 	std::vector< VkSemaphore>& waits,
 	std::vector< VkSemaphore>& signals, VkFence fence)
 {
-
 	std::vector<VkPipelineStageFlags> stages = {waitDstStageMask};
 	Queue::submit(cmdBufs, stages, waits, signals, fence);
+}
+
+void Queue::submit(VkCommandBuffer& cmdBuf,
+	std::vector< VkPipelineStageFlags>& waitDstStageMasks,
+	std::vector< VkSemaphore>& waits,
+	std::vector< VkSemaphore>& signals, VkFence fence)
+{
+	std::vector<VkCommandBuffer> cmdBufs = { cmdBuf };
+	Queue::submit(cmdBufs, waitDstStageMasks, waits, signals, fence);
 }
 
 void Queue::submit(std::vector< VkCommandBuffer>& cmdBufs,
