@@ -34,5 +34,13 @@ public:
 		dpSize.descriptorCount = descriptorCount;
 		return dpSize;
 	}
+
+	inline static VkDescriptorPoolSize storageBufferSize(uint32_t descriptorCount)
+	{
+		VkDescriptorPoolSize dpSize{};
+		dpSize.type = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+		dpSize.descriptorCount = descriptorCount;
+		return dpSize;
+	}
 };
 }
