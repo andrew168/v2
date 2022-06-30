@@ -1,4 +1,5 @@
-﻿#include "describe.h"
+﻿#include "..\util\assert.h"
+#include "describe.h"
 namespace aux
 {
 void Describe::image(VkWriteDescriptorSet& ds, 
@@ -42,6 +43,7 @@ void Describe::any(VkWriteDescriptorSet& ds,
 	switch (type)
 	{
 	case VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER:
+	case VK_DESCRIPTOR_TYPE_STORAGE_BUFFER:
 		ds.pBufferInfo = static_cast<const VkDescriptorBufferInfo*>(pImageInfo);
 		break;
 	case VK_DESCRIPTOR_TYPE_STORAGE_IMAGE:
@@ -49,7 +51,7 @@ void Describe::any(VkWriteDescriptorSet& ds,
 		ds.pImageInfo = static_cast<const VkDescriptorImageInfo*>(pImageInfo);
 		break;
 	default:
-		Assert(0, "add new type");
+		NOT_IMPLEMENTED();
 	}
 }
 

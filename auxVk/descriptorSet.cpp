@@ -1,4 +1,5 @@
-﻿#include "descriptorSet.h"
+﻿#include "..\util\assert.h"
+#include "descriptorSet.h"
 #include "describe.h"
 #include "pipeline.h"
 
@@ -21,6 +22,7 @@ DescriptorSet::DescriptorSet(VkDescriptorPool& pool, VkDescriptorSetLayout& dsl)
 
 void DescriptorSet::write(std::vector<Descriptor> descs)
 {
+	DEPRECIATEDBY("updateW");
 	std::vector<VkWriteDescriptorSet> computeWriteDescriptorSets(descs.size());
 	for (uint32_t i = 0; i < descs.size(); i++) 
 	{
@@ -32,7 +34,7 @@ void DescriptorSet::write(std::vector<Descriptor> descs)
 
 DescriptorSet::DescriptorSet(DescriptorSetCI &ci)
 {
-	Assert(0, "ToDo: "); // 应该把pool挪出去
+	TODO("pool: move out"); // 应该把pool挪出去
 	const VkDevice& device = Device::getR();
 
 	VkDescriptorPoolSize poolSize = { VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1 };
@@ -93,7 +95,7 @@ void DescriptorSet::allocate(VkDescriptorSet& dSet,
 	const VkDescriptorPool& pool, 
 	const VkDescriptorSetLayout* pLayout) 
 {
-	Assert(0, "Depreciated"); //ToDo:被DS类的 ctor取代
+	DEPRECIATED(); //ToDo:被DS类的 ctor取代
 	VkDescriptorSetAllocateInfo ai{};
 	ai.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
 	ai.descriptorPool = pool;
@@ -106,14 +108,27 @@ void DescriptorSet::allocate(VkDescriptorSet& dSet,
 */
 void DescriptorSet::updateW(std::vector<VkWriteDescriptorSet> sets)
 {
+	DEPRECIATEDBY("non-static!");
 	vkUpdateDescriptorSets(Device::getR(),
 		static_cast<uint32_t>(sets.size()), sets.data(), 0, NULL);
 }
 
 void DescriptorSet::updateC(std::vector<VkCopyDescriptorSet> sets)
 {
+	DEPRECIATEDBY("non-static!");
 	vkUpdateDescriptorSets(Device::getR(), 0, NULL,
 		static_cast<uint32_t>(sets.size()), sets.data());
+}
+
+void DescriptorSet::updateW(std::vector<Descriptor> descs)
+{
+	std::vector<VkWriteDescriptorSet> wds(descs.size());
+	for (uint32_t i = 0; i < descs.size(); i++)
+	{
+		auto& item = descs[i];
+		Describe::any(wds[i], item.descriptorType, *m_pDescriptorSet, item.dstBinding, item.pImageInfo);
+	}
+	vkUpdateDescriptorSets(Device::getR(), static_cast<uint32_t>(wds.size()), wds.data(), 0, NULL);
 }
 
 DescriptorSet::~DescriptorSet()

@@ -63,9 +63,11 @@ public:
         return descriptorSetAllocateInfo;
     }
 
+    void updateW(std::vector<Descriptor> descs);
+    
     static void updateW(std::vector<VkWriteDescriptorSet> sets);
     static void updateC(std::vector<VkCopyDescriptorSet> sets);
-
+   
     VkDescriptorSet* get() { return m_pDescriptorSet; }
     VkDescriptorSet& getR() { return *m_pDescriptorSet; }
 };
