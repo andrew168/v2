@@ -23,11 +23,18 @@ public:
     void end();
     void flush(VkQueue queue = VK_NULL_HANDLE, bool free = false); //ToDo: 这个free参数，误导用户， 不留它
     void free();
-    void setViewport(float width,
+    void setViewport(
+        float width,
         float height,
         float x0 = 0,
-        float y0 = 0);
-    void setScissor(uint32_t width, uint32_t height);
+        float y0 = 0,
+        float minDepth = 0.0f,
+        float maxDepth = 1.0f);
+    void setScissor(
+        uint32_t width, 
+        uint32_t height, 
+        uint32_t x0 = 0,
+        uint32_t y0 = 0);
     void pushConstantsToFS(VkPipelineLayout layout,
         uint32_t offset,
         uint32_t size,

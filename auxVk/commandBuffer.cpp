@@ -63,24 +63,30 @@ void CommandBuffer::free()
 void CommandBuffer::setViewport(float width,
 	float height,
 	float x0,
-	float y0)
+	float y0,
+	float minDepth, 
+	float maxDepth)
 {
 	VkViewport viewport{};
 	viewport.width = (float)width;
 	viewport.height = (float)height;
 	viewport.x = x0;
 	viewport.y = y0;
-	viewport.minDepth = 0.0f;
-	viewport.maxDepth = 1.0f;
+	viewport.minDepth = minDepth;
+	viewport.maxDepth = maxDepth;
 	vkCmdSetViewport(*m_pCmdBuf, 0, 1, &viewport);
 }
 
 void CommandBuffer::setScissor(uint32_t width,
-	uint32_t height)
+	uint32_t height,
+	uint32_t x0,
+	uint32_t y0)
 {
-	VkRect2D scissor{};
-	scissor.extent = { width, height };
-	vkCmdSetScissor(*m_pCmdBuf, 0, 1, &scissor);
+	VkRect2D rect2D{};
+	rect2D.extent = { width, height };
+	rect2D.offset.x = x0;
+	rect2D.offset.y = y0;
+	vkCmdSetScissor(*m_pCmdBuf, 0, 1, &rect2D);
 }
 
 void CommandBuffer::allocate(
