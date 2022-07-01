@@ -2,7 +2,7 @@
 #include "memory.h"
 #include "image.h"
 #include "imBarrier.h"
-#include "VertexBuffer.h"
+#include "buffer.h"
 #include "commandBuffer.h"
 #include "../util/util.h"
 #include "../util/log.h"

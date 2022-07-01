@@ -1,5 +1,5 @@
 ﻿#include "auxVk.h"
-#include "vertexBuffer.h"
+#include "buffer.h"
 
 namespace aux
 {
