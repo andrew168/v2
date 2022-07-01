@@ -8,17 +8,49 @@ struct Vertex {
     float uv[2];
 };
 
-class BufferBase {
+/*
+*/
+class BufferBase {  
 protected:
-	VkBufferUsageFlagBits m_bufferType = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
+	VkBufferUsageFlags m_bufferType = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
 	vks::Buffer m_buffer;
 public:
 	void* mapped = nullptr;
 
-	BufferBase(VkBufferUsageFlagBits bufferType);
+	BufferBase(VkBufferUsageFlagBits bufferType = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
 	~BufferBase();
 	template<typename T>
 	inline void create(std::vector<T>& data);
+	inline void create(
+		VkBufferUsageFlags usageFlags,
+		VkMemoryPropertyFlags memoryPropertyFlags,
+		VkDeviceSize size,
+		void* data = nullptr)
+	{
+		m_bufferType = usageFlags;
+		VK_CHECK_RESULT(Device::getVksDevice()->createBuffer(m_bufferType, 
+			memoryPropertyFlags, &m_buffer, size, data));
+	};
+
+	inline VkBufferMemoryBarrier barrier(
+	VkAccessFlags      srcAccessMask = 0,
+	VkAccessFlags      dstAccessMask = 0,
+	uint32_t           srcQueue  = VK_QUEUE_FAMILY_IGNORED,
+	uint32_t           dstQueue = VK_QUEUE_FAMILY_IGNORED) 
+	{
+		VkBufferMemoryBarrier barrier{};
+		barrier.sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER;
+		barrier.pNext = nullptr;
+		barrier.srcAccessMask = srcAccessMask;
+		barrier.dstAccessMask = dstAccessMask;
+		barrier.srcQueueFamilyIndex = srcQueue; //  VK_QUEUE_FAMILY_IGNORED;
+		barrier.dstQueueFamilyIndex = dstQueue; //  VK_QUEUE_FAMILY_IGNORED;
+		barrier.buffer = m_buffer.buffer;
+		barrier.size = m_buffer.size; //  m_buffer.descriptor.range;
+		barrier.offset = 0;
+		return barrier;
+	}
+	
 	inline static VkBufferCreateInfo ci()
 	{
 		VkBufferCreateInfo bufCreateInfo{};
@@ -28,7 +60,8 @@ public:
 
 	VkResult map(VkDeviceSize size = VK_WHOLE_SIZE, VkDeviceSize offset = 0);
 
-	vks::Buffer* get() { return &m_buffer; }
+	vks::Buffer* getVks() { return &m_buffer; }
+	VkBuffer get() { return m_buffer.buffer; }
 	VkDescriptorBufferInfo& getDescriptor() { return m_buffer.descriptor; }
 };
 
