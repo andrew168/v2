@@ -74,6 +74,23 @@ public:
         VkDeviceSize    offset = 0,
         VkIndexType     indexType = VK_INDEX_TYPE_UINT32);
 
+    void CommandBuffer::barrier(
+        VkPipelineStageFlags srcStageMask,
+        VkPipelineStageFlags dstStageMask,
+        const VkBufferMemoryBarrier* pBufferMemoryBarriers = nullptr,
+        VkDependencyFlags dependencyFlags = 0);
+
+    void barrier(
+        VkPipelineStageFlags srcStageMask,
+        VkPipelineStageFlags dstStageMask,
+        VkDependencyFlags dependencyFlags,
+        uint32_t memoryBarrierCount = 0,
+        const VkMemoryBarrier* pMemoryBarriers = nullptr,
+        uint32_t bufferMemoryBarrierCount = 0,
+        const VkBufferMemoryBarrier* pBufferMemoryBarriers = nullptr,
+        uint32_t imageMemoryBarrierCount = 0,
+        const VkImageMemoryBarrier* pImageMemoryBarriers = nullptr);
+    
     void dispatch(
         uint32_t groupCountX,
         uint32_t groupCountY,

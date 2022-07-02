@@ -94,11 +94,11 @@ void CommandBuffer::allocate(
 	std::vector<VkCommandBuffer>& cmdBufs)
 {
 	VkCommandBufferAllocateInfo ai{};
-	ai.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-	ai.commandPool = cmdPool;
-	ai.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-	ai.commandBufferCount = static_cast<uint32_t>(cmdBufs.size());
-	VK_CHECK_RESULT(vkAllocateCommandBuffers(Device::getR(), &ai, cmdBufs.data()));
+ai.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+ai.commandPool = cmdPool;
+ai.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+ai.commandBufferCount = static_cast<uint32_t>(cmdBufs.size());
+VK_CHECK_RESULT(vkAllocateCommandBuffers(Device::getR(), &ai, cmdBufs.data()));
 }
 
 void CommandBuffer::allocate(
@@ -181,6 +181,43 @@ CommandBuffer::~CommandBuffer()
 void CommandBuffer::fillBI(VkCommandBufferBeginInfo& bi)
 {
 	bi.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+}
+
+void CommandBuffer::barrier(
+	VkPipelineStageFlags srcStageMask,
+	VkPipelineStageFlags dstStageMask,
+	const VkBufferMemoryBarrier* pBufferMemoryBarriers,
+	VkDependencyFlags dependencyFlags)
+{
+	vkCmdPipelineBarrier(
+		*m_pCmdBuf,
+		srcStageMask,
+		dstStageMask,
+		dependencyFlags, // 0, 
+		0, nullptr,
+		1, pBufferMemoryBarriers,
+		0, nullptr);
+}
+
+void CommandBuffer::barrier(
+	VkPipelineStageFlags srcStageMask,
+	VkPipelineStageFlags dstStageMask,
+	VkDependencyFlags dependencyFlags,
+	uint32_t memoryBarrierCount,
+	const VkMemoryBarrier* pMemoryBarriers,
+	uint32_t bufferMemoryBarrierCount,
+	const VkBufferMemoryBarrier* pBufferMemoryBarriers,
+	uint32_t imageMemoryBarrierCount,
+	const VkImageMemoryBarrier* pImageMemoryBarriers)
+{
+	vkCmdPipelineBarrier(
+		*m_pCmdBuf,
+		srcStageMask,
+		dstStageMask,
+		dependencyFlags, // 0, 
+		memoryBarrierCount, pMemoryBarriers, // 0, nullptr,
+		bufferMemoryBarrierCount, pBufferMemoryBarriers, // 1, &buffer_barrier,
+		imageMemoryBarrierCount, pImageMemoryBarriers);
 }
 
 void CommandBuffer::dispatch(
