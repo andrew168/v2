@@ -1,4 +1,10 @@
 #pragma once
+namespace aux {
+#define V2CAT(x, y, z) x##y##z
+#define V2STAGE(x) V2CAT(VK_PIPELINE_STAGE_, x, _BIT)
+#define V2ACCESS(x) V2CAT(VK_ACCESS_, x, _BIT)
+};
+
 #include "..\util\log.h"
 #include "..\vk-all.h"
 #include "device.h"
