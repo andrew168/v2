@@ -45,6 +45,12 @@ public:
         uint32_t size,
         const void* pConstants);
 
+    void copyBuffer(
+        VkBuffer srcBuffer,
+        VkBuffer dstBuffer,
+        uint32_t regionCount = 1,
+        const VkBufferCopy* pRegions = nullptr);
+
     void copyBufferToImage(
         VkBuffer srcBuffer,
         Image  dstImage,

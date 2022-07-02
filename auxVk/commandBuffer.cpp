@@ -7,6 +7,7 @@ CommandBuffer::CommandBuffer()
 {
 	// ToDo: 从Device剥离CmdPool。
 	// 因为CmdPool与Queue family有关，图形和计算Queue有各自的pool，
+	// 等价于 vulkanDevice->createCommandBuffer(VK_COMMAND_BUFFER_LEVEL_PRIMARY, true);
 	m_pCmdBuf = new VkCommandBuffer();
 	m_cmdPool = (Device::getVksDevice())->commandPool;
 	CommandBuffer::allocate(m_cmdPool, *m_pCmdBuf);
@@ -50,7 +51,8 @@ void CommandBuffer::flush(VkQueue queue, bool free)
 	if (queue == VK_NULL_HANDLE) {
 		queue = Device::getQueue();
 	}
-	Device::getVksDevice()->flushCommandBuffer(*m_pCmdBuf, queue, free);
+	// CmdBuf 所属的Pool是唯一的，但是可以用多个Queue？
+	Device::getVksDevice()->flushCommandBuffer(*m_pCmdBuf, queue, m_cmdPool, free);
 }
 
 void CommandBuffer::free()
@@ -226,6 +228,19 @@ void CommandBuffer::dispatch(
 	uint32_t groupCountZ)
 {
 	vkCmdDispatch(*m_pCmdBuf, groupCountX, groupCountY, groupCountZ);
+}
+
+void CommandBuffer::copyBuffer(
+	VkBuffer srcBuffer,
+	VkBuffer dstBuffer,
+	uint32_t regionCount,
+	const VkBufferCopy* pRegions)
+{
+	VkBufferCopy copyRegion = {};
+	if (!pRegions) {
+		pRegions = &copyRegion;
+	}
+	vkCmdCopyBuffer(*m_pCmdBuf, srcBuffer, dstBuffer, regionCount, pRegions);
 }
 
 void CommandBuffer::copyBufferToImage(
