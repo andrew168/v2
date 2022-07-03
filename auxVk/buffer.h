@@ -65,8 +65,9 @@ public:
 
 	VkResult map(VkDeviceSize size = VK_WHOLE_SIZE, VkDeviceSize offset = 0);
 
+	VkBuffer* get() { return &m_buffer.buffer; }
+	VkBuffer& getR() { return m_buffer.buffer; }
 	vks::Buffer* getVks() { return &m_buffer; }
-	VkBuffer get() { return m_buffer.buffer; }
 	VkDescriptorBufferInfo& getDescriptor() { return m_buffer.descriptor; }
 };
 
