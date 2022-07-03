@@ -51,7 +51,10 @@ void ComputePipeline::bind(VkCommandBuffer& cmdBuf)
 
 ComputePipeline::~ComputePipeline()
 {
-	vkDestroyPipelineLayout(Device::getR(), m_layout, nullptr);
+	// !! 不能在此删除m_layout:
+	// 1) 如果多个Pipeline公用一个PL，会出现重复删除
+	// 2）不是自己created，不能删除 （谁create，谁destroy： 责任唯一化）
+	// vkDestroyPipelineLayout(Device::getR(), m_layout, nullptr);
 }
 
 }
