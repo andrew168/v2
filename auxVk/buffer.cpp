@@ -1,4 +1,5 @@
 ﻿#include "auxVk.h"
+#include "v2core.h"
 #include "buffer.h"
 
 namespace aux
@@ -35,11 +36,15 @@ UniformBuffer::UniformBuffer() :
 {
 }
 
-void VertexBuffer::bind(VkCommandBuffer& cmdBuf,
+void BufferBase::bind(VkCommandBuffer& cmdBuf,
     uint32_t firstBinding,
     uint32_t bindingCount,
     const VkDeviceSize* pOffsets)
 {
+    VkDeviceSize offsets[1] = { 0 };
+    if (!pOffsets) {
+        pOffsets = &offsets[0];
+    }
     vkCmdBindVertexBuffers(cmdBuf, firstBinding, bindingCount, &(m_buffer.buffer), pOffsets);
 }
 
@@ -54,6 +59,7 @@ void UniformBuffer::bind(VkCommandBuffer& cmdBuf,
     VkDeviceSize offset,
     VkIndexType indexType)
 {
+    DEPRECIATED("Wrong info");
     vkCmdBindIndexBuffer(cmdBuf, m_buffer.buffer, offset, indexType);
 }
 

@@ -32,6 +32,11 @@ public:
 			memoryPropertyFlags, &m_buffer, size, data));
 	};
 
+	void bind(VkCommandBuffer& cmdBuf,
+		uint32_t firstBinding,
+		uint32_t bindingCount = 1,
+		const VkDeviceSize* pOffsets = nullptr);
+
 	inline VkBufferMemoryBarrier barrier(
 	VkAccessFlags      srcAccessMask = 0,
 	VkAccessFlags      dstAccessMask = 0,
@@ -69,10 +74,6 @@ class VertexBuffer: public BufferBase
 {
 public:
     VertexBuffer();
-	void bind(VkCommandBuffer& cmdBuf,
-		uint32_t firstBinding,
-		uint32_t bindingCount = 1,
-		const VkDeviceSize* pOffsets = nullptr);
 	inline static VkVertexInputBindingDescription bindings(
 		uint32_t binding,
 		uint32_t stride,
