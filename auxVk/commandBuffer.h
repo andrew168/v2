@@ -98,9 +98,9 @@ public:
         const VkImageMemoryBarrier* pImageMemoryBarriers = nullptr);
     
     void dispatch(
-        uint32_t groupCountX,
-        uint32_t groupCountY,
-        uint32_t groupCountZ);
+        uint32_t groupCountX = 1,
+        uint32_t groupCountY = 1,
+        uint32_t groupCountZ = 1);
 
     static inline VkCommandBufferBeginInfo bi()
     {
