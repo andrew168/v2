@@ -9,6 +9,11 @@ Queue::Queue() :
 
 }
 
+Queue::Queue(uint32_t queueFamilyIndex)
+{
+	vkGetDeviceQueue(Device::getR(), queueFamilyIndex, 0, &m_queue);
+}
+
 Queue::Queue(VkQueue& queue) :
 	m_queue(queue)
 {

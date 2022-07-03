@@ -14,6 +14,7 @@ class Queue
     VkQueue m_queue;
 public:
     Queue();
+    Queue(uint32_t queueFamilyIndex);
     Queue(VkQueue& queue);
     void acquire(
         VkDevice device,
