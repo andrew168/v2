@@ -33,6 +33,19 @@ public:
 		specializationInfo.pData = data;
 		return specializationInfo;
 	}
+
+	inline static VkSpecializationMapEntry mapEntry(
+		uint32_t constantID,
+		uint32_t offset,
+		size_t size)
+	{
+		VkSpecializationMapEntry specializationMapEntry{};
+		specializationMapEntry.constantID = constantID;
+		specializationMapEntry.offset = offset;
+		specializationMapEntry.size = size;
+		return specializationMapEntry;
+	}
+
 };
 
 }
